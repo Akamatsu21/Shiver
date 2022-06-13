@@ -4,7 +4,7 @@
 #include <iterator>
 #include <sstream>
 
-std::pair<Command, std::queue<std::string>> CommandParser::parse(std::string input)
+std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::string &input)
 {
     std::istringstream iss(input);
     std::queue<std::string> params(

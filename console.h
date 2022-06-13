@@ -11,7 +11,7 @@ public:
     void clearScreen();
     void waitForAnyKey();
     std::string waitForInput();
-    void writeText(std::string text);
+    void writeText(const std::string& text);
 };
 
 #endif // CONSOLE_H

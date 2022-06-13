@@ -14,7 +14,9 @@ SOURCES += \
         event.cpp \
         game.cpp \
         main.cpp \
-        scriptingengine.cpp
+        player.cpp \
+        scriptingengine.cpp \
+        utils.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -25,9 +27,12 @@ HEADERS += \
     command.h \
     commandparser.h \
     console.h \
+    direction.h \
     event.h \
     game.h \
-    scriptingengine.h
+    player.h \
+    scriptingengine.h \
+    utils.h
 
 RESOURCES += \
     resources.qrc

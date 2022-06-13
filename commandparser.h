@@ -11,7 +11,7 @@ class CommandParser
 public:
     CommandParser() = delete;
 
-    static std::pair<Command, std::queue<std::string>> parse(std::string input);
+    static std::pair<Command, std::queue<std::string>> parse(const std::string& input);
 };
 
 #endif // COMMANDPARSER_H

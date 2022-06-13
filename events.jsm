@@ -1,18 +1,29 @@
 export const events =
-[
+{
+    event1:
     {
-        id: 0
+        description: "Starting room",
+        north: 2,
+        agility: "player.getAgility()"
     },
+    event2:
     {
-        id: 1,
-        description: "Starting room"
+        description: "Cave",
+        south: 1,
+        west: 3,
+        east: 4,
+        agility: "player.getAgility()"
     },
+    event3:
     {
-        id: 2,
-        description: "Cave"
+        description: "Enemy fight",
+        east: 2,
+        agility: "player.getAgility()"
     },
+    event4:
     {
-        id: 3,
-        description: "Enemy fight"
+        description: "Dead end",
+        west: 2,
+        agility: "player.getAgility()"
     }
-];
+};

@@ -6,17 +6,21 @@
 
 #include "event.h"
 
+class Player;
+
 class ScriptingEngine : public QObject
 {
     Q_OBJECT
 
     QJSEngine _js_engine;
-    QVariantList _event_list;
+    QVariantMap _event_list;
+    QJSValue _player;
 
 public:
     explicit ScriptingEngine(QObject* parent);
 
-    Event parseEvent(uint16_t id) const;
+    void registerPlayer(Player* player);
+    Event parseEvent(uint16_t id);
 };
 
 #endif // SCRIPTINGENGINE_H

@@ -4,8 +4,9 @@
 #include <QObject>
 
 #include "console.h"
-#include "scriptingengine.h"
 
+class Player;
+class ScriptingEngine;
 class QCoreApplication;
 
 class Game: public QObject
@@ -14,6 +15,7 @@ class Game: public QObject
 
     Console _console;
     ScriptingEngine* _scripting_engine;
+    Player* _player;
 
 public:
     explicit Game(QCoreApplication* parent);

@@ -25,7 +25,7 @@ std::string Console::waitForInput()
     return input;
 }
 
-void Console::writeText(std::string text)
+void Console::writeText(const std::string &text)
 {
     std::cout << text <<std::endl;
 }

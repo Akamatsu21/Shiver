@@ -10,7 +10,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
 {
     // TODO: Implement some error handling.
     _js_engine.installExtensions(QJSEngine::AllExtensions);
-    _event_list = _js_engine.importModule(":js/events.jsm").property("events").toVariant().toMap();
+    _event_list = _js_engine.importModule(":js/events.jsm").property("events");
 }
 
 void ScriptingEngine::registerPlayer(Player* player)
@@ -19,29 +19,51 @@ void ScriptingEngine::registerPlayer(Player* player)
     _js_engine.globalObject().setProperty("player", _player);
 }
 
-Event ScriptingEngine::parseEvent(uint16_t id)
+QJSValue ScriptingEngine::getObjectProperty(const QJSValue& object, const QString& property)
+{
+    if(object.property(property).isCallable())
+    {
+        return object.property(property).call();
+    }
+    else
+    {
+        return object.property(property);
+    }
+}
+
+Event ScriptingEngine::parseEvent(int id)
 {
     QString event_id = "event" + QString::number(id);
-    Q_ASSERT(_event_list.contains(event_id));
+    Q_ASSERT(_event_list.hasProperty(event_id));
 
-    QVariantMap event_object = _event_list.value(event_id).toMap();
-    Q_ASSERT(event_object.contains("description"));
-
+    QJSValue event_object = _event_list.property(event_id);
     Event event(id);
-    event.setDescription(event_object.value("description").toString().toStdString());
+
+    Q_ASSERT(event_object.hasProperty("description"));
+    event.setDescription(getObjectProperty(event_object, "description").toString().toStdString());
 
     for(Direction direction: utils::getAllDirections())
     {
         QString direction_string = QString::fromStdString(utils::directionToString(direction));
-        if(event_object.contains(direction_string))
+        if(event_object.hasProperty(direction_string))
         {
-            event.setDestination(direction, event_object.value(direction_string).toInt());
+            event.setDestination(direction, getObjectProperty(event_object, direction_string).toInt());
         }
     }
 
-    QJSValue test = _js_engine.evaluate("player.getLuck()");
-
-    event.setAg(_js_engine.evaluate(event_object.value("agility").toString()).toInt());
+    if(event_object.hasProperty("enemies"))
+    {
+        QJSValue enemies = getObjectProperty(event_object, "enemies");
+        Q_ASSERT(enemies.isArray());
+        uint8_t length = enemies.property("length").toInt();
+        for(uint8_t i = 0; i < length; ++i)
+        {
+            QJSValue enemy = enemies.property(i);
+            event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
+                           getObjectProperty(enemy, "agility").toInt(),
+                           getObjectProperty(enemy, "constitution").toInt());
+        }
+    }
 
     return event;
 }

@@ -1,6 +1,6 @@
 #include "player.h"
 
-Player::Player(QObject* parent, uint8_t agility, uint8_t constitution, uint8_t luck, ElixirType elixir_type):
+Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirType elixir_type):
     QObject(parent),
     _agility(agility),
     _constitution(constitution),
@@ -32,7 +32,7 @@ int Player::getLuck() const
     return _luck;
 }
 
-uint16_t Player::getGold() const
+int Player::getGold() const
 {
     return _gold;
 }
@@ -81,7 +81,7 @@ void Player::modifyLuck(int value)
     }
 }
 
-void Player::modifyGold(int8_t value)
+void Player::modifyGold(int value)
 {
     if(_gold < -value)
     {

@@ -13,19 +13,25 @@ void Console::clearScreen()
 
 void Console::waitForAnyKey()
 {
-    std::cout << std::endl;
-    (void)std::getchar();
+    std::getchar();
 }
 
 std::string Console::waitForInput()
 {
-    std::cout << std::endl << "> ";
+    writeLine();
+    std::cout << "> ";
     std::string input = "";
     std::getline(std::cin, input);
     return input;
 }
 
+void Console::writeLine()
+{
+    std::cout << std::endl;
+}
+
 void Console::writeText(const std::string &text)
 {
-    std::cout << text <<std::endl;
+    std::cout << text;
+    writeLine();
 }

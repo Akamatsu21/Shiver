@@ -11,6 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         commandparser.cpp \
         console.cpp \
+        enemy.cpp \
         event.cpp \
         game.cpp \
         main.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
     commandparser.h \
     console.h \
     direction.h \
+    enemy.h \
     event.h \
     game.h \
     player.h \

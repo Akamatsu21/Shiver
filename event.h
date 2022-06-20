@@ -3,30 +3,33 @@
 
 #include <string>
 #include <map>
+#include <queue>
 
 #include "direction.h"
+#include "enemy.h"
 
 class Event
 {
-    uint16_t _id;
+    int _id;
     std::string _description;
-    std::map<Direction, uint16_t> _destinations;
-    int _ag;
+    std::map<Direction, int> _destinations;
+    std::queue<Enemy> _enemies;
 
 public:
-    Event(uint16_t id);
+    Event(int id);
 
-    uint16_t getId() const;
+    int getId() const;
     std::string getDescription() const;
-    uint16_t getDestination(Direction direction);
+    int getDestination(Direction direction) const;
+    bool isDirectionAvailable(Direction direction) const;
+    bool hasEnemies() const;
 
     void setDescription(const std::string& description);
-    void setDestination(Direction direction, uint16_t destination);
+    void setDestination(Direction direction, int destination);
 
-    bool isDirectionAvailable(Direction direction);
-
-    int getAg();
-    void setAg(int ag);
+    Enemy& getCurrentEnemy();
+    void addEnemy(const std::string& name, int agility, int constitution);
+    void defeatCurrentEnemy();
 };
 
 #endif // EVENT_H

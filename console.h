@@ -11,6 +11,7 @@ public:
     void clearScreen();
     void waitForAnyKey();
     std::string waitForInput();
+    void writeLine();
     void writeText(const std::string& text);
 };
 

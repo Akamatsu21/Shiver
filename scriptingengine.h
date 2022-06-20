@@ -13,14 +13,15 @@ class ScriptingEngine : public QObject
     Q_OBJECT
 
     QJSEngine _js_engine;
-    QVariantMap _event_list;
+    QJSValue _event_list;
     QJSValue _player;
 
 public:
     explicit ScriptingEngine(QObject* parent);
 
     void registerPlayer(Player* player);
-    Event parseEvent(uint16_t id);
+    QJSValue getObjectProperty(const QJSValue& object, const QString& property);
+    Event parseEvent(int id);
 };
 
 #endif // SCRIPTINGENGINE_H

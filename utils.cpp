@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <random>
 
 std::string utils::directionToString(Direction direction)
 {
@@ -51,6 +52,21 @@ Direction utils::commandToDirection(Command command)
     default:
         result = Direction::INVALID;
         break;
+    }
+
+    return result;
+}
+
+int utils::rollD6(int count)
+{
+    static std::random_device rd;
+    static std::mt19937 rng(rd());
+    static std::uniform_int_distribution<std::mt19937::result_type> d6(1, 6);
+
+    int result = 0;
+    for(int i = 0; i < count; ++i)
+    {
+        result += d6(rng);
     }
 
     return result;

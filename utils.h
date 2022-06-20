@@ -16,6 +16,8 @@ std::string directionToString(Direction direction);
 
 std::vector<Direction> getAllDirections();
 
+int rollD6(int count);
+
 }
 
 #endif // UTILS_H

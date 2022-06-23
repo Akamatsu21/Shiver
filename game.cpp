@@ -1,14 +1,13 @@
 #include "game.h"
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <QCoreApplication>
 #include <QJSEngine>
 
-#include "commandparser.h"
-#include "player.h"
-#include "scriptingengine.h"
-#include "utils.h"
+#include "Models/player.h"
+#include "System/commandparser.h"
+#include "System/scriptingengine.h"
+#include "System/utils.h"
 
 Game::Game(QCoreApplication* parent):
     QObject(parent),
@@ -20,6 +19,17 @@ Game::Game(QCoreApplication* parent):
     _combat_state{false, 0, 0, 0}
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
+}
+
+void Game::displayCombatStatus()
+{
+    std::string msg = utils::createString("\nRemaining constitution:\n",
+                              _current_event.getCurrentEnemy().getName(), ": ",
+                              _current_event.getCurrentEnemy().getConstitution(),
+                              "\nPlayer: ",
+                              _player->getConstitution());
+    _console.writeText(msg);
+    _console.writeLine();
 }
 
 void Game::displayCurrentEvent()
@@ -35,15 +45,55 @@ void Game::displayCurrentEvent()
 void Game::displayCurrentEnemy()
 {
     _console.writeLine();
-    std::ostringstream ss("");
-    ss << "You are fighting against "
-       << _current_event.getCurrentEnemy().getName()
-       << "\nAgility: "
-       << _current_event.getCurrentEnemy().getAgility()
-       << "\nConstitution: "
-       << _current_event.getCurrentEnemy().getConstitution();
-    _console.writeText(ss.str());
+    std::string msg = utils::createString("You are fighting against ",
+                                          _current_event.getCurrentEnemy().getName(),
+                                          "\nAgility: ",
+                                          _current_event.getCurrentEnemy().getAgility(),
+                                          "\nConstitution: ",
+                                          _current_event.getCurrentEnemy().getConstitution());
+    _console.writeText(msg);
     _console.waitForAnyKey();
+}
+
+void Game::displayPlayerStats()
+{
+    std::string msg = utils::createString("Player",
+                                          "\nAgility: ",
+                                          _player->getAgility(),
+                                          "\nConstitution: ",
+                                          _player->getConstitution(),
+                                          "\nLuck: ",
+                                          _player->getLuck(),
+                                          "\nGold: ",
+                                          _player->getGold(),
+                                          "\nRations: ",
+                                          _player->getRations(),
+                                          "\n", _player->getElixirType(), ": ",
+                                          _player->getElixirCount(),
+                                          "\n\nInventory:\n",
+                                          _player->getInventory());
+    _console.writeText(msg);
+}
+
+void Game::resolveDamage(bool player_win, int damage)
+{
+    std::string msg("");
+    if(player_win)
+    {
+        _current_event.getCurrentEnemy().modifyConstitution(-damage);
+
+        msg += utils::createString("You deal ", damage, " damage to ",
+                                   _current_event.getCurrentEnemy().getName());
+    }
+    else
+    {
+        _player->modifyConstitution(-damage);
+
+        msg += utils::createString(_current_event.getCurrentEnemy().getName(),
+                                   " deals ", damage, " damage to you");
+    }
+
+    _console.writeText(msg);
 }
 
 void Game::updateCurrentEvent(int id)
@@ -62,10 +112,9 @@ void Game::checkForDeath()
     {
         if(_current_event.getCurrentEnemy().getConstitution() == 0)
         {
-            std::ostringstream ss("");
-            ss << "You have defeated "
-               << _current_event.getCurrentEnemy().getName();
-            _console.writeText(ss.str());
+            std::string msg = utils::createString("You have defeated ",
+                                                  _current_event.getCurrentEnemy().getName());
+            _console.writeText(msg);
             _current_event.defeatCurrentEnemy();
 
             if(!_current_event.hasEnemies())
@@ -97,14 +146,13 @@ void Game::handleCombatRound()
         _combat_state._enemy_score = utils::rollD6(2) + _current_event.getCurrentEnemy().getAgility();
         _combat_state._player_score = utils::rollD6(2) + _player->getAgility();
 
-        std::ostringstream ss("");
-        ss << "Combat round "
-           << _combat_state._combat_round
-           << "\n" << _current_event.getCurrentEnemy().getName() << "'s score: "
-           << _combat_state._enemy_score
-           << "\nPlayer's score: "
-           << _combat_state._player_score;
-        _console.writeText(ss.str());
+        std::string msg = utils::createString("Combat round ",
+                                              _combat_state._combat_round,
+                                              "\n",_current_event.getCurrentEnemy().getName(), "'s score: ",
+                                              _combat_state._enemy_score,
+                                              "\nPlayer's score: ",
+                                              _combat_state._player_score);
+        _console.writeText(msg);
 
         if(_combat_state._player_score == _combat_state._enemy_score)
         {
@@ -135,7 +183,10 @@ void Game::gameLoop()
         {
         case::Command::HELP:
             _console.writeText("Help page not yet available.");
-            break;
+            continue;
+        case::Command::STATS:
+            displayPlayerStats();
+            continue;
         case Command::NORTH:
         case Command::SOUTH:
         case Command::EAST:
@@ -159,6 +210,31 @@ void Game::gameLoop()
             }
         }   break;
         case Command::FIGHT:
+            if(!_combat_state._combat_in_progress)
+            {
+                _console.writeText("No enemies present!");
+                continue;
+            }
+
+            resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
+            displayCombatStatus();
+            break;
+        case Command::ESCAPE:
+            if(!_combat_state._combat_in_progress)
+            {
+                _console.writeText("No enemies present!");
+                continue;
+            }
+
+            resolveDamage(false, 2);
+            _current_event.defeatAllEnemies();
+            _combat_state._combat_in_progress = false;
+            _console.writeText("You have escaped!");
+            break;
+        case Command::TAKE:
+            _console.writeText("You took " + params.front());
+            break;
+        case Command::LUCKY:
         {
             if(!_combat_state._combat_in_progress)
             {
@@ -166,35 +242,21 @@ void Game::gameLoop()
                 continue;
             }
 
-            // Make function for building strings.
-            std::ostringstream ss("");
-            if(_combat_state._player_score > _combat_state._enemy_score)
+            bool player_win = _combat_state._player_score > _combat_state._enemy_score;
+            bool player_lucky = _player->performLuckTest();
+            int damage = 0;
+            if(player_win)
             {
-                _current_event.getCurrentEnemy().modifyConstitution(-2);
-
-                ss << "You deal 2 damage to "
-                   << _current_event.getCurrentEnemy().getName();
+                damage = player_lucky ? 4 : 1;
             }
             else
             {
-                _player->modifyConstitution(-2);
-
-                ss << _current_event.getCurrentEnemy().getName()
-                   << " deals 2 damage to you";
+                damage = player_lucky ? 1 : 3;
             }
 
-            ss << "\nRemaining constitution:\n"
-               << _current_event.getCurrentEnemy().getName() << ": " << _current_event.getCurrentEnemy().getConstitution()
-               << "\nPlayer: " << _player->getConstitution();
-            _console.writeText(ss.str());
-            _console.writeLine();
+            resolveDamage(player_win, damage);
+            displayCombatStatus();
         }   break;
-        case Command::ESCAPE:
-            _console.writeText("Time to die!");
-            break;
-        case Command::TAKE:
-            _console.writeText("You took " + params.front());
-            break;
         case Command::INVALID:
         default:
             _console.writeText("Invalid command");

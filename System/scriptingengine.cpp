@@ -1,6 +1,6 @@
 #include "scriptingengine.h"
-#include "player.h"
 #include "utils.h"
+#include "Models/player.h"
 
 ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),

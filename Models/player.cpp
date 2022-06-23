@@ -1,4 +1,5 @@
 #include "player.h"
+#include "System/utils.h"
 
 Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirType elixir_type):
     QObject(parent),
@@ -37,9 +38,43 @@ int Player::getGold() const
     return _gold;
 }
 
-bool Player::hasItem(const std::string& item)
+int Player::getRations() const
+{
+    return _rations;
+}
+
+int Player::getElixirCount() const
+{
+    return _elixir_count;
+}
+
+std::string Player::getElixirType() const
+{
+    switch(_elixir_type)
+    {
+    case ElixirType::AGILITY:
+        return "Elixir of Agility";
+    case ElixirType::CONSTITUTION:
+        return "Elixir of Constitution";
+    case ElixirType::LUCK:
+        return "Elixir of Luck";
+    default:
+        return "";
+    }
+}
+
+bool Player::hasItem(const std::string& item) const
 {
     return std::find(std::begin(_inventory), std::end(_inventory), item) != std::end(_inventory);
+}
+
+std::string Player::getInventory() const
+{
+    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
+        [](std::string acc, std::string element)
+        {
+            return acc + "\n" + element;
+        });
 }
 
 void Player::modifyAgility(int value)
@@ -141,4 +176,17 @@ void Player::addItem(const std::string& item)
 void Player::removeItem(const std::string& item)
 {
     _inventory.erase(std::find(std::begin(_inventory), std::end(_inventory), item));
+}
+
+bool Player::performLuckTest()
+{
+    if(getLuck() == 0)
+    {
+        return false;
+    }
+
+    int testValue = utils::rollD6(2);
+    bool success = testValue <= getLuck();
+    modifyLuck(-1);
+    return success;
 }

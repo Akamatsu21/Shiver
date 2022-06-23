@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QJSEngine>
 
-#include "event.h"
+#include "Models/event.h"
 
 class Player;
 

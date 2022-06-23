@@ -5,13 +5,15 @@ enum class Command
 {
     INVALID,
     HELP,
+    STATS,
     NORTH,
     SOUTH,
     EAST,
     WEST,
     FIGHT,
     ESCAPE,
-    TAKE
+    TAKE,
+    LUCKY
 };
 
 #endif // COMMAND_H

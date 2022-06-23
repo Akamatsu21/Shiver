@@ -58,3 +58,11 @@ void Event::defeatCurrentEnemy()
 {
     _enemies.pop();
 }
+
+void Event::defeatAllEnemies()
+{
+    while(!_enemies.empty())
+    {
+        _enemies.pop();
+    }
+}

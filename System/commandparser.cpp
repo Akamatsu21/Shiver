@@ -6,6 +6,11 @@
 
 std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::string &input)
 {
+    if(input.empty())
+    {
+        return std::make_pair(Command::INVALID, std::queue<std::string>());
+    }
+
     std::istringstream iss(input);
     std::queue<std::string> params(
                 std::deque<std::string>(
@@ -21,6 +26,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     if(input_command == "help")
     {
         command = Command::HELP;
+    }
+    else if(input_command == "stats")
+    {
+        command = Command::STATS;
     }
     else if(input_command == "north")
     {
@@ -50,6 +59,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     {
         command = Command::TAKE;
     }
+    else if(input_command == "lucky")
+    {
+        command = Command::LUCKY;
+    }
 
-    return std::pair<Command, std::queue<std::string>>(command, params);
+    return std::make_pair(command, params);
 }

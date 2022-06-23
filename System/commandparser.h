@@ -4,7 +4,7 @@
 #include <string>
 #include <queue>
 
-#include "command.h"
+#include "Enums/command.h"
 
 class CommandParser
 {

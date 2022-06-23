@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-#include "console.h"
-#include "event.h"
+#include "Models/event.h"
+#include "System/console.h"
 
 class Player;
 class ScriptingEngine;
@@ -30,9 +30,12 @@ class Game: public QObject
         int _player_score;
     } _combat_state;
 
+    void displayCombatStatus();
     void displayCurrentEvent();
     void displayCurrentEnemy();
+    void displayPlayerStats();
 
+    void resolveDamage(bool player_win, int damage);
     void updateCurrentEvent(int id);
 
     void checkForDeath();

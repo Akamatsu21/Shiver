@@ -9,15 +9,15 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        commandparser.cpp \
-        console.cpp \
-        enemy.cpp \
-        event.cpp \
+        Models/enemy.cpp \
+        Models/event.cpp \
+        Models/player.cpp \
+        System/commandparser.cpp \
+        System/console.cpp \
+        System/scriptingengine.cpp \
+		System/utils.cpp \
         game.cpp \
-        main.cpp \
-        player.cpp \
-        scriptingengine.cpp \
-        utils.cpp
+		main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -25,16 +25,19 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    command.h \
-    commandparser.h \
-    console.h \
-    direction.h \
-    enemy.h \
-    event.h \
-    game.h \
-    player.h \
-    scriptingengine.h \
-    utils.h
+    Enums/command.h \
+    Enums/direction.h \
+    Models/enemy.h \
+    Models/event.h \
+    Models/player.h \
+    System/commandparser.h \
+    System/console.h \
+    System/scriptingengine.h \
+    System/utils.h \
+	game.h
 
 RESOURCES += \
-    resources.qrc
+    Resources/resources.qrc
+
+DISTFILES += \
+    Resources/events.jsm

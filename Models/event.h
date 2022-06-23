@@ -5,7 +5,7 @@
 #include <map>
 #include <queue>
 
-#include "direction.h"
+#include "Enums/direction.h"
 #include "enemy.h"
 
 class Event
@@ -30,6 +30,7 @@ public:
     Enemy& getCurrentEnemy();
     void addEnemy(const std::string& name, int agility, int constitution);
     void defeatCurrentEnemy();
+    void defeatAllEnemies();
 };
 
 #endif // EVENT_H

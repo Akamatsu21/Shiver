@@ -16,11 +16,12 @@ export const events =
     {
         description: "Enemy fight",
         east: 2,
+        south: 5,
         enemies: [
             {
                 name: "Orc",
                 agility: 5,
-                constitution: 10
+                constitution: 1
             }
         ]
     },
@@ -40,5 +41,35 @@ export const events =
                 constitution: 60
             }
         ]
+    },
+    event5:
+    {
+        description: "You found a chest. You find: Amulet, Axe and Cock Shield. You may only take two.",
+        north: 3,
+        south: 6,
+        items: [
+            "Amulet",
+            "Axe",
+            "Cock Shield"
+        ],
+        item_limit: 2
+    },
+    event6:
+    {
+        description: function()
+        {
+            let desc = "You encounter the Kicker Troll. He kicks you in the nuts.\n";
+            if(player.hasItem("Cock Shield"))
+            {
+                desc += "Your shield protects you. You may proceed.";
+            }
+            else
+            {
+                desc += "You die."
+                player.modifyConstitution(-100);
+            }
+            return desc;
+        },
+        north: 5
     }
 };

@@ -1,4 +1,6 @@
 #include "player.h"
+#include <QVariant>
+
 #include "System/utils.h"
 
 Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirType elixir_type):
@@ -66,6 +68,11 @@ std::string Player::getElixirType() const
 bool Player::hasItem(const std::string& item) const
 {
     return std::find(std::begin(_inventory), std::end(_inventory), item) != std::end(_inventory);
+}
+
+bool Player::hasItem(const QVariant& item) const
+{
+    return hasItem(item.toString().toStdString());
 }
 
 std::string Player::getInventory() const

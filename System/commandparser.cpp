@@ -4,6 +4,8 @@
 #include <iterator>
 #include <sstream>
 
+#include "utils.h"
+
 std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::string &input)
 {
     if(input.empty())
@@ -19,8 +21,7 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
                 ));
     std::string input_command = params.front();
     params.pop();
-    std::transform(std::begin(input_command), std::end(input_command), std::begin(input_command),
-                   [](char c){ return std::tolower(c); });
+    input_command = utils::toLower(input_command);
 
     Command command = Command::INVALID;
     if(input_command == "help")

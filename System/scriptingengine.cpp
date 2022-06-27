@@ -55,13 +55,27 @@ Event ScriptingEngine::parseEvent(int id)
     {
         QJSValue enemies = getObjectProperty(event_object, "enemies");
         Q_ASSERT(enemies.isArray());
-        uint8_t length = enemies.property("length").toInt();
-        for(uint8_t i = 0; i < length; ++i)
+        int length = enemies.property("length").toInt();
+        for(int i = 0; i < length; ++i)
         {
             QJSValue enemy = enemies.property(i);
             event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
                            getObjectProperty(enemy, "agility").toInt(),
                            getObjectProperty(enemy, "constitution").toInt());
+        }
+    }
+
+    if(event_object.hasProperty("items"))
+    {
+        Q_ASSERT(event_object.hasProperty("item_limit"));
+        event.setItemLimit(getObjectProperty(event_object, "item_limit").toInt());
+
+        QJSValue items = getObjectProperty(event_object, "items");
+        Q_ASSERT(items.isArray());
+        int length = items.property("length").toInt();
+        for(int i = 0; i < length; ++i)
+        {
+            event.addItem(items.property(i).toString().toStdString());
         }
     }
 

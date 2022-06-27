@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <algorithm>
 #include <random>
 
 std::string utils::directionToString(Direction direction)
@@ -69,5 +70,13 @@ int utils::rollD6(int count)
         result += d6(rng);
     }
 
+    return result;
+}
+
+std::string utils::toLower(const std::string& s)
+{
+    std::string result("");
+    std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
+                   [](char c){ return std::tolower(c); });
     return result;
 }

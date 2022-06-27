@@ -16,8 +16,7 @@ Direction commandToDirection(Command command);
 template<typename... Args>
 std::string createString(Args... args)
 {
-    static std::ostringstream ss("");
-    ss.str("");
+    std::ostringstream ss("");
     ((ss << args), ...);
     return ss.str();
 }
@@ -27,6 +26,8 @@ std::string directionToString(Direction direction);
 std::vector<Direction> getAllDirections();
 
 int rollD6(int count);
+
+std::string toLower(const std::string& s);
 
 }
 

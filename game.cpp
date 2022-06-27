@@ -1,5 +1,6 @@
 #include "game.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <QCoreApplication>
 #include <QJSEngine>
@@ -232,8 +233,55 @@ void Game::gameLoop()
             _console.writeText("You have escaped!");
             break;
         case Command::TAKE:
-            _console.writeText("You took " + params.front());
-            break;
+        {
+            if(_combat_state._combat_in_progress)
+            {
+                _console.writeText("You have to defeat all enemies before you can pick up items.");
+                continue;
+            }
+            else if(params.empty())
+            {
+                _console.writeText("Not specified which item to take.");
+                continue;
+            }
+
+            std::ostringstream ss("");
+            while(!params.empty())
+            {
+                ss << params.front();
+                params.pop();
+                if(!params.empty())
+                {
+                    ss << " ";
+                }
+            }
+            std::string item = _current_event.findItem(ss.str());
+
+            if(item.empty())
+            {
+                _console.writeText("Item not found in this room.");
+                continue;
+            }
+            else
+            {
+                if(_player->hasItem(item))
+                {
+                    _console.writeText("You've already picked up this item.");
+                    continue;
+                }
+                else if(_current_event.getItemLimit() < 1)
+                {
+                    _console.writeText("You cannot take any more items from this room.");
+                    continue;
+                }
+                else
+                {
+                    _current_event.takeItem(item);
+                    _player->addItem(item);
+                }
+            }
+
+        }   break;
         case Command::LUCKY:
         {
             if(!_combat_state._combat_in_progress)

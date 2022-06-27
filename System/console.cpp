@@ -1,5 +1,6 @@
 #include "console.h"
 #include <iostream>
+#include <limits>
 
 Console::Console()
 {
@@ -8,12 +9,12 @@ Console::Console()
 
 void Console::clearScreen()
 {
-    system("clear");
+    (void)system("clear");
 }
 
 void Console::waitForAnyKey()
 {
-    std::getchar();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n' );
 }
 
 std::string Console::waitForInput()

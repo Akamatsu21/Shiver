@@ -43,10 +43,11 @@ public:
     int getElixirCount() const;
     std::string getElixirType() const;
     bool hasItem(const std::string& item) const;
+    Q_INVOKABLE bool hasItem(const QVariant& item) const;
     std::string getInventory() const;
 
     void modifyAgility(int value);
-    void modifyConstitution(int value);
+    Q_INVOKABLE void modifyConstitution(int value);
     void modifyLuck(int value);
     void modifyGold(int value);
 

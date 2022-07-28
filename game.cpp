@@ -24,8 +24,8 @@ Game::Game(QCoreApplication* parent):
 
 void Game::displayCombatStatus()
 {
-    std::string msg = utils::createString("\nRemaining constitution:\n",
-                              _current_event.getCurrentEnemy().getName(), ": ",
+    std::string msg = utils::createString("\nRemaining constitution:\n[e]",
+                              _current_event.getCurrentEnemy().getName(), "[/e]: ",
                               _current_event.getCurrentEnemy().getConstitution(),
                               "\nPlayer: ",
                               _player->getConstitution());
@@ -46,9 +46,9 @@ void Game::displayCurrentEvent()
 void Game::displayCurrentEnemy()
 {
     _console.writeLine();
-    std::string msg = utils::createString("You are fighting against ",
+    std::string msg = utils::createString("You are fighting against [e]",
                                           _current_event.getCurrentEnemy().getName(),
-                                          "\nAgility: ",
+                                          "[/e]\nAgility: ",
                                           _current_event.getCurrentEnemy().getAgility(),
                                           "\nConstitution: ",
                                           _current_event.getCurrentEnemy().getConstitution());
@@ -58,13 +58,13 @@ void Game::displayCurrentEnemy()
 
 void Game::displayPlayerStats()
 {
-    std::string msg = utils::createString("Player",
+    std::string msg = utils::createString("Adventurer",
                                           "\nAgility: ",
-                                          _player->getAgility(),
+                                          _player->getAgility(), "/", _player->getStartingAgility(),
                                           "\nConstitution: ",
-                                          _player->getConstitution(),
+                                          _player->getConstitution(), "/", _player->getStartingConstitution(),
                                           "\nLuck: ",
-                                          _player->getLuck(),
+                                          _player->getLuck(), "/", _player->getStartingLuck(),
                                           "\nGold: ",
                                           _player->getGold(),
                                           "\nRations: ",
@@ -83,15 +83,15 @@ void Game::resolveDamage(bool player_win, int damage)
     {
         _current_event.getCurrentEnemy().modifyConstitution(-damage);
 
-        msg += utils::createString("You deal ", damage, " damage to ",
-                                   _current_event.getCurrentEnemy().getName());
+        msg += utils::createString("You deal ", damage, " damage to [e]",
+                                   _current_event.getCurrentEnemy().getName(), "[/e]");
     }
     else
     {
         _player->modifyConstitution(-damage);
 
-        msg += utils::createString(_current_event.getCurrentEnemy().getName(),
-                                   " deals ", damage, " damage to you");
+        msg += utils::createString("[e]", _current_event.getCurrentEnemy().getName(),
+                                   "[/e] deals ", damage, " damage to you");
     }
 
     _console.writeText(msg);
@@ -113,8 +113,8 @@ void Game::checkForDeath()
     {
         if(_current_event.getCurrentEnemy().getConstitution() == 0)
         {
-            std::string msg = utils::createString("You have defeated ",
-                                                  _current_event.getCurrentEnemy().getName());
+            std::string msg = utils::createString("You have defeated [e]",
+                                                  _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
             _current_event.defeatCurrentEnemy();
 
@@ -149,7 +149,7 @@ void Game::handleCombatRound()
 
         std::string msg = utils::createString("Combat round ",
                                               _combat_state._combat_round,
-                                              "\n",_current_event.getCurrentEnemy().getName(), "'s score: ",
+                                              "\n[e]",_current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
                                               _combat_state._enemy_score,
                                               "\nPlayer's score: ",
                                               _combat_state._player_score);
@@ -227,6 +227,7 @@ void Game::gameLoop()
                 continue;
             }
 
+            // TODO: Add luck check option.
             resolveDamage(false, 2);
             _current_event.defeatAllEnemies();
             _combat_state._combat_in_progress = false;
@@ -260,28 +261,25 @@ void Game::gameLoop()
             if(item.empty())
             {
                 _console.writeText("Item not found in this room.");
-                continue;
             }
             else
             {
                 if(_player->hasItem(item))
                 {
                     _console.writeText("You've already picked up this item.");
-                    continue;
                 }
                 else if(_current_event.getItemLimit() < 1)
                 {
                     _console.writeText("You cannot take any more items from this room.");
-                    continue;
                 }
                 else
                 {
                     _current_event.takeItem(item);
                     _player->addItem(item);
+                    _console.writeText(utils::createString("[i]", item, "[/i] added to your inventory."));
                 }
             }
-
-        }   break;
+        }   continue;
         case Command::LUCKY:
         {
             if(!_combat_state._combat_in_progress)
@@ -291,7 +289,7 @@ void Game::gameLoop()
             }
 
             bool player_win = _combat_state._player_score > _combat_state._enemy_score;
-            bool player_lucky = _player->performLuckTest();
+            bool player_lucky = _player->performLuckCheck();
             int damage = 0;
             if(player_win)
             {
@@ -302,6 +300,7 @@ void Game::gameLoop()
                 damage = player_lucky ? 1 : 3;
             }
 
+            _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
             resolveDamage(player_win, damage);
             displayCombatStatus();
         }   break;

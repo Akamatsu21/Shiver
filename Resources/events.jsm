@@ -17,7 +17,8 @@ export const events =
         description: "Enemy fight",
         east: 2,
         south: 5,
-        enemies: [
+        enemies:
+        [
             {
                 name: "Orc",
                 agility: 5,
@@ -29,7 +30,8 @@ export const events =
     {
         description: "Dead end",
         west: 2,
-        enemies: [
+        enemies:
+        [
             {
                 name: "Goblin",
                 agility: 1,
@@ -44,10 +46,11 @@ export const events =
     },
     event5:
     {
-        description: "You found a chest. You find: Amulet, Axe and Cock Shield. You may only take two.",
+        description: "You found a chest. You find: [i]Amulet[/i], [i]Axe[/i] and [i]Cock Shield[/i]. You may only take two.",
         north: 3,
         south: 6,
-        items: [
+        items:
+        [
             "Amulet",
             "Axe",
             "Cock Shield"
@@ -58,7 +61,7 @@ export const events =
     {
         description: function()
         {
-            let desc = "You encounter the Kicker Troll. He kicks you in the nuts.\n";
+            let desc = "You encounter the [e]Kicker Troll[/e]. He kicks you in the nuts.\n";
             if(player.hasItem("Cock Shield"))
             {
                 desc += "Your shield protects you. You may proceed.";

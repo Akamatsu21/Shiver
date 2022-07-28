@@ -38,6 +38,9 @@ public:
     Q_INVOKABLE int getAgility() const;
     Q_INVOKABLE int getConstitution() const;
     Q_INVOKABLE int getLuck() const;
+    int getStartingAgility() const;
+    int getStartingConstitution() const;
+    int getStartingLuck() const;
     int getGold() const;
     int getRations() const;
     int getElixirCount() const;
@@ -55,7 +58,7 @@ public:
     bool drinkElixir();
     void addItem(const std::string& item);
     void removeItem(const std::string& item);
-    bool performLuckTest();
+    bool performLuckCheck();
 };
 
 #endif // PLAYER_H

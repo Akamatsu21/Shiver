@@ -5,6 +5,14 @@
 
 class Console
 {
+    std::string _log;
+
+    std::string replaceTag(const std::string& text,
+                           const std::string& open_tag,
+                           const std::string& close_tag,
+                           const std::string& colour_code) const;
+    std::string parseMarkup(const std::string& text) const;
+
 public:
     Console();
 

@@ -35,6 +35,21 @@ int Player::getLuck() const
     return _luck;
 }
 
+int Player::getStartingAgility() const
+{
+    return _starting_agility;
+}
+
+int Player::getStartingConstitution() const
+{
+    return _starting_constitution;
+}
+
+int Player::getStartingLuck() const
+{
+    return _starting_luck;
+}
+
 int Player::getGold() const
 {
     return _gold;
@@ -185,7 +200,7 @@ void Player::removeItem(const std::string& item)
     _inventory.erase(std::find(std::begin(_inventory), std::end(_inventory), item));
 }
 
-bool Player::performLuckTest()
+bool Player::performLuckCheck()
 {
     if(getLuck() == 0)
     {

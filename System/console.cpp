@@ -41,16 +41,69 @@ std::string Console::replaceTag(const std::string& text,
 std::string Console::parseMarkup(const std::string& text) const
 {
     std::string buffer = text;
-    buffer = replaceTag(buffer, "[e]", "[/e]", "\033[31m");
-    buffer = replaceTag(buffer, "[c]", "[/c]", "\033[32m");
-    buffer = replaceTag(buffer, "[i]", "[/i]", "\033[34m");
+    buffer = replaceTag(buffer, "[e]", "[/e]", "\033[31m"); // enemy name
+    buffer = replaceTag(buffer, "[c]", "[/c]", "\033[32m"); // command
+    buffer = replaceTag(buffer, "[i]", "[/i]", "\033[34m"); // item
+    buffer = replaceTag(buffer, "[p]", "[/p]", "\033[36m"); // player name
     return buffer;
+}
+
+void Console::clearScreenPreserveLog()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
 void Console::clearScreen()
 {
-    (void)system("clear");
+    clearScreenPreserveLog();
     _log = "";
+}
+
+void Console::restoreLog()
+{
+    clearScreenPreserveLog();
+    std::cout << _log;
+}
+
+int Console::showHelpPage(int page_number, int total_pages, const std::string &text)
+{
+    clearScreenPreserveLog();
+    std::string parsed_text = parseMarkup(text);
+    std::cout << parsed_text
+              << "\n\nPage " << page_number << "/" << total_pages
+              << "\nEnter a page number to see that page, or 0 to exit.\n";
+
+    bool invalid_input = true;
+    int new_page = 0;
+    while(invalid_input)
+    {
+        std::string input("");
+        std::getline(std::cin, input);
+
+        try
+        {
+            new_page = std::stoi(input);
+
+            if(new_page < 0 || new_page > total_pages)
+            {
+                throw std::out_of_range("Page range");
+            }
+            else
+            {
+                invalid_input = false;
+            }
+        }
+        catch(const std::exception&)
+        {
+            std::cout << "Invalid page number.\n";
+        }
+    }
+
+    return new_page;
 }
 
 void Console::waitForAnyKey()
@@ -62,10 +115,10 @@ void Console::waitForAnyKey()
 std::string Console::waitForInput()
 {
     writeLine();
-    std::cout << "> ";
-    std::string input = "";
+    std::cout << "\033[33m>\033[0m ";
+    std::string input("");
     std::getline(std::cin, input);
-    _log += "> " + input + "\n";
+    _log += "\033[33m>\033[0m " + input + "\n";
     return input;
 }
 
@@ -77,8 +130,8 @@ void Console::writeLine()
 
 void Console::writeText(const std::string &text)
 {
-    auto parsedText = parseMarkup(text);
-    std::cout << parsedText;
-    _log += parsedText;
+    std::string parsed_text = parseMarkup(text);
+    std::cout << parsed_text;
+    _log += parsed_text;
     writeLine();
 }

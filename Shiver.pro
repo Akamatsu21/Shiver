@@ -14,6 +14,7 @@ SOURCES += \
         Models/player.cpp \
         System/commandparser.cpp \
         System/console.cpp \
+    System/savestatemanager.cpp \
         System/scriptingengine.cpp \
 		System/utils.cpp \
         game.cpp \
@@ -27,11 +28,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     Enums/command.h \
     Enums/direction.h \
+    Enums/elixirtype.h \
+    Models/combatstate.h \
     Models/enemy.h \
     Models/event.h \
     Models/player.h \
     System/commandparser.h \
     System/console.h \
+    System/savestatemanager.h \
     System/scriptingengine.h \
     System/utils.h \
 	game.h

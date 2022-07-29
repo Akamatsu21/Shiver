@@ -65,7 +65,12 @@ int Player::getElixirCount() const
     return _elixir_count;
 }
 
-std::string Player::getElixirType() const
+ElixirType Player::getElixirType() const
+{
+    return _elixir_type;
+}
+
+std::string Player::getElixirTypeAsString() const
 {
     switch(_elixir_type)
     {

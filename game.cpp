@@ -13,13 +13,15 @@
 Game::Game(QCoreApplication* parent):
     QObject(parent),
     _console(),
-    _current_event(1),
     _scripting_engine(new ScriptingEngine(this)),
+    _current_event(1),
     _player(nullptr),
     _running(true),
+    _current_help_page(0),
     _combat_state{false, 0, 0, 0}
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
+    _help_pages = _scripting_engine->parseHelpPages();
 }
 
 void Game::displayCombatStatus()
@@ -27,7 +29,7 @@ void Game::displayCombatStatus()
     std::string msg = utils::createString("\nRemaining constitution:\n[e]",
                               _current_event.getCurrentEnemy().getName(), "[/e]: ",
                               _current_event.getCurrentEnemy().getConstitution(),
-                              "\nPlayer: ",
+                              "\n[p]Player[/p]: ",
                               _player->getConstitution());
     _console.writeText(msg);
     _console.writeLine();
@@ -58,7 +60,7 @@ void Game::displayCurrentEnemy()
 
 void Game::displayPlayerStats()
 {
-    std::string msg = utils::createString("Adventurer",
+    std::string msg = utils::createString("[p]Adventurer[/p]",
                                           "\nAgility: ",
                                           _player->getAgility(), "/", _player->getStartingAgility(),
                                           "\nConstitution: ",
@@ -69,7 +71,7 @@ void Game::displayPlayerStats()
                                           _player->getGold(),
                                           "\nRations: ",
                                           _player->getRations(),
-                                          "\n", _player->getElixirType(), ": ",
+                                          "\n", _player->getElixirTypeAsString(), ": ",
                                           _player->getElixirCount(),
                                           "\n\nInventory:\n",
                                           _player->getInventory());
@@ -95,6 +97,23 @@ void Game::resolveDamage(bool player_win, int damage)
     }
 
     _console.writeText(msg);
+}
+
+bool Game::resolveYesNoQuestion()
+{
+    for(;;)
+    {
+        std::string user_input = _console.waitForInput();
+        auto [valid, answer] = CommandParser::parseYesNo(user_input);
+        if(valid)
+        {
+            return answer;
+        }
+        else
+        {
+            _console.writeText("Invalid answer. Please answer [c]yes[/c] or [c]no[/c].");
+        }
+    }
 }
 
 void Game::updateCurrentEvent(int id)
@@ -151,7 +170,7 @@ void Game::handleCombatRound()
                                               _combat_state._combat_round,
                                               "\n[e]",_current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
                                               _combat_state._enemy_score,
-                                              "\nPlayer's score: ",
+                                              "\n[p]Player[/p]'s score: ",
                                               _combat_state._player_score);
         _console.writeText(msg);
 
@@ -172,7 +191,7 @@ void Game::handleCombatRound()
 
 void Game::gameLoop()
 {
-    _player = new Player(this, 18, 24, 18, Player::ElixirType::CONSTITUTION);
+    _player = new Player(this, 18, 24, 18, ElixirType::CONSTITUTION);
     _scripting_engine->registerPlayer(_player);
     updateCurrentEvent(1);
 
@@ -183,7 +202,15 @@ void Game::gameLoop()
         switch(command)
         {
         case::Command::HELP:
-            _console.writeText("Help page not yet available.");
+            _current_help_page = 1;
+            while(_current_help_page != 0)
+            {
+                _current_help_page = _console.showHelpPage(_current_help_page,
+                                                           _help_pages.size(),
+                                                           _help_pages.at(_current_help_page - 1));
+            }
+
+            _console.restoreLog();
             continue;
         case::Command::STATS:
             displayPlayerStats();
@@ -221,18 +248,27 @@ void Game::gameLoop()
             displayCombatStatus();
             break;
         case Command::ESCAPE:
+        {
             if(!_combat_state._combat_in_progress)
             {
                 _console.writeText("No enemies present!");
                 continue;
             }
 
-            // TODO: Add luck check option.
-            resolveDamage(false, 2);
+            int damage = 2;
+            _console.writeText("Would you like to attempt a luck check to reduce the damage received while escaping?");
+            if(resolveYesNoQuestion())
+            {
+                bool player_lucky = _player->performLuckCheck();
+                damage = player_lucky ? 1 : 3;
+                _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
+            }
+
+            resolveDamage(false, damage);
             _current_event.defeatAllEnemies();
             _combat_state._combat_in_progress = false;
             _console.writeText("You have escaped!");
-            break;
+        }   break;
         case Command::TAKE:
         {
             if(_combat_state._combat_in_progress)
@@ -274,7 +310,7 @@ void Game::gameLoop()
                 }
                 else
                 {
-                    _current_event.takeItem(item);
+                    _current_event.takeItem();
                     _player->addItem(item);
                     _console.writeText(utils::createString("[i]", item, "[/i] added to your inventory."));
                 }

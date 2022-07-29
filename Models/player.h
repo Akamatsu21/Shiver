@@ -4,17 +4,11 @@
 #include <QObject>
 #include <vector>
 
+#include "Enums/elixirtype.h"
+
 class Player: public QObject
 {
     Q_OBJECT
-
-public:
-    enum class ElixirType
-    {
-        AGILITY,
-        CONSTITUTION,
-        LUCK
-    };
 
 private:
     int _agility;
@@ -44,7 +38,8 @@ public:
     int getGold() const;
     int getRations() const;
     int getElixirCount() const;
-    std::string getElixirType() const;
+    ElixirType getElixirType() const;
+    std::string getElixirTypeAsString() const;
     bool hasItem(const std::string& item) const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
     std::string getInventory() const;

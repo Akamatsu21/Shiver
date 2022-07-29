@@ -61,7 +61,7 @@ std::string Event::findItem(const std::string& item) const
     }
 }
 
-int Event::getItemLimit()
+int Event::getItemLimit() const
 {
     return _item_limit;
 }
@@ -109,11 +109,10 @@ void Event::addItem(const std::string& item)
     _items.push_back(item);
 }
 
-void Event::takeItem(const std::string& item)
+void Event::takeItem()
 {
     if(_item_limit > 0)
     {
         --_item_limit;
-        _items.erase(std::find(std::begin(_items), std::end(_items), item));
     }
 }

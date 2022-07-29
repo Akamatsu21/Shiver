@@ -26,8 +26,9 @@ public:
     bool isDirectionAvailable(Direction direction) const;
     bool hasEnemies() const;
     bool hasItem(const std::string& item) const;
+    std::string getItemList() const;
     std::string findItem(const std::string& item) const;
-    int getItemLimit();
+    int getItemLimit() const;
 
     void setDescription(const std::string& description);
     void setDestination(Direction direction, int destination);
@@ -39,7 +40,7 @@ public:
     void defeatAllEnemies();
 
     void addItem(const std::string& item);
-    void takeItem(const std::string& item);
+    void takeItem();
 };
 
 #endif // EVENT_H

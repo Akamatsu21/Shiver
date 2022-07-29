@@ -1,0 +1,35 @@
+// Player stats
+Agility
+Constitution
+Luck
+Starting Agility
+Starting Constitution
+Starting Luck
+Gold
+Rations
+Elixir Count
+Elixir Type
+INVENTORY_START
+...
+INVENTORY_END
+
+// Current event description
+ID
+ENEMY_START
+...
+ENEMY_END
+ITEM_START
+...
+ITEM_END
+Item Limit
+
+// Combat state
+Combat in progress
+Combat round
+Enemy score
+Player score
+
+// Log
+LOG_START
+...
+LOG_END

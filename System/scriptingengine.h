@@ -14,6 +14,7 @@ class ScriptingEngine : public QObject
 
     QJSEngine _js_engine;
     QJSValue _event_list;
+    QJSValue _help_pages;
     QJSValue _player;
 
 public:
@@ -22,6 +23,7 @@ public:
     void registerPlayer(Player* player);
     QJSValue getObjectProperty(const QJSValue& object, const QString& property);
     Event parseEvent(int id);
+    std::vector<std::string> parseHelpPages();
 };
 
 #endif // SCRIPTINGENGINE_H

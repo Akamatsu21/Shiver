@@ -13,7 +13,10 @@ enum class Command
     FIGHT,
     ESCAPE,
     TAKE,
-    LUCKY
+    LUCKY,
+    SAVE,
+    LOAD,
+    SAVELIST
 };
 
 #endif // COMMAND_H

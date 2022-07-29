@@ -10,7 +10,7 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
 {
     if(input.empty())
     {
-        return std::make_pair(Command::INVALID, std::queue<std::string>());
+        return {Command::INVALID, std::queue<std::string>()};
     }
 
     std::istringstream iss(input);
@@ -64,6 +64,35 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     {
         command = Command::LUCKY;
     }
+    else if(input_command == "save")
+    {
+        command = Command::SAVE;
+    }
+    else if(input_command == "load")
+    {
+        command = Command::LOAD;
+    }
+    else if(input_command == "savelist")
+    {
+        command = Command::SAVELIST
+    }
 
-    return std::make_pair(command, params);
+    return {command, params};
+}
+
+std::pair<bool, bool> CommandParser::parseYesNo(const std::string &input)
+{
+    std::string answer = utils::toLower(input);
+
+    if(answer == "yes" || answer == "y")
+    {
+        return {true, true};
+    }
+
+    if(answer == "no" || answer == "n")
+    {
+        return {true, false};
+    }
+
+    return {false, false};
 }

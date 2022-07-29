@@ -6,11 +6,13 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),
     _js_engine(),
     _event_list(),
+    _help_pages(),
     _player()
 {
     // TODO: Implement some error handling.
     _js_engine.installExtensions(QJSEngine::AllExtensions);
     _event_list = _js_engine.importModule(":js/events.jsm").property("events");
+    _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
 }
 
 void ScriptingEngine::registerPlayer(Player* player)
@@ -80,4 +82,17 @@ Event ScriptingEngine::parseEvent(int id)
     }
 
     return event;
+}
+
+std::vector<std::string> ScriptingEngine::parseHelpPages()
+{
+    Q_ASSERT(_help_pages.isArray());
+    std::vector<std::string> pages{};
+    int length = _help_pages.property("length").toInt();
+    for(int i = 0; i < length; ++i)
+    {
+        pages.push_back(_help_pages.property(i).toString().toStdString());
+    }
+
+    return pages;
 }

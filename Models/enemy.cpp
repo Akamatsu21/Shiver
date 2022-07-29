@@ -1,4 +1,5 @@
 #include "enemy.h"
+#include "System/utils.h"
 
 Enemy::Enemy(const std::string& name, int agility, int constitution):
     _name(name),
@@ -22,6 +23,14 @@ int Enemy::getAgility() const
 int Enemy::getConstitution() const
 {
     return _constitution;
+}
+
+std::string Enemy::toString() const
+{
+    return utils::createString(_name, "\n",
+                               _agility, "\n",
+                               _constitution, "\n",
+                               _starting_constitution, "\n");
 }
 
 void Enemy::modifyConstitution(int value)

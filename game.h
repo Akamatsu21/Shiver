@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "Models/event.h"
+#include "Models/combatstate.h"
 #include "System/console.h"
 
 class Player;
@@ -15,20 +16,17 @@ class Game: public QObject
     Q_OBJECT
 
     Console _console;
-    Event _current_event;
     ScriptingEngine* _scripting_engine;
+
+    // Game data.
+    Event _current_event;
+    std::vector<std::string> _help_pages;
     Player* _player;
 
     // Game state.
     bool _running;
-
-    struct CombatState
-    {
-        bool _combat_in_progress;
-        int _combat_round;
-        int _enemy_score;
-        int _player_score;
-    } _combat_state;
+    int _current_help_page;
+    CombatState _combat_state;
 
     void displayCombatStatus();
     void displayCurrentEvent();
@@ -36,6 +34,7 @@ class Game: public QObject
     void displayPlayerStats();
 
     void resolveDamage(bool player_win, int damage);
+    bool resolveYesNoQuestion();
     void updateCurrentEvent(int id);
 
     void checkForDeath();

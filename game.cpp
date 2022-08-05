@@ -250,13 +250,14 @@ void Game::restoreGameState(const GameState& game_state)
         _player->setGold(game_state._player_gold);
         _player->setRations(game_state._player_rations);
         _player->setElixirCount(game_state._player_elixir_count);
-    } catch(std::out_of_range e)
+    } catch(const std::out_of_range& e)
     {
-        _console.writeError("Fatal error while loading savefile\n");
+        _console.writeError("Fatal error while loading savefile");
         _console.writeError(e.what());
-        _console.writeError("\nGame terminated\n");
+        _console.writeError("Game terminated");
         emit gameOver();
     }
+    _scripting_engine->registerPlayer(_player);
 
     QString inventory = QString::fromStdString(game_state._player_inventory);
     QTextStream ts(&inventory);
@@ -268,7 +269,7 @@ void Game::restoreGameState(const GameState& game_state)
     _current_event = _scripting_engine->parseEvent(game_state._event_id);
     if(game_state._event_enemy_present)
     {
-        Q_ASSERT(_current_event.hasEnemies());
+        assert(_current_event.hasEnemies());
         while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
         {
             _current_event.defeatCurrentEnemy();
@@ -277,11 +278,11 @@ void Game::restoreGameState(const GameState& game_state)
         try
         {
             _current_event.getCurrentEnemy().setConstitution(game_state._event_enemy_constitution);
-        } catch(std::out_of_range e)
+        } catch(const std::out_of_range& e)
         {
-            _console.writeError("Fatal error while loading savefile\n");
+            _console.writeError("Fatal error while loading savefile");
             _console.writeError(e.what());
-            _console.writeError("\nGame terminated\n");
+            _console.writeError("Game terminated");
             emit gameOver();
         }
     }
@@ -295,14 +296,14 @@ void Game::restoreGameState(const GameState& game_state)
 
     if(game_state._event_items_present)
     {
-        Q_ASSERT(_current_event.hasItems());
+        assert(_current_event.hasItems());
         _current_event.setItemLimit(game_state._event_item_limit);
     }
 
     _combat_state._combat_in_progress = game_state._combat_in_progress;
     if(game_state._combat_in_progress)
     {
-        Q_ASSERT(_current_event.hasEnemies());
+        assert(_current_event.hasEnemies());
         _combat_state._combat_round = game_state._combat_round;
         _combat_state._enemy_score = game_state._combat_enemy_score;
         _combat_state._player_score = game_state._combat_player_score;
@@ -401,21 +402,11 @@ void Game::gameLoop()
             }
             else if(params.empty())
             {
-                _console.writeText("Not specified which item to take.");
+                _console.writeText("Specify which item to take.");
                 continue;
             }
 
-            std::ostringstream ss("");
-            while(!params.empty())
-            {
-                ss << params.front();
-                params.pop();
-                if(!params.empty())
-                {
-                    ss << " ";
-                }
-            }
-            std::string item = _current_event.findItem(ss.str());
+            std::string item = _current_event.findItem(utils::parseParams(params));
 
             if(item.empty())
             {
@@ -464,29 +455,125 @@ void Game::gameLoop()
             displayCombatStatus();
         }   break;
         case Command::SAVE:
+        {
+            if(params.empty())
+            {
+                _console.writeText("Specify save file name.");
+                continue;
+            }
+
+            std::string save_file = utils::parseParams(params);
+            bool new_file = !_save_state_manager.saveFileExists(save_file);
+            if(!new_file)
+            {
+                _console.writeText(utils::createString("Are you sure you want to overwrite save file \"",
+                                                       save_file,
+                                                       "\"?"));
+                if(!resolveYesNoQuestion())
+                {
+                    continue;
+                }
+            }
+
             try
             {
                 _save_state_manager.createSaveFileContents(createGameState());
-                _save_state_manager.saveCurrentGameState("SAVE1");
-            } catch(std::system_error e)
+                _save_state_manager.saveCurrentGameState(save_file);
+                if(new_file)
+                {
+                    _console.writeText(utils::createString("New save file \"",
+                                                           save_file,
+                                                           "\" created successfully."));
+                }
+                else
+                {
+                    _console.writeText(utils::createString("Save file \"",
+                                                           save_file,
+                                                           "\" overwritten successfully."));
+                }
+            } catch(const std::system_error& e)
             {
-                _console.writeError("Error encountered\n");
+                _console.writeError("Error encountered");
                 _console.writeError(e.what());
-                _console.writeError("\nSave failed\n");
+                _console.writeError("Save failed");
             }
-            continue;
+        }   continue;
         case Command::LOAD:
+        {
+            if(params.empty())
+            {
+                _console.writeText("Specify save file name.");
+                continue;
+            }
+
+            std::string save_file = utils::parseParams(params);
+            if(!_save_state_manager.saveFileExists(save_file))
+            {
+                _console.writeText(utils::createString("Save file \"",
+                                                       save_file,
+                                                       "\" not found."));
+                continue;
+            }
+
+            _console.writeText("Are you sure you want to load a saved game?");
+            if(!resolveYesNoQuestion())
+            {
+                continue;
+            }
+
             try
             {
-                _save_state_manager.loadGameState("SAVE1");
+                _save_state_manager.loadSaveFile(save_file);
                 restoreGameState(_save_state_manager.parseSaveFileContents());
-            } catch(std::system_error e)
+            } catch(const std::system_error& e)
             {
-                _console.writeError("Error encountered\n");
+                _console.writeError("Error encountered");
                 _console.writeError(e.what());
-                _console.writeError("\nLoad failed\n");
+                _console.writeError("Load failed");
             }
-            continue;
+        }   continue;
+        case Command::SAVELIST:
+        {
+            std::string save_list = _save_state_manager.listSaveFiles();
+            if(save_list.empty())
+            {
+                _console.writeText("No save files found.");
+            }
+            else
+            {
+                _console.writeText(_save_state_manager.listSaveFiles());
+            }
+        }   continue;
+        case Command::SAVEDEL:
+        {
+            if(params.empty())
+            {
+                _console.writeText("Specify save file name.");
+                continue;
+            }
+
+            std::string save_file = utils::parseParams(params);
+            if(!_save_state_manager.saveFileExists(save_file))
+            {
+                _console.writeText(utils::createString("Save file \"",
+                                                       save_file,
+                                                       "\" not found."));
+                continue;
+            }
+
+            _console.writeText(utils::createString("Are you sure you want to delete save file \"",
+                                                   save_file,
+                                                   "\"?"));
+            if(!resolveYesNoQuestion())
+            {
+                continue;
+            }
+
+            _save_state_manager.deleteSaveFile(save_file);
+            _console.writeText(utils::createString("Save file \"",
+                                                   save_file,
+                                                   "\" successfully deleted."));
+        }   continue;
         case Command::INVALID:
         default:
             _console.writeText("Invalid command");

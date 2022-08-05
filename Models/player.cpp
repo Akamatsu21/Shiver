@@ -106,7 +106,7 @@ std::string Player::getInventory() const
         [](std::string acc, std::string element)
         {
             return acc + "\n" + element;
-    });
+        });
 }
 
 void Player::setAgility(int value)
@@ -252,7 +252,7 @@ bool Player::drinkElixir()
         _luck = _starting_luck;
         break;
     default:
-        Q_ASSERT(false);
+        assert(false);
         break;
     }
 

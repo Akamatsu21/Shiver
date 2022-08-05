@@ -11,8 +11,21 @@ SaveStateManager::SaveStateManager():
     if(!_save_dir.exists())
     {
         bool result = _save_dir.mkdir(".");
-        Q_ASSERT(result);
+        assert(result);
     }
+}
+
+bool SaveStateManager::saveFileExists(const std::string& save_slot) const
+{
+    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QFile save_file(fullFilePath);
+    return save_file.exists();
+}
+
+std::string SaveStateManager::listSaveFiles() const
+{
+    QStringList save_list = _save_dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+    return save_list.join("\n").toStdString();
 }
 
 void SaveStateManager::createSaveFileContents(const GameState& game_state)
@@ -71,20 +84,6 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     _save_file_contents = ss.str();
 }
 
-void SaveStateManager::loadGameState(const std::string& save_slot)
-{
-    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
-    QFile save_file(fullFilePath);
-    if(!save_file.open(QIODevice::ReadOnly))
-    {
-        throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
-    }
-
-    QTextStream ts(&save_file);
-    _save_file_contents = ts.readAll().toStdString();
-    save_file.close();
-}
-
 GameState SaveStateManager::parseSaveFileContents()
 {
     QString save_file(QString::fromStdString(_save_file_contents));
@@ -103,7 +102,7 @@ GameState SaveStateManager::parseSaveFileContents()
     game_state._player_elixir_type = ts.readLine().toInt();
 
     QString line = ts.readLine();
-    Q_ASSERT(line == "INVENTORY_START");
+    assert(line == "INVENTORY_START");
     game_state._player_inventory = "";
     for(;;)
     {
@@ -149,7 +148,7 @@ GameState SaveStateManager::parseSaveFileContents()
     }
 
     line = ts.readLine();
-    Q_ASSERT(line == "LOG_START");
+    assert(line == "LOG_START");
     game_state._log = "";
     for(;;)
     {
@@ -170,6 +169,28 @@ GameState SaveStateManager::parseSaveFileContents()
     }
 
     return game_state;
+}
+
+void SaveStateManager::deleteSaveFile(const std::string& save_slot)
+{
+    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QFile save_file(fullFilePath);
+    bool result = save_file.remove();
+    assert(result);
+}
+
+void SaveStateManager::loadSaveFile(const std::string& save_slot)
+{
+    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QFile save_file(fullFilePath);
+    if(!save_file.open(QIODevice::ReadOnly))
+    {
+        throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
+    }
+
+    QTextStream ts(&save_file);
+    _save_file_contents = ts.readAll().toStdString();
+    save_file.close();
 }
 
 void SaveStateManager::saveCurrentGameState(const std::string& save_slot)

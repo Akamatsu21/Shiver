@@ -58,6 +58,21 @@ Direction utils::commandToDirection(Command command)
     return result;
 }
 
+std::string utils::parseParams(std::queue<std::string>& params)
+{
+    std::ostringstream ss("");
+    while(!params.empty())
+    {
+        ss << params.front();
+        params.pop();
+        if(!params.empty())
+        {
+            ss << " ";
+        }
+    }
+    return ss.str();
+}
+
 int utils::rollD6(int count)
 {
     static std::random_device rd;

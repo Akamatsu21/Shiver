@@ -14,9 +14,14 @@ class SaveStateManager
 public:
     SaveStateManager();
 
+    bool saveFileExists(const std::string& save_slot) const;
+    std::string listSaveFiles() const;
+
     void createSaveFileContents(const GameState& game_state);
-    void loadGameState(const std::string& save_slot);
     GameState parseSaveFileContents();
+
+    void deleteSaveFile(const std::string& save_slot);
+    void loadSaveFile(const std::string& save_slot);
     void saveCurrentGameState(const std::string& save_slot);
 };
 

@@ -76,6 +76,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     {
         command = Command::SAVELIST;
     }
+    else if(input_command == "savedel")
+    {
+        command = Command::SAVEDEL;
+    }
 
     return {command, params};
 }

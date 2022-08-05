@@ -16,7 +16,8 @@ enum class Command
     LUCKY,
     SAVE,
     LOAD,
-    SAVELIST
+    SAVELIST,
+    SAVEDEL
 };
 
 #endif // COMMAND_H

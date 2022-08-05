@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include "Enums/command.h"
 #include "Enums/direction.h"
@@ -24,6 +25,8 @@ std::string createString(Args... args)
 std::string directionToString(Direction direction);
 
 std::vector<Direction> getAllDirections();
+
+std::string parseParams(std::queue<std::string>& params);
 
 int rollD6(int count);
 

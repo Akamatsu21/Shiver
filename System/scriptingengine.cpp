@@ -36,12 +36,12 @@ QJSValue ScriptingEngine::getObjectProperty(const QJSValue& object, const QStrin
 Event ScriptingEngine::parseEvent(int id)
 {
     QString event_id = "event" + QString::number(id);
-    Q_ASSERT(_event_list.hasProperty(event_id));
+    assert(_event_list.hasProperty(event_id));
 
     QJSValue event_object = _event_list.property(event_id);
     Event event(id);
 
-    Q_ASSERT(event_object.hasProperty("description"));
+    assert(event_object.hasProperty("description"));
     event.setDescription(getObjectProperty(event_object, "description").toString().toStdString());
 
     for(Direction direction: utils::getAllDirections())
@@ -56,7 +56,7 @@ Event ScriptingEngine::parseEvent(int id)
     if(event_object.hasProperty("enemies"))
     {
         QJSValue enemies = getObjectProperty(event_object, "enemies");
-        Q_ASSERT(enemies.isArray());
+        assert(enemies.isArray());
         int length = enemies.property("length").toInt();
         for(int i = 0; i < length; ++i)
         {
@@ -69,11 +69,11 @@ Event ScriptingEngine::parseEvent(int id)
 
     if(event_object.hasProperty("items"))
     {
-        Q_ASSERT(event_object.hasProperty("item_limit"));
+        assert(event_object.hasProperty("item_limit"));
         event.setItemLimit(getObjectProperty(event_object, "item_limit").toInt());
 
         QJSValue items = getObjectProperty(event_object, "items");
-        Q_ASSERT(items.isArray());
+        assert(items.isArray());
         int length = items.property("length").toInt();
         for(int i = 0; i < length; ++i)
         {
@@ -86,7 +86,7 @@ Event ScriptingEngine::parseEvent(int id)
 
 std::vector<std::string> ScriptingEngine::parseHelpPages()
 {
-    Q_ASSERT(_help_pages.isArray());
+    assert(_help_pages.isArray());
     std::vector<std::string> pages{};
     int length = _help_pages.property("length").toInt();
     for(int i = 0; i < length; ++i)

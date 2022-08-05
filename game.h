@@ -6,6 +6,7 @@
 #include "Models/event.h"
 #include "Models/combatstate.h"
 #include "System/console.h"
+#include "System/savestatemanager.h"
 
 class Player;
 class ScriptingEngine;
@@ -16,6 +17,7 @@ class Game: public QObject
     Q_OBJECT
 
     Console _console;
+    SaveStateManager _save_state_manager;
     ScriptingEngine* _scripting_engine;
 
     // Game data.
@@ -39,6 +41,9 @@ class Game: public QObject
 
     void checkForDeath();
     void handleCombatRound();
+
+    GameState createGameState();
+    void restoreGameState(const GameState& game_state);
 
 public:
     explicit Game(QCoreApplication* parent);

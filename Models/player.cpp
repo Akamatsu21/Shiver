@@ -1,7 +1,7 @@
 #include "player.h"
 #include <QVariant>
 
-#include "System/utils.h"
+#include "Utils/utils.h"
 
 Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirType elixir_type):
     QObject(parent),
@@ -97,11 +97,76 @@ bool Player::hasItem(const QVariant& item) const
 
 std::string Player::getInventory() const
 {
+    if(_inventory.empty())
+    {
+        return "";
+    }
+
     return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
         [](std::string acc, std::string element)
         {
             return acc + "\n" + element;
-        });
+    });
+}
+
+void Player::setAgility(int value)
+{
+    if(value < 0 || value > _starting_agility)
+    {
+        throw std::out_of_range("Player agility out of range.");
+    }
+
+    _agility = value;
+}
+
+void Player::setConstitution(int value)
+{
+    if(value < 0 || value > _starting_constitution)
+    {
+        throw std::out_of_range("Player constitution out of range.");
+    }
+
+    _constitution = value;
+}
+
+void Player::setLuck(int value)
+{
+    if(value < 0 || value > _starting_luck)
+    {
+        throw std::out_of_range("Player luck out of range.");
+    }
+
+    _luck = value;
+}
+
+void Player::setGold(int value)
+{
+    if(value < 0)
+    {
+        throw std::out_of_range("Gold number out of range.");
+    }
+
+    _gold = value;
+}
+
+void Player::setRations(int value)
+{
+    if(value < 0)
+    {
+        throw std::out_of_range("Rations number out of range.");
+    }
+
+    _rations = value;
+}
+
+void Player::setElixirCount(int value)
+{
+    if(value < 0)
+    {
+        throw std::out_of_range("Elixir number out of range.");
+    }
+
+    _elixir_count = value;
 }
 
 void Player::modifyAgility(int value)
@@ -197,7 +262,10 @@ bool Player::drinkElixir()
 
 void Player::addItem(const std::string& item)
 {
-    _inventory.push_back(item);
+    if(!hasItem(item))
+    {
+        _inventory.push_back(item);
+    }
 }
 
 void Player::removeItem(const std::string& item)

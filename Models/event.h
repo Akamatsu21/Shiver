@@ -25,6 +25,7 @@ public:
     int getDestination(Direction direction) const;
     bool isDirectionAvailable(Direction direction) const;
     bool hasEnemies() const;
+    bool hasItems() const;
     bool hasItem(const std::string& item) const;
     std::string getItemList() const;
     std::string findItem(const std::string& item) const;
@@ -34,6 +35,7 @@ public:
     void setDestination(Direction direction, int destination);
     void setItemLimit(int limit);
 
+    Enemy getCurrentEnemy() const;
     Enemy& getCurrentEnemy();
     void addEnemy(const std::string& name, int agility, int constitution);
     void defeatCurrentEnemy();

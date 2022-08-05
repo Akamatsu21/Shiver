@@ -16,7 +16,8 @@ public:
     std::string getName() const;
     int getAgility() const;
     int getConstitution() const;
-    std::string toString() const;
+
+    void setConstitution(int value);
 
     void modifyConstitution(int value);
 };

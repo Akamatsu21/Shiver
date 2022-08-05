@@ -4,7 +4,7 @@
 #include <iterator>
 #include <sstream>
 
-#include "utils.h"
+#include "Utils/utils.h"
 
 std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::string &input)
 {
@@ -74,7 +74,7 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     }
     else if(input_command == "savelist")
     {
-        command = Command::SAVELIST
+        command = Command::SAVELIST;
     }
 
     return {command, params};

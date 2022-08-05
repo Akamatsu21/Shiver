@@ -4,15 +4,18 @@
 #include <string>
 #include <QCoreApplication>
 #include <QJSEngine>
+#include <QTextStream>
 
+#include "Models/gamestate.h"
 #include "Models/player.h"
 #include "System/commandparser.h"
 #include "System/scriptingengine.h"
-#include "System/utils.h"
+#include "Utils/utils.h"
 
 Game::Game(QCoreApplication* parent):
     QObject(parent),
     _console(),
+    _save_state_manager(),
     _scripting_engine(new ScriptingEngine(this)),
     _current_event(1),
     _player(nullptr),
@@ -189,6 +192,126 @@ void Game::handleCombatRound()
 
 }
 
+GameState Game::createGameState()
+{
+    GameState game_state{};
+    game_state._player_agility = _player->getAgility();
+    game_state._player_constitution = _player->getConstitution();
+    game_state._player_luck = _player->getLuck();
+    game_state._player_start_agility = _player->getStartingAgility();
+    game_state._player_start_constitution = _player->getStartingConstitution();
+    game_state._player_start_luck = _player->getStartingLuck();
+    game_state._player_gold = _player->getGold();
+    game_state._player_rations = _player->getRations();
+    game_state._player_elixir_count = _player->getElixirCount();
+    game_state._player_elixir_type = static_cast<int>(_player->getElixirType());
+    game_state._player_inventory = _player->getInventory();
+
+    game_state._event_id = _current_event.getId();
+    game_state._event_enemy_present = _current_event.hasEnemies();
+    if(_current_event.hasEnemies())
+    {
+        game_state._event_enemy_name = _current_event.getCurrentEnemy().getName();
+        game_state._event_enemy_constitution = _current_event.getCurrentEnemy().getConstitution();
+    }
+    game_state._event_items_present = _current_event.hasItems();
+    if(_current_event.hasItems())
+    {
+        game_state._event_item_limit = _current_event.getItemLimit();
+    }
+
+    game_state._combat_in_progress = _combat_state._combat_in_progress;
+    if(_combat_state._combat_in_progress)
+    {
+        game_state._combat_round = _combat_state._combat_round;
+        game_state._combat_enemy_score = _combat_state._enemy_score;
+        game_state._combat_player_score = _combat_state._player_score;
+    }
+
+    game_state._log = _console.getLogContents();
+
+    return game_state;
+}
+
+void Game::restoreGameState(const GameState& game_state)
+{
+    delete _player;
+    _player = new Player(this,
+                         game_state._player_start_agility,
+                         game_state._player_start_constitution,
+                         game_state._player_start_luck,
+                         static_cast<ElixirType>(game_state._player_elixir_type));
+
+    try
+    {
+        _player->setAgility(game_state._player_agility);
+        _player->setConstitution(game_state._player_constitution);
+        _player->setLuck(game_state._player_luck);
+        _player->setGold(game_state._player_gold);
+        _player->setRations(game_state._player_rations);
+        _player->setElixirCount(game_state._player_elixir_count);
+    } catch(std::out_of_range e)
+    {
+        _console.writeError("Fatal error while loading savefile\n");
+        _console.writeError(e.what());
+        _console.writeError("\nGame terminated\n");
+        emit gameOver();
+    }
+
+    QString inventory = QString::fromStdString(game_state._player_inventory);
+    QTextStream ts(&inventory);
+    while(!ts.atEnd())
+    {
+        _player->addItem(ts.readLine().toStdString());
+    }
+
+    _current_event = _scripting_engine->parseEvent(game_state._event_id);
+    if(game_state._event_enemy_present)
+    {
+        Q_ASSERT(_current_event.hasEnemies());
+        while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
+        {
+            _current_event.defeatCurrentEnemy();
+        }
+
+        try
+        {
+            _current_event.getCurrentEnemy().setConstitution(game_state._event_enemy_constitution);
+        } catch(std::out_of_range e)
+        {
+            _console.writeError("Fatal error while loading savefile\n");
+            _console.writeError(e.what());
+            _console.writeError("\nGame terminated\n");
+            emit gameOver();
+        }
+    }
+    else
+    {
+        if(_current_event.hasEnemies())
+        {
+            _current_event.defeatAllEnemies();
+        }
+    }
+
+    if(game_state._event_items_present)
+    {
+        Q_ASSERT(_current_event.hasItems());
+        _current_event.setItemLimit(game_state._event_item_limit);
+    }
+
+    _combat_state._combat_in_progress = game_state._combat_in_progress;
+    if(game_state._combat_in_progress)
+    {
+        Q_ASSERT(_current_event.hasEnemies());
+        _combat_state._combat_round = game_state._combat_round;
+        _combat_state._enemy_score = game_state._combat_enemy_score;
+        _combat_state._player_score = game_state._combat_player_score;
+    }
+
+    _console.setLog(game_state._log);
+    _console.restoreLog();
+}
+
 void Game::gameLoop()
 {
     _player = new Player(this, 18, 24, 18, ElixirType::CONSTITUTION);
@@ -340,6 +463,30 @@ void Game::gameLoop()
             resolveDamage(player_win, damage);
             displayCombatStatus();
         }   break;
+        case Command::SAVE:
+            try
+            {
+                _save_state_manager.createSaveFileContents(createGameState());
+                _save_state_manager.saveCurrentGameState("SAVE1");
+            } catch(std::system_error e)
+            {
+                _console.writeError("Error encountered\n");
+                _console.writeError(e.what());
+                _console.writeError("\nSave failed\n");
+            }
+            continue;
+        case Command::LOAD:
+            try
+            {
+                _save_state_manager.loadGameState("SAVE1");
+                restoreGameState(_save_state_manager.parseSaveFileContents());
+            } catch(std::system_error e)
+            {
+                _console.writeError("Error encountered\n");
+                _console.writeError(e.what());
+                _console.writeError("\nLoad failed\n");
+            }
+            continue;
         case Command::INVALID:
         default:
             _console.writeText("Invalid command");

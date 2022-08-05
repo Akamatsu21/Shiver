@@ -2,24 +2,21 @@
 #define SAVESTATEMANAGER_H
 
 #include <string>
+#include <QDir>
 
-struct CombatState;
-class Console;
-class Event;
-class Player;
+struct GameState;
 
 class SaveStateManager
 {
-    std::string _game_state;
+    QDir _save_dir;
+    std::string _save_file_contents;
 
 public:
     SaveStateManager();
 
-    void createGameState(const Player& player,
-                         const Event& event,
-                         const CombatState& combat_state,
-                         const Console& console);
+    void createSaveFileContents(const GameState& game_state);
     void loadGameState(const std::string& save_slot);
+    GameState parseSaveFileContents();
     void saveCurrentGameState(const std::string& save_slot);
 };
 

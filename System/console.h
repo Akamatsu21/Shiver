@@ -18,11 +18,16 @@ class Console
 public:
     Console();
 
+    std::string getLogContents() const;
+
+    void setLog(const std::string& value);
+
     void clearScreen();
     void restoreLog();
     int showHelpPage(int page_number, int total_pages, const std::string& text);
     void waitForAnyKey();
     std::string waitForInput();
+    void writeError(const std::string& error);
     void writeLine();
     void writeText(const std::string& text);
 };

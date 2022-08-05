@@ -1,7 +1,8 @@
 #include "event.h"
 #include <algorithm>
+#include <numeric>
 
-#include "System/utils.h"
+#include "Utils/utils.h"
 
 Event::Event(int id):
     _id(id),
@@ -39,9 +40,28 @@ bool Event::hasEnemies() const
     return !_enemies.empty();
 }
 
+bool Event::hasItems() const
+{
+    return !_items.empty();
+}
+
 bool Event::hasItem(const std::string& item) const
 {
     return std::find(std::begin(_items), std::end(_items), item) != std::end(_items);
+}
+
+std::string Event::getItemList() const
+{
+    if(_items.empty())
+    {
+        return "";
+    }
+
+    return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0),
+        [](std::string acc, std::string element)
+        {
+            return acc + "\n" + element;
+        });
 }
 
 std::string Event::findItem(const std::string& item) const
@@ -79,6 +99,11 @@ void Event::setDestination(Direction direction, int destination)
 void Event::setItemLimit(int limit)
 {
     _item_limit = limit;
+}
+
+Enemy Event::getCurrentEnemy() const
+{
+    return _enemies.front();
 }
 
 Enemy& Event::getCurrentEnemy()

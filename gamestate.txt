@@ -15,12 +15,9 @@ INVENTORY_END
 
 // Current event description
 ID
-ENEMY_START
-...
-ENEMY_END
-ITEM_START
-...
-ITEM_END
+Enemy present
+Enemy name
+Enemy constitution
 Item Limit
 
 // Combat state

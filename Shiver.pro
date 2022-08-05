@@ -14,11 +14,11 @@ SOURCES += \
         Models/player.cpp \
         System/commandparser.cpp \
         System/console.cpp \
-    System/savestatemanager.cpp \
+        System/savestatemanager.cpp \
         System/scriptingengine.cpp \
-		System/utils.cpp \
+        Utils/utils.cpp \
         game.cpp \
-		main.cpp
+        main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -32,13 +32,14 @@ HEADERS += \
     Models/combatstate.h \
     Models/enemy.h \
     Models/event.h \
+    Models/gamestate.h \
     Models/player.h \
     System/commandparser.h \
     System/console.h \
     System/savestatemanager.h \
     System/scriptingengine.h \
-    System/utils.h \
-	game.h
+    Utils/utils.h \
+    game.h
 
 RESOURCES += \
     Resources/resources.qrc

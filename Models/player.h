@@ -22,7 +22,7 @@ private:
     int _gold;
     int _rations;
     int _elixir_count;
-    ElixirType _elixir_type;
+    const ElixirType _elixir_type;
 
     std::vector<std::string> _inventory;
 
@@ -43,6 +43,13 @@ public:
     bool hasItem(const std::string& item) const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
     std::string getInventory() const;
+
+    void setAgility(int value);
+    void setConstitution(int value);
+    void setLuck(int value);
+    void setGold(int value);
+    void setRations(int value);
+    void setElixirCount(int value);
 
     void modifyAgility(int value);
     Q_INVOKABLE void modifyConstitution(int value);

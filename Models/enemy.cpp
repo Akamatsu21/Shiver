@@ -1,5 +1,5 @@
 #include "enemy.h"
-#include "System/utils.h"
+#include "Utils/utils.h"
 
 Enemy::Enemy(const std::string& name, int agility, int constitution):
     _name(name),
@@ -25,12 +25,14 @@ int Enemy::getConstitution() const
     return _constitution;
 }
 
-std::string Enemy::toString() const
+void Enemy::setConstitution(int value)
 {
-    return utils::createString(_name, "\n",
-                               _agility, "\n",
-                               _constitution, "\n",
-                               _starting_constitution, "\n");
+    if(value < 0 || value > _starting_constitution)
+    {
+        throw std::out_of_range("Enemy constitution out of range.");
+    }
+
+    _constitution = value;
 }
 
 void Enemy::modifyConstitution(int value)

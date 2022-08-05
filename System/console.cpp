@@ -10,6 +10,16 @@ Console::Console():
 
 }
 
+std::string Console::getLogContents() const
+{
+    return _log;
+}
+
+void Console::setLog(const std::string& value)
+{
+    _log = value;
+}
+
 std::string Console::replaceTag(const std::string& text,
                                 const std::string& open_tag,
                                 const std::string& close_tag,
@@ -97,7 +107,7 @@ int Console::showHelpPage(int page_number, int total_pages, const std::string &t
                 invalid_input = false;
             }
         }
-        catch(const std::exception&)
+        catch(const std::out_of_range&)
         {
             std::cout << "Invalid page number.\n";
         }
@@ -120,6 +130,11 @@ std::string Console::waitForInput()
     std::getline(std::cin, input);
     _log += "\033[33m>\033[0m " + input + "\n";
     return input;
+}
+
+void Console::writeError(const std::string& error)
+{
+    std::cout << "\033[0;91m" << error;
 }
 
 void Console::writeLine()

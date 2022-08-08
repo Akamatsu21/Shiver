@@ -13,6 +13,7 @@ class SaveStateManager
 
 public:
     SaveStateManager();
+    void initDirectories();
 
     bool saveFileExists(const std::string& save_slot) const;
     std::string listSaveFiles() const;

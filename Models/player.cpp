@@ -252,7 +252,6 @@ bool Player::drinkElixir()
         _luck = _starting_luck;
         break;
     default:
-        assert(false);
         break;
     }
 

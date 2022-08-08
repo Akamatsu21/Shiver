@@ -8,10 +8,17 @@ SaveStateManager::SaveStateManager():
     _save_dir("save"),
     _save_file_contents("")
 {
+}
+
+void SaveStateManager::initDirectories()
+{
     if(!_save_dir.exists())
     {
-        bool result = _save_dir.mkdir(".");
-        assert(result);
+        if(!_save_dir.mkdir("."))
+        {
+            throw std::system_error(std::make_error_code(std::errc::io_error),
+                                    "Save directory cannot be created.");
+        }
     }
 }
 
@@ -102,7 +109,10 @@ GameState SaveStateManager::parseSaveFileContents()
     game_state._player_elixir_type = ts.readLine().toInt();
 
     QString line = ts.readLine();
-    assert(line == "INVENTORY_START");
+    if(line != "INVENTORY_START")
+    {
+        throw std::runtime_error("Corrupted savefile.");
+    }
     game_state._player_inventory = "";
     for(;;)
     {
@@ -148,7 +158,10 @@ GameState SaveStateManager::parseSaveFileContents()
     }
 
     line = ts.readLine();
-    assert(line == "LOG_START");
+    if(line != "LOG_START")
+    {
+        throw std::runtime_error("Corrupted savefile.");
+    }
     game_state._log = "";
     for(;;)
     {
@@ -175,8 +188,10 @@ void SaveStateManager::deleteSaveFile(const std::string& save_slot)
 {
     QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
     QFile save_file(fullFilePath);
-    bool result = save_file.remove();
-    assert(result);
+    if(!save_file.remove())
+    {
+        throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be deleted");
+    }
 }
 
 void SaveStateManager::loadSaveFile(const std::string& save_slot)

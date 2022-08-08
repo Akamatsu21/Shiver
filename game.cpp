@@ -25,6 +25,17 @@ Game::Game(QCoreApplication* parent):
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
     _help_pages = _scripting_engine->parseHelpPages();
+    try
+    {
+        _save_state_manager.initDirectories();
+    }
+    catch(const std::system_error& e)
+    {
+        _console.writeError("Fatal error while loading the game.");
+        _console.writeError(e.what());
+        _console.writeError("Game terminated.");
+        emit gameOver();
+    }
 }
 
 void Game::displayCombatStatus()
@@ -235,6 +246,14 @@ GameState Game::createGameState()
 
 void Game::restoreGameState(const GameState& game_state)
 {
+    auto terminate = [this](const char* msg)
+    {
+        _console.writeError("Fatal error while loading savefile.");
+        _console.writeError(msg);
+        _console.writeError("Game terminated.");
+        emit gameOver();
+    };
+
     delete _player;
     _player = new Player(this,
                          game_state._player_start_agility,
@@ -250,12 +269,10 @@ void Game::restoreGameState(const GameState& game_state)
         _player->setGold(game_state._player_gold);
         _player->setRations(game_state._player_rations);
         _player->setElixirCount(game_state._player_elixir_count);
-    } catch(const std::out_of_range& e)
+    }
+    catch(const std::out_of_range& e)
     {
-        _console.writeError("Fatal error while loading savefile");
-        _console.writeError(e.what());
-        _console.writeError("Game terminated");
-        emit gameOver();
+        terminate(e.what());
     }
     _scripting_engine->registerPlayer(_player);
 
@@ -269,7 +286,11 @@ void Game::restoreGameState(const GameState& game_state)
     _current_event = _scripting_engine->parseEvent(game_state._event_id);
     if(game_state._event_enemy_present)
     {
-        assert(_current_event.hasEnemies());
+        if(!_current_event.hasEnemies())
+        {
+            terminate("Incorrect game state loaded.");
+        }
+
         while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
         {
             _current_event.defeatCurrentEnemy();
@@ -278,12 +299,10 @@ void Game::restoreGameState(const GameState& game_state)
         try
         {
             _current_event.getCurrentEnemy().setConstitution(game_state._event_enemy_constitution);
-        } catch(const std::out_of_range& e)
+        }
+        catch(const std::out_of_range& e)
         {
-            _console.writeError("Fatal error while loading savefile");
-            _console.writeError(e.what());
-            _console.writeError("Game terminated");
-            emit gameOver();
+            terminate(e.what());
         }
     }
     else
@@ -296,14 +315,20 @@ void Game::restoreGameState(const GameState& game_state)
 
     if(game_state._event_items_present)
     {
-        assert(_current_event.hasItems());
+        if(!_current_event.hasItems())
+        {
+            terminate("Incorrect game state loaded.");
+        }
         _current_event.setItemLimit(game_state._event_item_limit);
     }
 
     _combat_state._combat_in_progress = game_state._combat_in_progress;
     if(game_state._combat_in_progress)
     {
-        assert(_current_event.hasEnemies());
+        if(!_current_event.hasEnemies())
+        {
+            terminate("Incorrect game state loaded.");
+        }
         _combat_state._combat_round = game_state._combat_round;
         _combat_state._enemy_score = game_state._combat_enemy_score;
         _combat_state._player_score = game_state._combat_player_score;
@@ -407,7 +432,6 @@ void Game::gameLoop()
             }
 
             std::string item = _current_event.findItem(utils::parseParams(params));
-
             if(item.empty())
             {
                 _console.writeText("Item not found in this room.");
@@ -491,11 +515,12 @@ void Game::gameLoop()
                                                            save_file,
                                                            "\" overwritten successfully."));
                 }
-            } catch(const std::system_error& e)
+            }
+            catch(const std::system_error& e)
             {
-                _console.writeError("Error encountered");
+                _console.writeError("Error encountered.");
                 _console.writeError(e.what());
-                _console.writeError("Save failed");
+                _console.writeError("Save failed.");
             }
         }   continue;
         case Command::LOAD:
@@ -525,11 +550,12 @@ void Game::gameLoop()
             {
                 _save_state_manager.loadSaveFile(save_file);
                 restoreGameState(_save_state_manager.parseSaveFileContents());
-            } catch(const std::system_error& e)
+            }
+            catch(const std::runtime_error& e)
             {
-                _console.writeError("Error encountered");
+                _console.writeError("Error encountered.");
                 _console.writeError(e.what());
-                _console.writeError("Load failed");
+                _console.writeError("Load failed.");
             }
         }   continue;
         case Command::SAVELIST:
@@ -569,14 +595,23 @@ void Game::gameLoop()
                 continue;
             }
 
-            _save_state_manager.deleteSaveFile(save_file);
-            _console.writeText(utils::createString("Save file \"",
-                                                   save_file,
-                                                   "\" successfully deleted."));
+            try
+            {
+                _save_state_manager.deleteSaveFile(save_file);
+                _console.writeText(utils::createString("Save file \"",
+                                                       save_file,
+                                                       "\" successfully deleted."));
+            }
+            catch(const std::system_error& e)
+            {
+                _console.writeError("Error encountered.");
+                _console.writeError(e.what());
+                _console.writeError("File deletion failed.");
+            }
         }   continue;
         case Command::INVALID:
         default:
-            _console.writeText("Invalid command");
+            _console.writeText("Invalid command.");
             continue;
         }
 

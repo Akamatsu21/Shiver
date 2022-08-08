@@ -9,10 +9,18 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     _help_pages(),
     _player()
 {
-    // TODO: Implement some error handling.
+}
+
+void ScriptingEngine::loadModules()
+{
     _js_engine.installExtensions(QJSEngine::AllExtensions);
     _event_list = _js_engine.importModule(":js/events.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
+
+    if(_event_list.isError() || _help_pages.isError())
+    {
+        throw std::runtime_error("Failure loading JS modules.");
+    }
 }
 
 void ScriptingEngine::registerPlayer(Player* player)

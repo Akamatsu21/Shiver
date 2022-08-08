@@ -24,12 +24,13 @@ Game::Game(QCoreApplication* parent):
     _combat_state{false, 0, 0, 0}
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
-    _help_pages = _scripting_engine->parseHelpPages();
     try
     {
         _save_state_manager.initDirectories();
+        _scripting_engine->loadModules();
+        _help_pages = _scripting_engine->parseHelpPages();
     }
-    catch(const std::system_error& e)
+    catch(const std::runtime_error& e)
     {
         _console.writeError("Fatal error while loading the game.");
         _console.writeError(e.what());

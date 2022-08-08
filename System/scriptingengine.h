@@ -20,7 +20,9 @@ class ScriptingEngine : public QObject
 public:
     explicit ScriptingEngine(QObject* parent);
 
+    void loadModules();
     void registerPlayer(Player* player);
+
     QJSValue getObjectProperty(const QJSValue& object, const QString& property);
     Event parseEvent(int id);
     std::vector<std::string> parseHelpPages();

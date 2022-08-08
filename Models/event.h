@@ -37,7 +37,8 @@ public:
 
     Enemy getCurrentEnemy() const;
     Enemy& getCurrentEnemy();
-    void addEnemy(const std::string& name, int agility, int constitution);
+    void addEnemy(const std::string& name, int agility,
+                  int constitution, QJSValue& on_death);
     void defeatCurrentEnemy();
     void defeatAllEnemies();
 

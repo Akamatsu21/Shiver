@@ -11,6 +11,7 @@ CONFIG -= app_bundle
 SOURCES += \
         Models/enemy.cpp \
         Models/event.cpp \
+        Models/gamevariables.cpp \
         Models/player.cpp \
         System/commandparser.cpp \
         System/console.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     Models/enemy.h \
     Models/event.h \
     Models/gamestate.h \
+    Models/gamevariables.h \
     Models/player.h \
     System/commandparser.h \
     System/console.h \

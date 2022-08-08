@@ -1,11 +1,14 @@
 #include "enemy.h"
-#include "Utils/utils.h"
 
-Enemy::Enemy(const std::string& name, int agility, int constitution):
+Enemy::Enemy(const std::string& name,
+             int agility,
+             int constitution,
+             QJSValue on_death):
     _name(name),
     _agility(agility),
     _constitution(constitution),
-    _starting_constitution(constitution)
+    _starting_constitution(constitution),
+    _on_death_callback(on_death)
 {
 
 }
@@ -45,5 +48,13 @@ void Enemy::modifyConstitution(int value)
     else if(_constitution > _starting_constitution)
     {
         _constitution = _starting_constitution;
+    }
+}
+
+void Enemy::triggerOnDeathCallback()
+{
+    if(_on_death_callback.isCallable())
+    {
+        _on_death_callback.call();
     }
 }

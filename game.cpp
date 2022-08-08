@@ -7,6 +7,7 @@
 #include <QTextStream>
 
 #include "Models/gamestate.h"
+#include "Models/gamevariables.h"
 #include "Models/player.h"
 #include "System/commandparser.h"
 #include "System/scriptingengine.h"
@@ -19,6 +20,7 @@ Game::Game(QCoreApplication* parent):
     _scripting_engine(new ScriptingEngine(this)),
     _current_event(1),
     _player(nullptr),
+    _game_vars(new GameVariables(this)),
     _running(true),
     _current_help_page(0),
     _combat_state{false, 0, 0, 0}
@@ -28,6 +30,7 @@ Game::Game(QCoreApplication* parent):
     {
         _save_state_manager.initDirectories();
         _scripting_engine->loadModules();
+        _scripting_engine->registerGameVariables(_game_vars);
         _help_pages = _scripting_engine->parseHelpPages();
     }
     catch(const std::runtime_error& e)
@@ -150,6 +153,7 @@ void Game::checkForDeath()
             std::string msg = utils::createString("You have defeated [e]",
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
+            _current_event.getCurrentEnemy().triggerOnDeathCallback();
             _current_event.defeatCurrentEnemy();
 
             if(!_current_event.hasEnemies())
@@ -241,6 +245,7 @@ GameState Game::createGameState()
     }
 
     game_state._log = _console.getLogContents();
+    game_state._variables = _game_vars->toString();
 
     return game_state;
 }
@@ -336,6 +341,28 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _console.setLog(game_state._log);
+
+    _game_vars->clear();
+    QString variables = QString::fromStdString(game_state._variables);
+    ts.setString(&variables);
+    while(!ts.atEnd())
+    {
+        QString line = ts.readLine();
+        QString key = ts.readLine();
+        if(line == "counter")
+        {
+            _game_vars->setCounter(key, ts.readLine().toInt());
+        }
+        else if(line == "flag")
+        {
+            _game_vars->setFlag(key, static_cast<bool>(ts.readLine().toInt()));
+        }
+        else
+        {
+            terminate("Incorrect game state loaded.");
+        }
+    }
+
     _console.restoreLog();
 }
 

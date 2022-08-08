@@ -30,6 +30,7 @@ struct GameState
     int _combat_player_score;
 
     std::string _log;
+    std::string _variables;
 };
 
 #endif // GAMESTATE_H

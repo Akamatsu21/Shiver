@@ -8,9 +8,10 @@
 #include "System/console.h"
 #include "System/savestatemanager.h"
 
+class GameVariables;
 class Player;
-class ScriptingEngine;
 class QCoreApplication;
+class ScriptingEngine;
 
 class Game: public QObject
 {
@@ -24,6 +25,7 @@ class Game: public QObject
     Event _current_event;
     std::vector<std::string> _help_pages;
     Player* _player;
+    GameVariables* _game_vars;
 
     // Game state.
     bool _running;

@@ -30,3 +30,14 @@ Player score
 LOG_START
 ...
 LOG_END
+
+// Variables
+VARS_START
+counter
+name
+value
+flag
+name
+value
+...
+VARS_END

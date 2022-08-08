@@ -1,4 +1,5 @@
 #include "scriptingengine.h"
+#include "Models/gamevariables.h"
 #include "Models/player.h"
 #include "Utils/utils.h"
 
@@ -6,6 +7,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),
     _js_engine(),
     _event_list(),
+    _game_vars(),
     _help_pages(),
     _player()
 {
@@ -21,6 +23,12 @@ void ScriptingEngine::loadModules()
     {
         throw std::runtime_error("Failure loading JS modules.");
     }
+}
+
+void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
+{
+    _game_vars = _js_engine.newQObject(game_vars);
+    _js_engine.globalObject().setProperty("game_vars", _game_vars);
 }
 
 void ScriptingEngine::registerPlayer(Player* player)
@@ -69,9 +77,14 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             QJSValue enemy = enemies.property(i);
+            QJSValue on_death_callback = enemy.hasProperty("onDeath")
+                                         ? enemy.property("onDeath")
+                                         : QJSValue(false);
+
             event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
                            getObjectProperty(enemy, "agility").toInt(),
-                           getObjectProperty(enemy, "constitution").toInt());
+                           getObjectProperty(enemy, "constitution").toInt(),
+                           on_death_callback);
         }
     }
 

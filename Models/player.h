@@ -10,7 +10,6 @@ class Player: public QObject
 {
     Q_OBJECT
 
-private:
     int _agility;
     int _constitution;
     int _luck;

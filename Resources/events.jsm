@@ -22,13 +22,21 @@ export const events =
             {
                 name: "Orc",
                 agility: 5,
-                constitution: 1
+                constitution: 1,
+                onDeath: function()
+                {
+                    game_vars.incrementCounter("orc_kills", +1);
+                }
             }
         ]
     },
     event4:
     {
-        description: "Dead end",
+        description: function()
+        {
+            game_vars.setFlag("visited_dead_end", true);
+            return "Dead end";
+        },
         west: 2,
         enemies:
         [
@@ -73,6 +81,33 @@ export const events =
             }
             return desc;
         },
-        north: 5
+        north: 5,
+        south: 7
+    },
+    event7:
+    {
+        description: function()
+        {
+            let desc = "You find a decrepit old man sitting on a rock. He stares you down.\n\"Have you been to the dead end up north?\" he asks.\n";
+            if(game_vars.getFlag("visited_dead_end"))
+            {
+                desc += "You reply you have. He high fives you with a laugh.";
+            }
+            else
+            {
+                desc += "You say you haven't. He shows you a middle finger.";
+            }
+            return desc;
+        },
+        north: 6,
+        west: 8
+    },
+    event8:
+    {
+        description: function()
+        {
+            return "You approach a dodgy man, sitting at a table inside a cave.\n\"I am the orc counting guy\" he introduces himself.\n\"Thus far, in your adventure you have killed " + game_vars.getCounter("orc_kills") + " Orcs!\"";
+        },
+        east: 7
     }
 };

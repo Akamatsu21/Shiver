@@ -7,9 +7,9 @@
 Event::Event(int id):
     _id(id),
     _description(""),
-    _destinations(),
-    _enemies(),
-    _items(),
+    _destinations{},
+    _enemies{},
+    _items{},
     _item_limit(0)
 {
 
@@ -32,7 +32,7 @@ int Event::getDestination(Direction direction) const
 
 bool Event::isDirectionAvailable(Direction direction) const
 {
-    return _destinations.find(direction) != std::end(_destinations);
+    return _destinations.count(direction) > 0;
 }
 
 bool Event::hasEnemies() const
@@ -111,9 +111,10 @@ Enemy& Event::getCurrentEnemy()
     return _enemies.front();
 }
 
-void Event::addEnemy(const std::string& name, int agility, int constitution)
+void Event::addEnemy(const std::string& name, int agility,
+                     int constitution, QJSValue& on_death)
 {
-    _enemies.emplace(name, agility, constitution);
+    _enemies.emplace(name, agility, constitution, on_death);
 }
 
 void Event::defeatCurrentEnemy()

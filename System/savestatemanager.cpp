@@ -88,6 +88,11 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        << game_state._log
        << "LOG_END\n";
 
+    // Game variables.
+    ss << "VARS_START\n"
+       << game_state._variables
+       << "VARS_END\n";
+
     _save_file_contents = ss.str();
 }
 
@@ -178,6 +183,30 @@ GameState SaveStateManager::parseSaveFileContents()
         else
         {
             game_state._log += line.toStdString();
+        }
+    }
+
+    line = ts.readLine();
+    if(line != "VARS_START")
+    {
+        throw std::runtime_error("Corrupted savefile.");
+    }
+    game_state._variables = "";
+    for(;;)
+    {
+        if(line != "VARS_START")
+        {
+            game_state._variables += "\n";
+        }
+
+        line = ts.readLine();
+        if(line == "VARS_END")
+        {
+            break;
+        }
+        else
+        {
+            game_state._variables += line.toStdString();
         }
     }
 

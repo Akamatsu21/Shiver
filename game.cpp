@@ -289,6 +289,27 @@ void Game::restoreGameState(const GameState& game_state)
         _player->addItem(ts.readLine().toStdString());
     }
 
+    _game_vars->clear();
+    QString variables = QString::fromStdString(game_state._variables);
+    ts.setString(&variables);
+    while(!ts.atEnd())
+    {
+        QString line = ts.readLine();
+        QString key = ts.readLine();
+        if(line == "counter")
+        {
+            _game_vars->setCounter(key, ts.readLine().toInt());
+        }
+        else if(line == "flag")
+        {
+            _game_vars->setFlag(key, static_cast<bool>(ts.readLine().toInt()));
+        }
+        else
+        {
+            terminate("Incorrect game state loaded.");
+        }
+    }
+
     _current_event = _scripting_engine->parseEvent(game_state._event_id);
     if(game_state._event_enemy_present)
     {
@@ -341,28 +362,6 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _console.setLog(game_state._log);
-
-    _game_vars->clear();
-    QString variables = QString::fromStdString(game_state._variables);
-    ts.setString(&variables);
-    while(!ts.atEnd())
-    {
-        QString line = ts.readLine();
-        QString key = ts.readLine();
-        if(line == "counter")
-        {
-            _game_vars->setCounter(key, ts.readLine().toInt());
-        }
-        else if(line == "flag")
-        {
-            _game_vars->setFlag(key, static_cast<bool>(ts.readLine().toInt()));
-        }
-        else
-        {
-            terminate("Incorrect game state loaded.");
-        }
-    }
-
     _console.restoreLog();
 }
 

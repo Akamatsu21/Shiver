@@ -14,7 +14,7 @@ void SaveStateManager::initDirectories()
 {
     if(!_save_dir.exists())
     {
-        if(!_save_dir.mkdir("."))
+        if(!_save_dir.mkpath("."))
         {
             throw std::system_error(std::make_error_code(std::errc::io_error),
                                     "Save directory cannot be created.");

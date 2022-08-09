@@ -133,7 +133,7 @@ std::string Console::waitForInput()
 
 void Console::writeError(const std::string& error)
 {
-    std::cout << "\033[0;91m" << error;
+    std::cout << "\033[0;91m" << error << "\033[0m";
     writeLine();
 }
 

@@ -29,13 +29,24 @@ class Game: public QObject
 
     // Game state.
     bool _running;
-    int _current_help_page;
     CombatState _combat_state;
+
+    // Command handlers.
+    bool handleDirectionCommand(Direction direction);
+    bool handleEscapeCommand();
+    bool handleFightCommand();
+    void handleHelpCommand();
+    void handleLoadCommand(const std::string& save_file);
+    bool handleLuckyCommand();
+    void handleSaveCommand(const std::string& save_file);
+    void handleSaveDelCommand(const std::string& save_file);
+    void handleSaveListCommand();
+    void handleStatsCommand();
+    void handleTakeCommand(const std::string& item);
 
     void displayCombatStatus();
     void displayCurrentEvent();
     void displayCurrentEnemy();
-    void displayPlayerStats();
 
     void resolveDamage(bool player_win, int damage);
     bool resolveYesNoQuestion();
@@ -47,10 +58,13 @@ class Game: public QObject
     GameState createGameState();
     void restoreGameState(const GameState& game_state);
 
+    void characterCreation();
+    void gameLoop();
+
 public:
     explicit Game(QCoreApplication* parent);
 
-    void gameLoop();
+    void titleScreen();
 
 signals:
     void gameOver();

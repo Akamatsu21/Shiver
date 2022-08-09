@@ -1,0 +1,25 @@
+|------------------------------------------------------|
+| _______          _________          _______  _______ |
+|(  ____ \|\     /|\__   __/|\     /|(  ____ \(  ____ )|
+|| (    \/| )   ( |   ) (   | )   ( || (    \/| (    )||
+|| (_____ | (___) |   | |   | |   | || (__    | (____)||
+|(_____  )|  ___  |   | |   ( (   ) )|  __)   |     __)|
+|      ) || (   ) |   | |    \ \_/ / | (      | (\ (   |
+|/\____) || )   ( |___) (___  \   /  | (____/\| ) \ \__|
+|\_______)|/     \|\_______/   \_/   (_______/|/   \__/|
+|                                                      |
+|------------------------------------------------------|
+
+                Hey, Brave Adventurer!
+    Is it you that was said to have ice-cold water
+        flowing in his veins instead of blood,
+          and a body made out of pure steel?
+If so, have a look in the direction of the setting sun.
+  Over there, amongst the remnants of the Kingdom of
+      Almanhagor, hides an undiscovered Dungeon.
+Only you can excavate its Great Mystery. Get going!
+
+
+Type [c]begin[/c] to start your adventure.
+Type [c]load[/c] to load a saved game.
+Type [c]help[/c] to see the game manual.

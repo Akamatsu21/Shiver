@@ -4,6 +4,7 @@
 enum class Command
 {
     INVALID,
+    BEGIN,
     HELP,
     STATS,
     NORTH,

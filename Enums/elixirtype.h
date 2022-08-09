@@ -3,6 +3,7 @@
 
 enum class ElixirType
 {
+    INVALID,
     AGILITY,
     CONSTITUTION,
     LUCK

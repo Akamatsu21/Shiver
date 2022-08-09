@@ -80,6 +80,7 @@ std::string Player::getElixirTypeAsString() const
         return "Elixir of Constitution";
     case ElixirType::LUCK:
         return "Elixir of Luck";
+    case ElixirType::INVALID:
     default:
         return "";
     }

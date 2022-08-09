@@ -3,4 +3,7 @@
         <file>events.jsm</file>
         <file>help.jsm</file>
     </qresource>
+    <qresource prefix="/static">
+        <file>title.txt</file>
+    </qresource>
 </RCC>

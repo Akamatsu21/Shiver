@@ -93,7 +93,6 @@ int Console::showHelpPage(int page_number, int total_pages, const std::string &t
     {
         std::string input("");
         std::getline(std::cin, input);
-
         try
         {
             new_page = std::stoi(input);
@@ -107,7 +106,7 @@ int Console::showHelpPage(int page_number, int total_pages, const std::string &t
                 invalid_input = false;
             }
         }
-        catch(const std::out_of_range&)
+        catch(const std::logic_error&)
         {
             std::cout << "Invalid page number.\n";
         }

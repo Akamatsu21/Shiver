@@ -21,7 +21,6 @@ Game::Game(QCoreApplication* parent):
     _player(nullptr),
     _game_vars(new GameVariables(this)),
     _running(true),
-    _current_help_page(0),
     _combat_state{false, 0, 0, 0}
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
@@ -38,6 +37,291 @@ Game::Game(QCoreApplication* parent):
         _console.writeError(e.what());
         _console.writeError("Game terminated.");
         emit gameOver();
+    }
+}
+
+bool Game::handleDirectionCommand(Direction direction)
+{
+    if(_combat_state._combat_in_progress)
+    {
+        _console.writeText("You have to defeat all enemies before you can travel.");
+        return false;
+    }
+
+    if(_current_event.isDirectionAvailable(direction))
+    {
+        updateCurrentEvent(_current_event.getDestination(direction));
+        return true;
+    }
+    else
+    {
+        _console.writeText("Direction unavailable.");
+        return false;
+    }
+}
+
+bool Game::handleEscapeCommand()
+{
+    if(!_combat_state._combat_in_progress)
+    {
+        _console.writeText("No enemies present!");
+        return false;
+    }
+
+    int damage = 2;
+    _console.writeText("Would you like to attempt a luck check to reduce the damage received while escaping?");
+    if(resolveYesNoQuestion())
+    {
+        bool player_lucky = _player->performLuckCheck();
+        damage = player_lucky ? 1 : 3;
+        _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
+    }
+
+    resolveDamage(false, damage);
+    _current_event.defeatAllEnemies();
+    _combat_state._combat_in_progress = false;
+    _console.writeText("You have escaped!");
+    return true;
+}
+
+bool Game::handleFightCommand()
+{
+    if(!_combat_state._combat_in_progress)
+    {
+        _console.writeText("No enemies present!");
+        return false;
+    }
+
+    resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
+    displayCombatStatus();
+    return true;
+}
+
+void Game::handleHelpCommand()
+{
+    int current_help_page = 1;
+    while(current_help_page != 0)
+    {
+        current_help_page = _console.showHelpPage(current_help_page,
+                                                  _help_pages.size(),
+                                                  _help_pages.at(current_help_page - 1));
+    }
+
+    _console.restoreLog();
+}
+
+void Game::handleLoadCommand(const std::string& save_file)
+{
+    if(save_file.empty())
+    {
+        _console.writeText("Specify save file name.");
+        return;
+    }
+
+    if(!_save_state_manager.saveFileExists(save_file))
+    {
+        _console.writeText(utils::createString("Save file \"",
+                                               save_file,
+                                               "\" not found."));
+        return;
+    }
+
+    _console.writeText("Are you sure you want to load a saved game?");
+    if(!resolveYesNoQuestion())
+    {
+        return;
+    }
+
+    try
+    {
+        _save_state_manager.loadSaveFile(save_file);
+        restoreGameState(_save_state_manager.parseSaveFileContents());
+    }
+    catch(const std::runtime_error& e)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(e.what());
+        _console.writeError("Load failed.");
+    }
+}
+
+bool Game::handleLuckyCommand()
+{
+    if(!_combat_state._combat_in_progress)
+    {
+        _console.writeText("No enemies present!");
+        return false;
+    }
+
+    bool player_win = _combat_state._player_score > _combat_state._enemy_score;
+    bool player_lucky = _player->performLuckCheck();
+    int damage = 0;
+    if(player_win)
+    {
+        damage = player_lucky ? 4 : 1;
+    }
+    else
+    {
+        damage = player_lucky ? 1 : 3;
+    }
+
+    _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
+    resolveDamage(player_win, damage);
+    displayCombatStatus();
+    return true;
+}
+
+void Game::handleSaveCommand(const std::string& save_file)
+{
+    if(save_file.empty())
+    {
+        _console.writeText("Specify save file name.");
+        return;
+    }
+
+    bool new_file = !_save_state_manager.saveFileExists(save_file);
+    if(!new_file)
+    {
+        _console.writeText(utils::createString("Are you sure you want to overwrite save file \"",
+                                               save_file,
+                                               "\"?"));
+        if(!resolveYesNoQuestion())
+        {
+            return;
+        }
+    }
+
+    try
+    {
+        _save_state_manager.createSaveFileContents(createGameState());
+        _save_state_manager.saveCurrentGameState(save_file);
+        if(new_file)
+        {
+            _console.writeText(utils::createString("New save file \"",
+                                                   save_file,
+                                                   "\" created successfully."));
+        }
+        else
+        {
+            _console.writeText(utils::createString("Save file \"",
+                                                   save_file,
+                                                   "\" overwritten successfully."));
+        }
+    }
+    catch(const std::system_error& e)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(e.what());
+        _console.writeError("Save failed.");
+    }
+}
+
+void Game::handleSaveDelCommand(const std::string& save_file)
+{
+    if(save_file.empty())
+    {
+        _console.writeText("Specify save file name.");
+        return;
+    }
+
+    if(!_save_state_manager.saveFileExists(save_file))
+    {
+        _console.writeText(utils::createString("Save file \"",
+                                               save_file,
+                                               "\" not found."));
+        return;
+    }
+
+    _console.writeText(utils::createString("Are you sure you want to delete save file \"",
+                                           save_file,
+                                           "\"?"));
+    if(!resolveYesNoQuestion())
+    {
+        return;
+    }
+
+    try
+    {
+        _save_state_manager.deleteSaveFile(save_file);
+        _console.writeText(utils::createString("Save file \"",
+                                               save_file,
+                                               "\" successfully deleted."));
+    }
+    catch(const std::system_error& e)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(e.what());
+        _console.writeError("File deletion failed.");
+    }
+}
+
+void Game::handleSaveListCommand()
+{
+    std::string save_list = _save_state_manager.listSaveFiles();
+    if(save_list.empty())
+    {
+        _console.writeText("No save files found.");
+    }
+    else
+    {
+        _console.writeText(_save_state_manager.listSaveFiles());
+    }
+}
+
+void Game::handleStatsCommand()
+{
+    std::string msg = utils::createString("[p]Adventurer[/p]",
+                                          "\nAgility: ",
+                                          _player->getAgility(), "/", _player->getStartingAgility(),
+                                          "\nConstitution: ",
+                                          _player->getConstitution(), "/", _player->getStartingConstitution(),
+                                          "\nLuck: ",
+                                          _player->getLuck(), "/", _player->getStartingLuck(),
+                                          "\nGold: ",
+                                          _player->getGold(),
+                                          "\nRations: ",
+                                          _player->getRations(),
+                                          "\n", _player->getElixirTypeAsString(), ": ",
+                                          _player->getElixirCount(),
+                                          "\n\nInventory:\n",
+                                          _player->getInventory());
+    _console.writeText(msg);
+}
+
+void Game::handleTakeCommand(const std::string& item)
+{
+    if(_combat_state._combat_in_progress)
+    {
+        _console.writeText("You have to defeat all enemies before you can pick up items.");
+        return;
+    }
+    else if(item.empty())
+    {
+        _console.writeText("Specify which item to take.");
+        return;
+    }
+
+    std::string found_item = _current_event.findItem(item);
+    if(found_item.empty())
+    {
+        _console.writeText("Item not found in this room.");
+    }
+    else
+    {
+        if(_player->hasItem(found_item))
+        {
+            _console.writeText("You've already picked up this item.");
+        }
+        else if(_current_event.getItemLimit() < 1)
+        {
+            _console.writeText("You cannot take any more items from this room.");
+        }
+        else
+        {
+            _current_event.takeItem();
+            _player->addItem(found_item);
+            _console.writeText(utils::createString("[i]", found_item, "[/i] added to your inventory."));
+        }
     }
 }
 
@@ -73,26 +357,6 @@ void Game::displayCurrentEnemy()
                                           _current_event.getCurrentEnemy().getConstitution());
     _console.writeText(msg);
     _console.waitForAnyKey();
-}
-
-void Game::displayPlayerStats()
-{
-    std::string msg = utils::createString("[p]Adventurer[/p]",
-                                          "\nAgility: ",
-                                          _player->getAgility(), "/", _player->getStartingAgility(),
-                                          "\nConstitution: ",
-                                          _player->getConstitution(), "/", _player->getStartingConstitution(),
-                                          "\nLuck: ",
-                                          _player->getLuck(), "/", _player->getStartingLuck(),
-                                          "\nGold: ",
-                                          _player->getGold(),
-                                          "\nRations: ",
-                                          _player->getRations(),
-                                          "\n", _player->getElixirTypeAsString(), ": ",
-                                          _player->getElixirCount(),
-                                          "\n\nInventory:\n",
-                                          _player->getInventory());
-    _console.writeText(msg);
 }
 
 void Game::resolveDamage(bool player_win, int damage)
@@ -373,277 +637,96 @@ void Game::restoreGameState(const GameState& game_state)
     _console.restoreLog();
 }
 
+void Game::characterCreation()
+{
+    _console.clearScreen();
+    std::string msg = "Creating your character...\nRandomly assigning player stats:\n";
+    int agility = utils::rollD6(1) + 6;
+    int constitution = utils::rollD6(2) + 12;
+    int luck = utils::rollD6(1) + 6;
+    msg += utils::createString("Agility: ", agility,
+                               "\nConstitution: ", constitution,
+                               "\nLuck: ", luck,
+                               "\n\nChoose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
+    _console.writeText(msg);
+
+    ElixirType elixir = ElixirType::INVALID;
+    while(elixir == ElixirType::INVALID)
+    {
+        std::string user_input = _console.waitForInput();
+        elixir = CommandParser::parseElixirType(user_input);
+
+        if(elixir == ElixirType::INVALID)
+        {
+            _console.writeText("Invalid choice.");
+        }
+    }
+
+    _player = new Player(this, agility, constitution, luck, elixir);
+    _scripting_engine->registerPlayer(_player);
+    _console.writeText("\nThis is your character. Type [c]stats[/c] at any point to see this list.");
+    handleStatsCommand();
+    _console.writeText("\nYou are now ready to begin your adventure.");
+    _console.waitForAnyKey();
+}
+
 void Game::gameLoop()
 {
-    _player = new Player(this, 18, 24, 18, ElixirType::CONSTITUTION);
-    _scripting_engine->registerPlayer(_player);
     updateCurrentEvent(1);
-
     while(_running)
     {
         std::string user_input = _console.waitForInput();
-        auto [command, params] = CommandParser::parse(user_input);
+        auto [command, params] = CommandParser::parseCommand(user_input);
         switch(command)
         {
         case::Command::HELP:
-            _current_help_page = 1;
-            while(_current_help_page != 0)
-            {
-                _current_help_page = _console.showHelpPage(_current_help_page,
-                                                           _help_pages.size(),
-                                                           _help_pages.at(_current_help_page - 1));
-            }
-
-            _console.restoreLog();
+            handleHelpCommand();
             continue;
         case::Command::STATS:
-            displayPlayerStats();
+            handleStatsCommand();
             continue;
         case Command::NORTH:
         case Command::SOUTH:
         case Command::EAST:
         case Command::WEST:
-        {
-            if(_combat_state._combat_in_progress)
+            if(!handleDirectionCommand(utils::commandToDirection(command)))
             {
-                _console.writeText("You have to defeat all enemies before you can travel.");
                 continue;
             }
-
-            Direction direction = utils::commandToDirection(command);
-            if(_current_event.isDirectionAvailable(direction))
-            {
-                updateCurrentEvent(_current_event.getDestination(direction));
-            }
-            else
-            {
-                _console.writeText("Direction unavailable.");
-                continue;
-            }
-        }   break;
+            break;
         case Command::FIGHT:
-            if(!_combat_state._combat_in_progress)
+            if(!handleFightCommand())
             {
-                _console.writeText("No enemies present!");
                 continue;
             }
-
-            resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
-            displayCombatStatus();
             break;
         case Command::ESCAPE:
-        {
-            if(!_combat_state._combat_in_progress)
+            if(!handleEscapeCommand())
             {
-                _console.writeText("No enemies present!");
                 continue;
             }
-
-            int damage = 2;
-            _console.writeText("Would you like to attempt a luck check to reduce the damage received while escaping?");
-            if(resolveYesNoQuestion())
-            {
-                bool player_lucky = _player->performLuckCheck();
-                damage = player_lucky ? 1 : 3;
-                _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
-            }
-
-            resolveDamage(false, damage);
-            _current_event.defeatAllEnemies();
-            _combat_state._combat_in_progress = false;
-            _console.writeText("You have escaped!");
-        }   break;
+            break;
         case Command::TAKE:
-        {
-            if(_combat_state._combat_in_progress)
-            {
-                _console.writeText("You have to defeat all enemies before you can pick up items.");
-                continue;
-            }
-            else if(params.empty())
-            {
-                _console.writeText("Specify which item to take.");
-                continue;
-            }
-
-            std::string item = _current_event.findItem(utils::parseParams(params));
-            if(item.empty())
-            {
-                _console.writeText("Item not found in this room.");
-            }
-            else
-            {
-                if(_player->hasItem(item))
-                {
-                    _console.writeText("You've already picked up this item.");
-                }
-                else if(_current_event.getItemLimit() < 1)
-                {
-                    _console.writeText("You cannot take any more items from this room.");
-                }
-                else
-                {
-                    _current_event.takeItem();
-                    _player->addItem(item);
-                    _console.writeText(utils::createString("[i]", item, "[/i] added to your inventory."));
-                }
-            }
-        }   continue;
+            handleTakeCommand(utils::parseParams(params));
+            continue;
         case Command::LUCKY:
-        {
-            if(!_combat_state._combat_in_progress)
+            if(!handleLuckyCommand())
             {
-                _console.writeText("No enemies present!");
                 continue;
             }
-
-            bool player_win = _combat_state._player_score > _combat_state._enemy_score;
-            bool player_lucky = _player->performLuckCheck();
-            int damage = 0;
-            if(player_win)
-            {
-                damage = player_lucky ? 4 : 1;
-            }
-            else
-            {
-                damage = player_lucky ? 1 : 3;
-            }
-
-            _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
-            resolveDamage(player_win, damage);
-            displayCombatStatus();
-        }   break;
+            break;
         case Command::SAVE:
-        {
-            if(params.empty())
-            {
-                _console.writeText("Specify save file name.");
-                continue;
-            }
-
-            std::string save_file = utils::parseParams(params);
-            bool new_file = !_save_state_manager.saveFileExists(save_file);
-            if(!new_file)
-            {
-                _console.writeText(utils::createString("Are you sure you want to overwrite save file \"",
-                                                       save_file,
-                                                       "\"?"));
-                if(!resolveYesNoQuestion())
-                {
-                    continue;
-                }
-            }
-
-            try
-            {
-                _save_state_manager.createSaveFileContents(createGameState());
-                _save_state_manager.saveCurrentGameState(save_file);
-                if(new_file)
-                {
-                    _console.writeText(utils::createString("New save file \"",
-                                                           save_file,
-                                                           "\" created successfully."));
-                }
-                else
-                {
-                    _console.writeText(utils::createString("Save file \"",
-                                                           save_file,
-                                                           "\" overwritten successfully."));
-                }
-            }
-            catch(const std::system_error& e)
-            {
-                _console.writeError("Error encountered.");
-                _console.writeError(e.what());
-                _console.writeError("Save failed.");
-            }
-        }   continue;
+            handleSaveCommand(utils::parseParams(params));
+            continue;
         case Command::LOAD:
-        {
-            if(params.empty())
-            {
-                _console.writeText("Specify save file name.");
-                continue;
-            }
-
-            std::string save_file = utils::parseParams(params);
-            if(!_save_state_manager.saveFileExists(save_file))
-            {
-                _console.writeText(utils::createString("Save file \"",
-                                                       save_file,
-                                                       "\" not found."));
-                continue;
-            }
-
-            _console.writeText("Are you sure you want to load a saved game?");
-            if(!resolveYesNoQuestion())
-            {
-                continue;
-            }
-
-            try
-            {
-                _save_state_manager.loadSaveFile(save_file);
-                restoreGameState(_save_state_manager.parseSaveFileContents());
-            }
-            catch(const std::runtime_error& e)
-            {
-                _console.writeError("Error encountered.");
-                _console.writeError(e.what());
-                _console.writeError("Load failed.");
-            }
-        }   continue;
+            handleLoadCommand(utils::parseParams(params));
+            continue;
         case Command::SAVELIST:
-        {
-            std::string save_list = _save_state_manager.listSaveFiles();
-            if(save_list.empty())
-            {
-                _console.writeText("No save files found.");
-            }
-            else
-            {
-                _console.writeText(_save_state_manager.listSaveFiles());
-            }
-        }   continue;
+            handleSaveListCommand();
+            continue;
         case Command::SAVEDEL:
-        {
-            if(params.empty())
-            {
-                _console.writeText("Specify save file name.");
-                continue;
-            }
-
-            std::string save_file = utils::parseParams(params);
-            if(!_save_state_manager.saveFileExists(save_file))
-            {
-                _console.writeText(utils::createString("Save file \"",
-                                                       save_file,
-                                                       "\" not found."));
-                continue;
-            }
-
-            _console.writeText(utils::createString("Are you sure you want to delete save file \"",
-                                                   save_file,
-                                                   "\"?"));
-            if(!resolveYesNoQuestion())
-            {
-                continue;
-            }
-
-            try
-            {
-                _save_state_manager.deleteSaveFile(save_file);
-                _console.writeText(utils::createString("Save file \"",
-                                                       save_file,
-                                                       "\" successfully deleted."));
-            }
-            catch(const std::system_error& e)
-            {
-                _console.writeError("Error encountered.");
-                _console.writeError(e.what());
-                _console.writeError("File deletion failed.");
-            }
-        }   continue;
+            handleSaveDelCommand(utils::parseParams(params));
+            continue;
         case Command::INVALID:
         default:
             _console.writeText("Invalid command.");
@@ -658,4 +741,55 @@ void Game::gameLoop()
     }
 
     emit gameOver();
+}
+
+void Game::titleScreen()
+{
+    try
+    {
+        _console.clearScreen();
+        _console.writeText(utils::getTitleScreenText());
+    }
+    catch(const std::system_error& e)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(e.what());
+        _console.writeError("Game couldn't be started.");
+        return;
+    }
+
+    bool title_screen = true;
+    while(title_screen)
+    {
+        std::string user_input = _console.waitForInput();
+        auto [command, params] = CommandParser::parseCommand(user_input);
+        switch(command)
+        {
+        case Command::BEGIN:
+            title_screen = false;
+            break;
+        case::Command::HELP:
+            handleHelpCommand();
+            continue;
+        case Command::SAVE:
+            _console.writeText("Please start a game first.");
+            continue;
+        case Command::LOAD:
+            handleLoadCommand(utils::parseParams(params));
+            continue;
+        case Command::SAVELIST:
+            handleSaveListCommand();
+            continue;
+        case Command::SAVEDEL:
+            handleSaveDelCommand(utils::parseParams(params));
+            continue;
+        case Command::INVALID:
+        default:
+            _console.writeText("Invalid command.");
+            continue;
+        }
+    }
+
+    characterCreation();
+    gameLoop();
 }

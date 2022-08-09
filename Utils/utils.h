@@ -26,6 +26,8 @@ std::string directionToString(Direction direction);
 
 std::vector<Direction> getAllDirections();
 
+std::string getTitleScreenText();
+
 std::string parseParams(std::queue<std::string>& params);
 
 int rollD6(int count);

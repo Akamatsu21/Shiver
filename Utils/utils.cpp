@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <algorithm>
 #include <random>
+#include <QFile>
 
 std::string utils::directionToString(Direction direction)
 {
@@ -94,4 +95,15 @@ std::string utils::toLower(const std::string& s)
     std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
                    [](char c){ return std::tolower(c); });
     return result;
+}
+
+std::string utils::getTitleScreenText()
+{
+    QFile file(":static/title.txt");
+    if(file.open(QIODevice::ReadOnly))
+    {
+        return file.readAll().toStdString();
+    }
+
+    throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
 }

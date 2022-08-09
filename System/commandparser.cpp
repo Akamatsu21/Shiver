@@ -6,7 +6,7 @@
 
 #include "Utils/utils.h"
 
-std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::string &input)
+std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const std::string &input)
 {
     if(input.empty())
     {
@@ -24,7 +24,11 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     input_command = utils::toLower(input_command);
 
     Command command = Command::INVALID;
-    if(input_command == "help")
+    if(input_command == "begin")
+    {
+        command = Command::BEGIN;
+    }
+    else if(input_command == "help")
     {
         command = Command::HELP;
     }
@@ -82,6 +86,30 @@ std::pair<Command, std::queue<std::string>> CommandParser::parse(const std::stri
     }
 
     return {command, params};
+}
+
+ElixirType CommandParser::parseElixirType(const std::string& input)
+{
+    if(input.empty())
+    {
+        return ElixirType::INVALID;
+    }
+    std::string input_command = utils::toLower(input);
+    ElixirType elixir = ElixirType::INVALID;
+    if(input_command == "agility")
+    {
+        elixir = ElixirType::AGILITY;
+    }
+    else if(input_command == "constitution")
+    {
+        elixir = ElixirType::CONSTITUTION;
+    }
+    else if(input_command == "luck")
+    {
+        elixir = ElixirType::LUCK;
+    }
+
+    return elixir;
 }
 
 std::pair<bool, bool> CommandParser::parseYesNo(const std::string &input)

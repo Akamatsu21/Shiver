@@ -18,6 +18,7 @@ ID
 Enemy present
 Enemy name
 Enemy constitution
+Item present
 Item Limit
 
 // Combat state

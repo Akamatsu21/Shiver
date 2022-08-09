@@ -4,7 +4,6 @@
 #include <string>
 #include <QCoreApplication>
 #include <QJSEngine>
-#include <QTextStream>
 
 #include "Models/gamestate.h"
 #include "Models/gamevariables.h"
@@ -282,31 +281,40 @@ void Game::restoreGameState(const GameState& game_state)
     }
     _scripting_engine->registerPlayer(_player);
 
-    QString inventory = QString::fromStdString(game_state._player_inventory);
-    QTextStream ts(&inventory);
-    while(!ts.atEnd())
+    std::istringstream ss(game_state._player_inventory);
+    while(!ss.eof())
     {
-        _player->addItem(ts.readLine().toStdString());
+        std::string item("");
+        std::getline(ss, item);
+        _player->addItem(item);
     }
 
     _game_vars->clear();
-    QString variables = QString::fromStdString(game_state._variables);
-    ts.setString(&variables);
-    while(!ts.atEnd())
+    ss.str(game_state._variables);
+    ss.clear();
+    while(!ss.eof())
     {
-        QString line = ts.readLine();
-        QString key = ts.readLine();
-        if(line == "counter")
+        std::string type("");
+        std::string key("");
+        std::getline(ss, type);
+        std::getline(ss, key);
+        if(type == "counter")
         {
-            _game_vars->setCounter(key, ts.readLine().toInt());
+            int counter(0);
+            ss >> counter;
+            ss.get();
+            _game_vars->setCounter(QString::fromStdString(key), counter);
         }
-        else if(line == "flag")
+        else if(type == "flag")
         {
-            _game_vars->setFlag(key, static_cast<bool>(ts.readLine().toInt()));
+            bool flag(false);
+            ss >> flag;
+            ss.get();
+            _game_vars->setFlag(QString::fromStdString(key), flag);
         }
         else
         {
-            terminate("Incorrect game state loaded.");
+            terminate("Incorrect game state loaded. Error code: 3189");
         }
     }
 
@@ -315,7 +323,7 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasEnemies())
         {
-            terminate("Incorrect game state loaded.");
+            terminate("Incorrect game state loaded. Error code: 5554");
         }
 
         while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
@@ -344,7 +352,7 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasItems())
         {
-            terminate("Incorrect game state loaded.");
+            terminate("Incorrect game state loaded. Error code: 9254");
         }
         _current_event.setItemLimit(game_state._event_item_limit);
     }
@@ -354,7 +362,7 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasEnemies())
         {
-            terminate("Incorrect game state loaded.");
+            terminate("Incorrect game state loaded. Error code: 3642");
         }
         _combat_state._combat_round = game_state._combat_round;
         _combat_state._enemy_score = game_state._combat_enemy_score;

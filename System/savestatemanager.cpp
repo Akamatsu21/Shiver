@@ -98,115 +98,119 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
 
 GameState SaveStateManager::parseSaveFileContents()
 {
-    QString save_file(QString::fromStdString(_save_file_contents));
-    QTextStream ts(&save_file);
+    std::istringstream ss(_save_file_contents);
     GameState game_state{};
 
-    game_state._player_agility = ts.readLine().toInt();
-    game_state._player_constitution = ts.readLine().toInt();
-    game_state._player_luck = ts.readLine().toInt();
-    game_state._player_start_agility = ts.readLine().toInt();
-    game_state._player_start_constitution = ts.readLine().toInt();
-    game_state._player_start_luck = ts.readLine().toInt();
-    game_state._player_gold = ts.readLine().toInt();
-    game_state._player_rations = ts.readLine().toInt();
-    game_state._player_elixir_count = ts.readLine().toInt();
-    game_state._player_elixir_type = ts.readLine().toInt();
+    ss >> game_state._player_agility
+       >> game_state._player_constitution
+       >> game_state._player_luck
+       >> game_state._player_start_agility
+       >> game_state._player_start_constitution
+       >> game_state._player_start_luck
+       >> game_state._player_gold
+       >> game_state._player_rations
+       >> game_state._player_elixir_count
+       >> game_state._player_elixir_type;
+    ss.get(); // eat the final newline
 
-    QString line = ts.readLine();
+    std::string line("");
+    std::getline(ss, line);
     if(line != "INVENTORY_START")
     {
-        throw std::runtime_error("Corrupted savefile.");
+        throw std::runtime_error("Corrupted savefile. Error code: 9545");
     }
     game_state._player_inventory = "";
+    bool first = true;
     for(;;)
     {
-        if(line != "INVENTORY_START")
-        {
-            game_state._player_inventory += "\n";
-        }
-
-        line = ts.readLine();
+        std::getline(ss, line);
         if(line == "INVENTORY_END")
         {
             break;
         }
         else
         {
-            game_state._player_inventory += line.toStdString();
+            if(!first)
+            {
+                game_state._player_inventory += "\n";
+            }
+            else
+            {
+                first = false;
+            }
+            game_state._player_inventory += line;
         }
     }
 
-    game_state._event_id = ts.readLine().toInt();
-    bool enemy_present = ts.readLine().toInt() != 0;
-    game_state._event_enemy_present = enemy_present;
-    if(enemy_present)
+    ss >> game_state._event_id
+       >> game_state._event_enemy_present;
+    ss.get(); // eat the final newline
+    if(game_state._event_enemy_present)
     {
-        game_state._event_enemy_name = ts.readLine().toStdString();
-        game_state._event_enemy_constitution = ts.readLine().toInt();
+        std::getline(ss, game_state._event_enemy_name);
+        ss >> game_state._event_enemy_constitution;
     }
 
-    bool items_present = ts.readLine().toInt() != 0;
-    game_state._event_items_present = items_present;
-    if(items_present)
+    ss >> game_state._event_items_present;
+    if(game_state._event_items_present)
     {
-        game_state._event_item_limit = ts.readLine().toInt();
+        ss >> game_state._event_item_limit;
     }
 
-    bool combat_in_progress = ts.readLine().toInt() != 0;
-    game_state._combat_in_progress = combat_in_progress;
-    if(combat_in_progress)
+    ss >> game_state._combat_in_progress;
+    if(game_state._combat_in_progress)
     {
-        game_state._combat_round = ts.readLine().toInt();
-        game_state._combat_enemy_score = ts.readLine().toInt();
-        game_state._combat_player_score = ts.readLine().toInt();
+        ss >> game_state._combat_round
+           >> game_state._combat_enemy_score
+           >> game_state._combat_player_score;
     }
+    ss.get(); // eat the final newline
 
-    line = ts.readLine();
+    std::getline(ss, line);
     if(line != "LOG_START")
     {
-        throw std::runtime_error("Corrupted savefile.");
+        throw std::runtime_error("Corrupted savefile. Error code: 3670");
     }
     game_state._log = "";
     for(;;)
     {
-        if(line != "LOG_START")
-        {
-            game_state._log += "\n";
-        }
-
-        line = ts.readLine();
+        std::getline(ss, line);
         if(line == "LOG_END")
         {
             break;
         }
         else
         {
-            game_state._log += line.toStdString();
+            game_state._log += line;
+            game_state._log += "\n";
         }
     }
 
-    line = ts.readLine();
+    std::getline(ss, line);
     if(line != "VARS_START")
     {
-        throw std::runtime_error("Corrupted savefile.");
+        throw std::runtime_error("Corrupted savefile. Error code: 4190");
     }
     game_state._variables = "";
+    first = true;
     for(;;)
     {
-        if(line != "VARS_START")
-        {
-            game_state._variables += "\n";
-        }
-
-        line = ts.readLine();
+        std::getline(ss, line);
         if(line == "VARS_END")
         {
-            break;
+          break;
         }
         else
         {
-            game_state._variables += line.toStdString();
+            if(!first)
+            {
+              game_state._variables += "\n";
+            }
+            else
+            {
+              first = false;
+            }
+            game_state._variables += line;
         }
     }
 

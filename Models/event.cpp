@@ -112,7 +112,7 @@ Enemy& Event::getCurrentEnemy()
 }
 
 void Event::addEnemy(const std::string& name, int agility,
-                     int constitution, QJSValue& on_death)
+                     int constitution, QJSValue on_death)
 {
     _enemies.emplace(name, agility, constitution, on_death);
 }

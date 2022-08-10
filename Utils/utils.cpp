@@ -5,7 +5,7 @@
 
 std::string utils::directionToString(Direction direction)
 {
-    std::string result = "";
+    std::string result;
     switch(direction)
     {
     case Direction::NORTH:
@@ -61,7 +61,7 @@ Direction utils::commandToDirection(Command command)
 
 std::string utils::parseParams(std::queue<std::string>& params)
 {
-    std::ostringstream ss("");
+    std::ostringstream ss;
     while(!params.empty())
     {
         ss << params.front();
@@ -95,7 +95,7 @@ int utils::rollD6(int count)
 
 std::string utils::toLower(const std::string& s)
 {
-    std::string result("");
+    std::string result;
     std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
                    [](char c){ return std::tolower(c); });
     return result;

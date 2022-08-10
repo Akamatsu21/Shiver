@@ -167,7 +167,7 @@ void Game::handleHelpCommand()
     _console.restoreLog();
 }
 
-bool Game::handleLoadCommand(const std::string& save_file)
+bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_needed)
 {
     if(save_file.empty())
     {
@@ -183,10 +183,13 @@ bool Game::handleLoadCommand(const std::string& save_file)
         return false;
     }
 
-    _console.writeText("Are you sure you want to load a saved game?");
-    if(!resolveYesNoQuestion())
+    if(confirmation_needed)
     {
-        return false;
+        _console.writeText("Are you sure you want to load a saved game?");
+        if(!resolveYesNoQuestion())
+        {
+            return false;
+        }
     }
 
     try
@@ -397,7 +400,6 @@ void Game::displayCombatStatus()
 
 void Game::displayCurrentEvent()
 {
-    _console.clearScreen();
     _console.writeText(_current_event.getDescription());
     if(_combat_state._combat_in_progress)
     {
@@ -420,7 +422,7 @@ void Game::displayCurrentEnemy()
 
 void Game::resolveDamage(bool player_win, int damage)
 {
-    std::string msg("");
+    std::string msg;
     if(player_win)
     {
         _current_event.getCurrentEnemy().modifyConstitution(-damage);
@@ -456,14 +458,25 @@ bool Game::resolveYesNoQuestion()
     }
 }
 
-void Game::updateCurrentEvent(int id)
+void Game::updateCurrentEvent(int id, bool redirect)
 {
     _current_event = _scripting_engine->parseEvent(id);
     if(_current_event.hasEnemies())
     {
         _combat_state = { true, 0, 0, 0 };
     }
+
+    if(!redirect)
+    {
+        _console.clearScreen();
+    }
     displayCurrentEvent();
+
+    if(_current_event.getRedirect() != 0)
+    {
+        _console.waitForAnyKey();
+        updateCurrentEvent(_current_event.getRedirect(), true);
+    }
 }
 
 void Game::checkForDeath()
@@ -532,7 +545,7 @@ void Game::handleCombatRound()
 
 GameState Game::createGameState()
 {
-    GameState game_state{};
+    GameState game_state = {};
     game_state._player_agility = _player->getAgility();
     game_state._player_constitution = _player->getConstitution();
     game_state._player_luck = _player->getLuck();
@@ -607,7 +620,7 @@ void Game::restoreGameState(const GameState& game_state)
     std::istringstream ss(game_state._player_inventory);
     while(!ss.eof())
     {
-        std::string item("");
+        std::string item;
         std::getline(ss, item);
         _player->addItem(item);
     }
@@ -619,20 +632,19 @@ void Game::restoreGameState(const GameState& game_state)
         ss.clear();
         while(!ss.eof())
         {
-            std::string type("");
-            std::string key("");
+            std::string type, key;
             std::getline(ss, type);
             std::getline(ss, key);
             if(type == "counter")
             {
-                int counter(0);
+                int counter = 0;
                 ss >> counter;
                 ss.get();
                 _game_vars->setCounter(QString::fromStdString(key), counter);
             }
             else if(type == "flag")
             {
-                bool flag(false);
+                bool flag = false;
                 ss >> flag;
                 ss.get();
                 _game_vars->setFlag(QString::fromStdString(key), flag);
@@ -709,7 +721,7 @@ void Game::characterCreation()
     msg += utils::createString("Agility: ", agility,
                                "\nConstitution: ", constitution,
                                "\nLuck: ", luck,
-                               "\n\nChoose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
+                               "\n\nChoose one of the three stats. You will receive an elixir that can be used\nup to twice per game to recover that statistic back to the starting value.");
     _console.writeText(msg);
 
     ElixirType elixir = ElixirType::INVALID;
@@ -786,7 +798,7 @@ void Game::gameLoop()
             handleSaveCommand(utils::parseParams(params));
             continue;
         case Command::LOAD:
-            handleLoadCommand(utils::parseParams(params));
+            handleLoadCommand(utils::parseParams(params), true);
             continue;
         case Command::SAVELIST:
             handleSaveListCommand();
@@ -844,7 +856,7 @@ void Game::titleScreen()
             _console.writeText("Please start a game first.");
             continue;
         case Command::LOAD:
-            if(!handleLoadCommand(utils::parseParams(params)))
+            if(!handleLoadCommand(utils::parseParams(params), false))
             {
                 continue;
             }

@@ -38,7 +38,7 @@ class Game: public QObject
     bool handleEscapeCommand();
     bool handleFightCommand();
     void handleHelpCommand();
-    bool handleLoadCommand(const std::string& save_file);
+    bool handleLoadCommand(const std::string& save_file, bool confirmation_needed);
     bool handleLuckyCommand();
     void handleSaveCommand(const std::string& save_file);
     void handleSaveDelCommand(const std::string& save_file);
@@ -52,7 +52,7 @@ class Game: public QObject
 
     void resolveDamage(bool player_win, int damage);
     bool resolveYesNoQuestion();
-    void updateCurrentEvent(int id);
+    void updateCurrentEvent(int id, bool redirect = false);
 
     void checkForDeath();
     void handleCombatRound();

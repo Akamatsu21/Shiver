@@ -91,7 +91,7 @@ int Console::showHelpPage(int page_number, int total_pages, const std::string &t
     int new_page = 0;
     while(invalid_input)
     {
-        std::string input("");
+        std::string input;
         std::getline(std::cin, input);
         try
         {
@@ -125,7 +125,7 @@ std::string Console::waitForInput()
 {
     writeLine();
     std::cout << "\033[33m>\033[0m ";
-    std::string input("");
+    std::string input;
     std::getline(std::cin, input);
     _log += "\033[33m>\033[0m " + input + "\n";
     return input;

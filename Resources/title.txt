@@ -10,6 +10,8 @@
 |                                                      |
 |------------------------------------------------------|
 
+          Original game by Jacek Ciesielski.
+
                 Hey, Brave Adventurer!
     Is it you that was said to have ice-cold water
         flowing in his veins instead of blood,

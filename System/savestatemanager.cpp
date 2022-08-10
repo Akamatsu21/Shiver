@@ -25,7 +25,7 @@ void SaveStateManager::initDirectories()
 
 bool SaveStateManager::saveFileExists(const std::string& save_slot) const
 {
-    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QString fullFilePath = _save_dir.absolutePath() + "/" + QString::fromStdString(save_slot);
     QFile save_file(fullFilePath);
     return save_file.exists();
 }
@@ -38,7 +38,7 @@ std::string SaveStateManager::listSaveFiles() const
 
 void SaveStateManager::createSaveFileContents(const GameState& game_state)
 {
-    std::ostringstream ss("");
+    std::ostringstream ss;
 
     // Player stats.
     ss << game_state._player_agility << "\n"
@@ -100,7 +100,7 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
 GameState SaveStateManager::parseSaveFileContents()
 {
     std::istringstream ss(_save_file_contents);
-    GameState game_state{};
+    GameState game_state = {};
 
     ss >> game_state._player_agility
        >> game_state._player_constitution
@@ -114,7 +114,7 @@ GameState SaveStateManager::parseSaveFileContents()
        >> game_state._player_elixir_type;
     ss.get(); // eat the final newline
 
-    std::string line("");
+    std::string line;
     std::getline(ss, line);
     if(line != "INVENTORY_START")
     {
@@ -220,7 +220,7 @@ GameState SaveStateManager::parseSaveFileContents()
 
 void SaveStateManager::deleteSaveFile(const std::string& save_slot)
 {
-    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QString fullFilePath = _save_dir.absolutePath() + "/" + QString::fromStdString(save_slot);
     QFile save_file(fullFilePath);
     if(!save_file.remove())
     {
@@ -230,7 +230,7 @@ void SaveStateManager::deleteSaveFile(const std::string& save_slot)
 
 void SaveStateManager::loadSaveFile(const std::string& save_slot)
 {
-    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QString fullFilePath = _save_dir.absolutePath() + "/" + QString::fromStdString(save_slot);
     QFile save_file(fullFilePath);
     if(!save_file.open(QIODevice::ReadOnly))
     {
@@ -252,7 +252,7 @@ void SaveStateManager::loadSaveFile(const std::string& save_slot)
 
 void SaveStateManager::saveCurrentGameState(const std::string& save_slot)
 {
-    QString fullFilePath(_save_dir.absolutePath() + "/" + QString::fromStdString(save_slot));
+    QString fullFilePath = _save_dir.absolutePath() + "/" + QString::fromStdString(save_slot);
     QFile save_file(fullFilePath);
     if(!save_file.open(QIODevice::WriteOnly))
     {

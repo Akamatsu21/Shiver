@@ -11,6 +11,7 @@
 class Event
 {
     int _id;
+    int _redirect;
     std::string _description;
     std::map<Direction, int> _destinations;
     std::queue<Enemy> _enemies;
@@ -21,6 +22,7 @@ public:
     Event(int id);
 
     int getId() const;
+    int getRedirect() const;
     std::string getDescription() const;
     int getDestination(Direction direction) const;
     bool isDirectionAvailable(Direction direction) const;
@@ -31,6 +33,7 @@ public:
     std::string findItem(const std::string& item) const;
     int getItemLimit() const;
 
+    void setRedirect(int redirect);
     void setDescription(const std::string& description);
     void setDestination(Direction direction, int destination);
     void setItemLimit(int limit);

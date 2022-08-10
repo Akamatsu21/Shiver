@@ -16,7 +16,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
 void ScriptingEngine::loadModules()
 {
     _js_engine.installExtensions(QJSEngine::AllExtensions);
-    _event_list = _js_engine.importModule(":js/events.jsm").property("events");
+    _event_list = _js_engine.importModule(":js/test.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
 
     if(_event_list.isError() || _help_pages.isError())
@@ -59,6 +59,11 @@ Event ScriptingEngine::parseEvent(int id)
 
     assert(event_object.hasProperty("description"));
     event.setDescription(getObjectProperty(event_object, "description").toString().toStdString());
+
+    if(event_object.hasProperty("redirect"))
+    {
+        event.setRedirect(getObjectProperty(event_object, "redirect").toInt());
+    }
 
     for(Direction direction: utils::getAllDirections())
     {
@@ -108,7 +113,7 @@ Event ScriptingEngine::parseEvent(int id)
 std::vector<std::string> ScriptingEngine::parseHelpPages()
 {
     assert(_help_pages.isArray());
-    std::vector<std::string> pages{};
+    std::vector<std::string> pages;
     int length = _help_pages.property("length").toInt();
     for(int i = 0; i < length; ++i)
     {

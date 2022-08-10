@@ -2,6 +2,7 @@
     <qresource prefix="/js">
         <file>events.jsm</file>
         <file>help.jsm</file>
+        <file>test.jsm</file>
     </qresource>
     <qresource prefix="/static">
         <file>title.txt</file>

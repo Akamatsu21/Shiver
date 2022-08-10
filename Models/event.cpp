@@ -6,6 +6,7 @@
 
 Event::Event(int id):
     _id(id),
+    _redirect(0),
     _description(""),
     _destinations{},
     _enemies{},
@@ -18,6 +19,11 @@ Event::Event(int id):
 int Event::getId() const
 {
     return _id;
+}
+
+int Event::getRedirect() const
+{
+    return _redirect;
 }
 
 std::string Event::getDescription() const
@@ -67,7 +73,7 @@ std::string Event::getItemList() const
 std::string Event::findItem(const std::string& item) const
 {
     std::string itemLower = utils::toLower(item);
-    std::vector<std::string> itemsLower{};
+    std::vector<std::string> itemsLower;
     std::transform(std::begin(_items), std::end(_items), std::back_inserter(itemsLower),
                    [](const std::string& s){ return utils::toLower(s); });
     auto result = std::find(std::begin(itemsLower), std::end(itemsLower), itemLower);
@@ -84,6 +90,11 @@ std::string Event::findItem(const std::string& item) const
 int Event::getItemLimit() const
 {
     return _item_limit;
+}
+
+void Event::setRedirect(int redirect)
+{
+    _redirect = redirect;
 }
 
 void Event::setDescription(const std::string &description)

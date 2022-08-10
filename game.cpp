@@ -24,6 +24,10 @@ Game::Game(QCoreApplication* parent):
     _combat_state{false, 0, 0, 0}
 {
     connect(this, &Game::gameOver, parent, &QCoreApplication::quit, Qt::QueuedConnection);
+}
+
+void Game::setup()
+{
     try
     {
         _save_state_manager.initDirectories();
@@ -57,6 +61,59 @@ bool Game::handleDirectionCommand(Direction direction)
     {
         _console.writeText("Direction unavailable.");
         return false;
+    }
+}
+
+void Game::handleDrinkCommand()
+{
+    if(_player->drinkElixir())
+    {
+        std::string stat;
+        switch(_player->getElixirType())
+        {
+        case ElixirType::AGILITY:
+            stat =  "Agility";
+            break;
+        case ElixirType::CONSTITUTION:
+            stat = "Constitution";
+            break;
+        case ElixirType::LUCK:
+            stat = "Luck";
+            break;
+        case ElixirType::INVALID:
+        default:
+            _console.writeError("Error: Impossible game state.");
+            break;
+        }
+
+        std::string msg = utils::createString("You drank your elixir. ", stat, " restored to the starting value.");
+        if(_player->getElixirType() == ElixirType::LUCK)
+        {
+            msg += "\nYour starting luck has increased by 1!";
+        }
+        _console.writeText(msg);
+    }
+    else
+    {
+        _console.writeText("You don't have any elixir left!");
+    }
+}
+
+void Game::handleEatCommand()
+{
+    if(_combat_state._combat_in_progress)
+    {
+        _console.writeText("You have to defeat all enemies before you can eat.");
+        return;
+    }
+
+    if(_player->eatRation())
+    {
+        _console.writeText("You consume a Ration and recover 4 Constitution.");
+    }
+    else
+    {
+        _console.writeText("You don't have any rations left!");
     }
 }
 
@@ -708,6 +765,12 @@ void Game::gameLoop()
             break;
         case Command::TAKE:
             handleTakeCommand(utils::parseParams(params));
+            continue;
+        case Command::EAT:
+            handleEatCommand();
+            continue;
+        case Command::DRINK:
+            handleDrinkCommand();
             continue;
         case Command::LUCKY:
             if(!handleLuckyCommand())

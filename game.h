@@ -33,6 +33,8 @@ class Game: public QObject
 
     // Command handlers.
     bool handleDirectionCommand(Direction direction);
+    void handleDrinkCommand();
+    void handleEatCommand();
     bool handleEscapeCommand();
     bool handleFightCommand();
     void handleHelpCommand();
@@ -64,6 +66,7 @@ class Game: public QObject
 public:
     explicit Game(QCoreApplication* parent);
 
+    void setup();
     void titleScreen();
 
 signals:

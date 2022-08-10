@@ -64,6 +64,14 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     {
         command = Command::TAKE;
     }
+    else if(input_command == "eat")
+    {
+        command = Command::EAT;
+    }
+    else if(input_command == "drink")
+    {
+        command = Command::DRINK;
+    }
     else if(input_command == "lucky")
     {
         command = Command::LUCKY;

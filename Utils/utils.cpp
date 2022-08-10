@@ -76,8 +76,12 @@ std::string utils::parseParams(std::queue<std::string>& params)
 
 int utils::rollD6(int count)
 {
+#ifdef _WIN32
+    static std::mt19937 rng(time(0));
+#else
     static std::random_device rd;
     static std::mt19937 rng(rd());
+#endif
     static std::uniform_int_distribution<std::mt19937::result_type> d6(1, 6);
 
     int result = 0;

@@ -167,12 +167,12 @@ void Game::handleHelpCommand()
     _console.restoreLog();
 }
 
-void Game::handleLoadCommand(const std::string& save_file)
+bool Game::handleLoadCommand(const std::string& save_file)
 {
     if(save_file.empty())
     {
         _console.writeText("Specify save file name.");
-        return;
+        return false;
     }
 
     if(!_save_state_manager.saveFileExists(save_file))
@@ -180,13 +180,13 @@ void Game::handleLoadCommand(const std::string& save_file)
         _console.writeText(utils::createString("Save file \"",
                                                save_file,
                                                "\" not found."));
-        return;
+        return false;
     }
 
     _console.writeText("Are you sure you want to load a saved game?");
     if(!resolveYesNoQuestion())
     {
-        return;
+        return false;
     }
 
     try
@@ -200,6 +200,8 @@ void Game::handleLoadCommand(const std::string& save_file)
         _console.writeError(e.what());
         _console.writeError("Load failed.");
     }
+
+    return true;
 }
 
 bool Game::handleLuckyCommand()
@@ -611,31 +613,34 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _game_vars->clear();
-    ss.str(game_state._variables);
-    ss.clear();
-    while(!ss.eof())
+    if(!game_state._variables.empty())
     {
-        std::string type("");
-        std::string key("");
-        std::getline(ss, type);
-        std::getline(ss, key);
-        if(type == "counter")
+        ss.str(game_state._variables);
+        ss.clear();
+        while(!ss.eof())
         {
-            int counter(0);
-            ss >> counter;
-            ss.get();
-            _game_vars->setCounter(QString::fromStdString(key), counter);
-        }
-        else if(type == "flag")
-        {
-            bool flag(false);
-            ss >> flag;
-            ss.get();
-            _game_vars->setFlag(QString::fromStdString(key), flag);
-        }
-        else
-        {
-            terminate("Incorrect game state loaded. Error code: 3189");
+            std::string type("");
+            std::string key("");
+            std::getline(ss, type);
+            std::getline(ss, key);
+            if(type == "counter")
+            {
+                int counter(0);
+                ss >> counter;
+                ss.get();
+                _game_vars->setCounter(QString::fromStdString(key), counter);
+            }
+            else if(type == "flag")
+            {
+                bool flag(false);
+                ss >> flag;
+                ss.get();
+                _game_vars->setFlag(QString::fromStdString(key), flag);
+            }
+            else
+            {
+                terminate("Incorrect game state loaded. Error code: 3189");
+            }
         }
     }
 
@@ -729,7 +734,6 @@ void Game::characterCreation()
 
 void Game::gameLoop()
 {
-    updateCurrentEvent(1);
     while(_running)
     {
         std::string user_input = _console.waitForInput();
@@ -829,6 +833,8 @@ void Game::titleScreen()
         switch(command)
         {
         case Command::BEGIN:
+            characterCreation();
+            updateCurrentEvent(1);
             title_screen = false;
             break;
         case::Command::HELP:
@@ -838,8 +844,12 @@ void Game::titleScreen()
             _console.writeText("Please start a game first.");
             continue;
         case Command::LOAD:
-            handleLoadCommand(utils::parseParams(params));
-            continue;
+            if(!handleLoadCommand(utils::parseParams(params)))
+            {
+                continue;
+            }
+            title_screen = false;
+            break;
         case Command::SAVELIST:
             handleSaveListCommand();
             continue;
@@ -853,6 +863,5 @@ void Game::titleScreen()
         }
     }
 
-    characterCreation();
     gameLoop();
 }

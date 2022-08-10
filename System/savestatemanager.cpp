@@ -1,6 +1,7 @@
 #include "savestatemanager.h"
 #include <sstream>
 #include <QTextStream>
+#include <QDataStream>
 
 #include "Models/gamestate.h"
 
@@ -236,8 +237,16 @@ void SaveStateManager::loadSaveFile(const std::string& save_slot)
         throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
     }
 
+#ifdef DEBUG_SAVE
     QTextStream ts(&save_file);
     _save_file_contents = ts.readAll().toStdString();
+#else
+    QDataStream ds(&save_file);
+    QString contents = "";
+    ds >> contents;
+    _save_file_contents = contents.toStdString();
+#endif
+
     save_file.close();
 }
 
@@ -250,7 +259,13 @@ void SaveStateManager::saveCurrentGameState(const std::string& save_slot)
         throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
     }
 
+#ifdef DEBUG_SAVE
     QTextStream ts(&save_file);
     ts << QString::fromStdString(_save_file_contents);
+#else
+    QDataStream ds(&save_file);
+    ds << QString::fromStdString(_save_file_contents);
+#endif
+
     save_file.close();
 }

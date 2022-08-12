@@ -4,8 +4,11 @@
 #include <limits>
 #include <sstream>
 
-Console::Console():
-    _log("")
+Console::Console(QObject* parent):
+    QObject(parent),
+    _log(""),
+    _visible_text(""),
+    _waiting_for_input(false)
 {
 
 }
@@ -15,9 +18,28 @@ std::string Console::getLogContents() const
     return _log;
 }
 
+QString Console::getVisibleText() const
+{
+    return _visible_text;
+}
+
+bool Console::isWatingForInput() const
+{
+    return _waiting_for_input;
+}
+
 void Console::setLog(const std::string& value)
 {
     _log = value;
+}
+
+void Console::setWaitingForInput(bool value)
+{
+    if(_waiting_for_input != value)
+    {
+        _waiting_for_input = value;
+        emit waitingForInputChanged();
+    }
 }
 
 std::string Console::replaceTag(const std::string& text,
@@ -60,30 +82,27 @@ std::string Console::parseMarkup(const std::string& text) const
     return buffer;
 }
 
-void Console::clearScreenPreserveLog()
+void Console::clearVisibleText()
 {
-#ifdef _WIN32
-    system("cls");
-#else
-    system("clear");
-#endif
+    _visible_text = "";
+    emit visibleTextChanged();
 }
 
 void Console::clearScreen()
 {
-    clearScreenPreserveLog();
+    clearVisibleText();
     _log = "";
 }
 
 void Console::restoreLog()
 {
-    clearScreenPreserveLog();
-    std::cout << _log;
+    _visible_text = QString::fromStdString(_log);
+    emit visibleTextChanged();
 }
 
 int Console::showHelpPage(int page_number, int total_pages, const std::string &text)
 {
-    clearScreenPreserveLog();
+    clearVisibleText();
     std::string parsed_text = parseMarkup(text);
     std::cout << parsed_text
               << "\n\nPage " << page_number << "/" << total_pages
@@ -125,12 +144,15 @@ void Console::waitForAnyKey()
 
 std::string Console::waitForInput()
 {
-    writeLine();
-    std::cout << "\033[33m>\033[0m ";
-    std::string input;
-    std::getline(std::cin, input);
-    _log += "\033[33m>\033[0m " + input + "\n";
-    return input;
+      _waiting_for_input = true;
+      return "";
+
+//    writeLine();
+//    std::cout << "\033[33m>\033[0m ";
+//    std::string input;
+//    std::getline(std::cin, input);
+//    _log += "\033[33m>\033[0m " + input + "\n";
+      //    return input;
 }
 
 void Console::writeError(const std::string& error)
@@ -141,14 +163,21 @@ void Console::writeError(const std::string& error)
 
 void Console::writeLine()
 {
-    std::cout << std::endl;
     _log += "\n";
+    restoreLog();
 }
 
 void Console::writeText(const std::string &text)
 {
     std::string parsed_text = parseMarkup(text);
-    std::cout << parsed_text;
     _log += parsed_text;
-    writeLine();
+    _log += "\n";
+    restoreLog();
+}
+
+void Console::obtainUserInput(const QString& input)
+{
+    setWaitingForInput(false);
+    writeText("\n> " + input.toStdString());
+    emit inputReady(input.toStdString());
 }

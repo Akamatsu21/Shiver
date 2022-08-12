@@ -14,7 +14,7 @@
 
 Game::Game(QCoreApplication* parent):
     QObject(parent),
-    _console(),
+    _console(parent),
     _save_state_manager(),
     _scripting_engine(new ScriptingEngine(this)),
     _current_event(1),

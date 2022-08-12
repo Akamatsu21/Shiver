@@ -1,8 +1,6 @@
-QT -= gui
-QT += qml
+QT += quick
 
-CONFIG += c++17 console
-CONFIG -= app_bundle
+CONFIG += c++17
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -47,5 +45,8 @@ HEADERS += \
 RESOURCES += \
     Resources/resources.qrc
 
-DISTFILES += \
-    Resources/events.jsm
+# Additional import path used to resolve QML modules in Qt Creator's code model
+QML_IMPORT_PATH =
+
+# Additional import path used to resolve QML modules just for Qt Quick Designer
+QML_DESIGNER_IMPORT_PATH =

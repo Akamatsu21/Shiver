@@ -65,6 +65,11 @@ Event ScriptingEngine::parseEvent(int id)
         event.setRedirect(getObjectProperty(event_object, "redirect").toInt());
     }
 
+    if(event_object.hasProperty("new_room"))
+    {
+        event.setNewRoom(getObjectProperty(event_object, "new_room").toBool());
+    }
+
     for(Direction direction: utils::getAllDirections())
     {
         QString direction_string = QString::fromStdString(utils::directionToString(direction));
@@ -104,6 +109,40 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             event.addItem(items.property(i).toString().toStdString());
+        }
+    }
+
+    if(event_object.hasProperty("yes_no_choice"))
+    {
+        QJSValue choice = getObjectProperty(event_object, "yes_no_choice");
+        event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
+        event.addChoiceOption("yes", getObjectProperty(choice, "yes").toInt());
+        event.addChoiceOption("no", getObjectProperty(choice, "no").toInt());
+    }
+    else if(event_object.hasProperty("choice"))
+    {
+        QJSValue choice = getObjectProperty(event_object, "choice");
+        event.setChoice(ChoiceType::MULTI, getObjectProperty(choice, "question").toString().toStdString());
+
+        QJSValue options = getObjectProperty(choice, "options");
+        assert(options.isArray());
+        int length = options.property("length").toInt();
+        for(int i = 0; i < length; ++i)
+        {
+            event.addChoiceOption(getObjectProperty(options.property(i), "answer").toString().toStdString(),
+                                  getObjectProperty(options.property(i), "redirect").toInt());
+        }
+    }
+
+    if(event_object.hasProperty("locals"))
+    {
+        QJSValue locals = getObjectProperty(event_object, "locals");
+        assert(locals.isArray());
+        int length = locals.property("length").toInt();
+        for(int i = 0; i < length; ++i)
+        {
+            event.addLocalCommand(getObjectProperty(locals.property(i), "command").toString().toStdString(),
+                                  getObjectProperty(locals.property(i), "redirect").toInt());
         }
     }
 

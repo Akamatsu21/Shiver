@@ -34,7 +34,7 @@ public:
     int getStartingAgility() const;
     int getStartingConstitution() const;
     int getStartingLuck() const;
-    int getGold() const;
+    Q_INVOKABLE int getGold() const;
     int getRations() const;
     int getElixirCount() const;
     ElixirType getElixirType() const;
@@ -50,16 +50,17 @@ public:
     void setRations(int value);
     void setElixirCount(int value);
 
-    void modifyAgility(int value);
+    Q_INVOKABLE void modifyAgility(int value);
     Q_INVOKABLE void modifyConstitution(int value);
-    void modifyLuck(int value);
-    void modifyGold(int value);
+    Q_INVOKABLE void modifyLuck(int value);
+    Q_INVOKABLE void modifyGold(int value);
 
     bool eatRation();
     bool drinkElixir();
     void addItem(const std::string& item);
+    Q_INVOKABLE void addItem(const QVariant& item);
     void removeItem(const std::string& item);
-    bool performLuckCheck();
+    Q_INVOKABLE bool performLuckCheck();
 };
 
 #endif // PLAYER_H

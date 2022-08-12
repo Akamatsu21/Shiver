@@ -54,6 +54,8 @@ std::string Console::parseMarkup(const std::string& text) const
     buffer = replaceTag(buffer, "[e]", "[/e]", "\033[31m"); // enemy name
     buffer = replaceTag(buffer, "[c]", "[/c]", "\033[32m"); // command
     buffer = replaceTag(buffer, "[i]", "[/i]", "\033[34m"); // item
+    buffer = replaceTag(buffer, "[l]", "[/l]", "\033[33m"); // local command
+    buffer = replaceTag(buffer, "[o]", "[/o]", "\033[35m"); // option
     buffer = replaceTag(buffer, "[p]", "[/p]", "\033[36m"); // player name
     return buffer;
 }

@@ -268,6 +268,11 @@ void Player::addItem(const std::string& item)
     }
 }
 
+void Player::addItem(const QVariant& item)
+{
+    addItem(item.toString().toStdString());
+}
+
 void Player::removeItem(const std::string& item)
 {
     _inventory.erase(std::find(std::begin(_inventory), std::end(_inventory), item));

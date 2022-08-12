@@ -207,6 +207,25 @@ bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_nee
     return true;
 }
 
+bool Game::handleLocalCommand(const std::string& input)
+{
+    if(_current_event.hasLocalCommands())
+    {
+        std::string command = utils::toLower(input);
+        const std::vector<std::string>& local_commands = _current_event.getLocalCommands();
+        bool valid = std::find(std::begin(local_commands),
+                               std::end(local_commands),
+                               command) != std::end(local_commands);
+        if(valid)
+        {
+            updateCurrentEvent(_current_event.getLocalCommandRedirect(command));
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Game::handleLuckyCommand()
 {
     if(!_combat_state._combat_in_progress)
@@ -453,12 +472,30 @@ bool Game::resolveYesNoQuestion()
         }
         else
         {
-            _console.writeText("Invalid answer. Please answer [c]yes[/c] or [c]no[/c].");
+            _console.writeText("Invalid answer. Please answer [o]yes[/o] or [o]no[/o].");
         }
     }
 }
 
-void Game::updateCurrentEvent(int id, bool redirect)
+std::string Game::resolveMultiChoiceQuestion(const std::vector<std::string>& options)
+{
+    for(;;)
+    {
+        std::string user_input = _console.waitForInput();
+        std::string answer = utils::toLower(user_input);
+        bool valid = std::find(std::begin(options), std::end(options), answer) != std::end(options);
+        if(valid)
+        {
+            return answer;
+        }
+        else
+        {
+            _console.writeText("Invalid answer. Please choose one of the highlighted answers.");
+        }
+    }
+}
+
+void Game::updateCurrentEvent(int id, bool new_room)
 {
     _current_event = _scripting_engine->parseEvent(id);
     if(_current_event.hasEnemies())
@@ -466,7 +503,7 @@ void Game::updateCurrentEvent(int id, bool redirect)
         _combat_state = { true, 0, 0, 0 };
     }
 
-    if(!redirect)
+    if(new_room)
     {
         _console.clearScreen();
     }
@@ -475,7 +512,27 @@ void Game::updateCurrentEvent(int id, bool redirect)
     if(_current_event.getRedirect() != 0)
     {
         _console.waitForAnyKey();
-        updateCurrentEvent(_current_event.getRedirect(), true);
+        updateCurrentEvent(_current_event.getRedirect(),
+                           _current_event.leadsToNewRoom());
+    }
+    else if(_current_event.hasYesNoChoice())
+    {
+        _console.writeLine();
+        _console.writeText(_current_event.getChoice()._question);
+        std::string answer = resolveYesNoQuestion() ? "yes" : "no";
+        _console.writeLine();
+        updateCurrentEvent(_current_event.getChoice()._options.at(answer),
+                           _current_event.leadsToNewRoom());
+    }
+    else if(_current_event.hasMultiChoice())
+    {
+        _console.writeLine();
+        _console.writeText(_current_event.getChoice()._question);
+        std::string answer = resolveMultiChoiceQuestion(
+                    utils::getKeys(_current_event.getChoice()._options));
+        _console.writeLine();
+        updateCurrentEvent(_current_event.getChoice()._options.at(answer),
+                           _current_event.leadsToNewRoom());
     }
 }
 
@@ -721,7 +778,7 @@ void Game::characterCreation()
     msg += utils::createString("Agility: ", agility,
                                "\nConstitution: ", constitution,
                                "\nLuck: ", luck,
-                               "\n\nChoose one of the three stats. You will receive an elixir that can be used\nup to twice per game to recover that statistic back to the starting value.");
+                               "\n\nChoose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
     _console.writeText(msg);
 
     ElixirType elixir = ElixirType::INVALID;
@@ -808,6 +865,10 @@ void Game::gameLoop()
             continue;
         case Command::INVALID:
         default:
+            if(handleLocalCommand(user_input))
+            {
+                break;
+            }
             _console.writeText("Invalid command.");
             continue;
         }

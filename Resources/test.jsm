@@ -3,7 +3,18 @@ export const events =
     event1:
     {
         description: "Starting room",
-        north: 2
+        north: 2,
+        west: function()
+        {
+            if(game_vars.getFlag("met_fairy"))
+            {
+                return 11;
+            }
+            else
+            {
+                return 10;
+            }
+        }
     },
     event2:
     {
@@ -57,6 +68,7 @@ export const events =
         description: "You found a chest. You find: [i]Amulet[/i], [i]Axe[/i] and [i]Cock Shield[/i]. You may only take two.",
         north: 3,
         south: 9,
+        east: 16,
         items:
         [
             "Amulet",
@@ -114,5 +126,93 @@ export const events =
     {
         description: "You suddenly hear the ground shaking...",
         redirect: 6
+    },
+    event10:
+    {
+        description: "There is a big door in front of you.",
+        yes_no_choice:
+        {
+            question: "Would you like to try and break if down?",
+            no: 11,
+            yes: 12
+        }
+    },
+    event11:
+    {
+        description: "There is nothing more for you to do here.",
+        east: 1
+    },
+    event12:
+    {
+        description: function()
+        {
+            game_vars.setFlag("met_fairy", true);
+            return "You encounter a fairy. It offers to grant your one wish. You options are: 100 [o]gold[/o], [o]heal[/o] your Constitution to the starting value, gain a magical [o]sword[/o] or do [o]nothing[/o].";
+        },
+        choice:
+        {
+            question: "What do you choose?",
+            options:
+            [
+                {
+                    answer: "gold",
+                    redirect: 13
+                },
+                {
+                    answer: "heal",
+                    redirect: 14
+                },
+                {
+                    answer: "sword",
+                    redirect: 15
+                },
+                {
+                    answer: "nothing",
+                    redirect: 11
+                }
+            ]
+        }
+    },
+    event13:
+    {
+        description: function()
+        {
+            player.modifyGold(+100);
+            return "The fairy hands you a pot full of gold coins. It then bows and disappears."
+        },
+        redirect: 11,
+        new_room: true
+    },
+    event14:
+    {
+        description: function()
+        {
+            player.modifyConstitution(+100);
+            return "The fairy performs a few mysterious gestures. You feel like you're in a trance. Your body feels lighter than air, and when you reconnect with reality you realise all your wounds have been healed, but the fairy is nowhere to be found."
+        },
+        redirect: 11,
+        new_room: true
+    },
+    event15:
+    {
+        description: function()
+        {
+            player.addItem("Magical Sword");
+            return "The fairy hands you a huge sword covered in runes. You thank her and she bids you farewell."
+        },
+        redirect: 11,
+        new_room: true
+    },
+    event16:
+    {
+        description: "You enter a murky chamber. There is a magical circle on the floor. You may use it to [l]teleport[/l].",
+        locals:
+        [
+            {
+                command: "teleport",
+                redirect: 8
+            }
+        ],
+        west: 5
     }
 };

@@ -30,6 +30,7 @@ HEADERS += \
     Enums/command.h \
     Enums/direction.h \
     Enums/elixirtype.h \
+    Models/choice.h \
     Models/combatstate.h \
     Models/enemy.h \
     Models/event.h \

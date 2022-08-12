@@ -12,7 +12,7 @@
 
           Original game by Jacek Ciesielski.
 
-                Hey, Brave Adventurer!
+                Hey, brave [p]Adventurer[/p]!
     Is it you that was said to have ice-cold water
         flowing in his veins instead of blood,
           and a body made out of pure steel?

@@ -7,11 +7,14 @@
 Event::Event(int id):
     _id(id),
     _redirect(0),
+    _new_room(false),
     _description(""),
     _destinations{},
     _enemies{},
     _items{},
-    _item_limit(0)
+    _item_limit(0),
+    _choice(),
+    _local_commands{}
 {
 
 }
@@ -24,6 +27,11 @@ int Event::getId() const
 int Event::getRedirect() const
 {
     return _redirect;
+}
+
+bool Event::leadsToNewRoom() const
+{
+    return _new_room;
 }
 
 std::string Event::getDescription() const
@@ -92,12 +100,47 @@ int Event::getItemLimit() const
     return _item_limit;
 }
 
+bool Event::hasYesNoChoice() const
+{
+    return _choice._type == ChoiceType::YES_NO;
+}
+
+bool Event::hasMultiChoice() const
+{
+    return _choice._type == ChoiceType::MULTI;
+}
+
+Choice Event::getChoice() const
+{
+    return _choice;
+}
+
+bool Event::hasLocalCommands() const
+{
+    return !_local_commands.empty();
+}
+
+std::vector<std::string> Event::getLocalCommands() const
+{
+    return utils::getKeys(_local_commands);
+}
+
+int Event::getLocalCommandRedirect(const std::string& command) const
+{
+    return _local_commands.at(command);
+}
+
 void Event::setRedirect(int redirect)
 {
     _redirect = redirect;
 }
 
-void Event::setDescription(const std::string &description)
+void Event::setNewRoom(bool new_room)
+{
+    _new_room = new_room;
+}
+
+void Event::setDescription(const std::string& description)
 {
     _description = description;
 }
@@ -152,4 +195,20 @@ void Event::takeItem()
     {
         --_item_limit;
     }
+}
+
+void Event::setChoice(ChoiceType type, const std::string& question)
+{
+    _choice._type = type;
+    _choice._question = question;
+}
+
+void Event::addChoiceOption(const std::string& answer, int redirect)
+{
+    _choice._options[answer] = redirect;
+}
+
+void Event::addLocalCommand(const std::string& command, int redirect)
+{
+    _local_commands[command] = redirect;
 }

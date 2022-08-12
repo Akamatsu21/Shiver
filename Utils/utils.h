@@ -1,10 +1,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <map>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <queue>
+#include <vector>
 
 #include "Enums/command.h"
 #include "Enums/direction.h"
@@ -25,6 +26,17 @@ std::string createString(Args... args)
 std::string directionToString(Direction direction);
 
 std::vector<Direction> getAllDirections();
+
+template<typename K, typename V>
+std::vector<K> getKeys(const std::map<K, V>& map)
+{
+    std::vector<K> keys;
+    for(const auto& element: map)
+    {
+        keys.push_back(element.first);
+    }
+    return keys;
+}
 
 std::string getTitleScreenText();
 

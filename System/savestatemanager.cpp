@@ -79,12 +79,6 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     }
 
     // Console log.
-    std::string log = game_state._log;
-    size_t pos = log.find("\n\033[33m>\033m[0m save\n");
-    if(pos != std::string::npos)
-    {
-        log = log.substr(0, pos);
-    }
     ss << "LOG_START\n"
        << game_state._log
        << "LOG_END\n";

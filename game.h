@@ -39,6 +39,7 @@ class Game: public QObject
     bool handleFightCommand();
     void handleHelpCommand();
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed);
+    bool handleLocalCommand(const std::string& input);
     bool handleLuckyCommand();
     void handleSaveCommand(const std::string& save_file);
     void handleSaveDelCommand(const std::string& save_file);
@@ -52,7 +53,8 @@ class Game: public QObject
 
     void resolveDamage(bool player_win, int damage);
     bool resolveYesNoQuestion();
-    void updateCurrentEvent(int id, bool redirect = false);
+    std::string resolveMultiChoiceQuestion(const std::vector<std::string>& options);
+    void updateCurrentEvent(int id, bool new_room = true);
 
     void checkForDeath();
     void handleCombatRound();

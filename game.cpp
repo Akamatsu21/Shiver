@@ -799,7 +799,7 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
         _scripting_engine->registerPlayer(_player);
         _console.writeText("<br />This is your character. Type [c]stats[/c] at any point to see this list.");
         handleStatsCommand();
-        _console.writeText("<br />You are now ready to begin your adventure.");
+        _console.writeText("<br />You are now ready to begin your adventure.<br />Please press enter to continue.");
         mode = InputMode::KEY_GAME_START;
     }
 

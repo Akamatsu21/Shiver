@@ -6,7 +6,7 @@ Window
 {
     id: main_window
     width: 800
-    height: 800
+    height: 1000
     visible: true
     title: "Shiver"
     signal inputReceived(input: string)

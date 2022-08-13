@@ -1,3 +1,4 @@
+<pre>
 |------------------------------------------------------|
 | _______          _________          _______  _______ |
 |(  ____ \|\     /|\__   __/|\     /|(  ____ \(  ____ )|
@@ -25,3 +26,4 @@ Only you can excavate its Great Mystery. Get going!
 Type [c]begin[/c] to start your adventure.
 Type [c]load[/c] to load a saved game.
 Type [c]help[/c] to see the game manual.
+</pre>

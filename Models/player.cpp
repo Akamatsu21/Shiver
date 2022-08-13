@@ -107,7 +107,21 @@ std::string Player::getInventory() const
         [](std::string acc, std::string element)
         {
             return acc + "\n" + element;
-        });
+    });
+}
+
+std::string Player::getInventoryHtml() const
+{
+    if(_inventory.empty())
+    {
+        return "";
+    }
+
+    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
+        [](std::string acc, std::string element)
+        {
+            return acc + "<br />" + element;
+    });
 }
 
 void Player::setAgility(int value)

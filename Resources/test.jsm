@@ -81,7 +81,7 @@ export const events =
     {
         description: function()
         {
-            let desc = "You encounter the [e]Kicker Troll[/e]. He kicks you in the nuts.\n";
+            let desc = "You encounter the [e]Kicker Troll[/e]. He kicks you in the nuts.<br />";
             if(player.hasItem("Cock Shield"))
             {
                 desc += "Your shield protects you. You may proceed.";
@@ -100,7 +100,7 @@ export const events =
     {
         description: function()
         {
-            let desc = "You find a decrepit old man sitting on a rock. He stares you down.\n\"Have you been to the dead end up north?\" he asks.\n";
+            let desc = "You find a decrepit old man sitting on a rock. He stares you down.<br />\"Have you been to the dead end up north?\" he asks.<br />";
             if(game_vars.getFlag("visited_dead_end"))
             {
                 desc += "You reply you have. He high fives you with a laugh.";
@@ -118,7 +118,7 @@ export const events =
     {
         description: function()
         {
-            return "You approach a dodgy man, sitting at a table inside a cave.\n\"I am the orc counting guy\" he introduces himself.\n\"Thus far, in your adventure you have killed " + game_vars.getCounter("orc_kills") + " Orcs!\"";
+            return "You approach a dodgy man, sitting at a table inside a cave.<br />\"I am the orc counting guy\" he introduces himself.<br />\"Thus far, in your adventure you have killed " + game_vars.getCounter("orc_kills") + " Orcs!\"";
         },
         east: 7
     },

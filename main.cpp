@@ -4,7 +4,7 @@
 #include <QQuickView>
 #include <QQuickItem>
 
-//#include "game.h"
+#include "gamewindow.h"
 #include "System/console.h"
 
 int main(int argc, char* argv[])
@@ -21,21 +21,13 @@ int main(int argc, char* argv[])
                             QCoreApplication::exit(-1);
                         }
                      }, Qt::QueuedConnection);
+
     Console* console = new Console(&app);
-    console->writeText("Hello");
-    console->writeLine();
-    console->writeText("Time to start your adventure.");
     engine.rootContext()->setContextProperty("terminalController", console);
     engine.load(url);
 
-    QObject::connect(engine.rootObjects().at(0), SIGNAL(inputReceived(QString)),
-                     console, SLOT(obtainUserInput(QString)));
-
-    console->setWaitingForInput(true);
-
-//    Game* game = new Game(&app);
-//    game->setup();
-//    game->titleScreen();
+    GameWindow* gameWindow = new GameWindow(&app, *console, engine);
+    gameWindow->startGame();
 
     return app.exec();
 }

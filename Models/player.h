@@ -42,6 +42,7 @@ public:
     bool hasItem(const std::string& item) const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
     std::string getInventory() const;
+    std::string getInventoryHtml() const;
 
     void setAgility(int value);
     void setConstitution(int value);

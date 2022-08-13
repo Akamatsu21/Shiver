@@ -81,7 +81,7 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     // Console log.
     ss << "LOG_START\n"
        << game_state._log
-       << "LOG_END\n";
+       << "\nLOG_END\n";
 
     // Game variables.
     ss << "VARS_START\n"

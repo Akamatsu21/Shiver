@@ -4,11 +4,15 @@
 #include <limits>
 #include <sstream>
 
+#include "Utils/utils.h"
+
 Console::Console(QObject* parent):
     QObject(parent),
     _log(""),
     _visible_text(""),
-    _waiting_for_input(false)
+    _waiting_for_input(false),
+    _waiting_for_return(false),
+    _help_visible(false)
 {
 
 }
@@ -28,6 +32,16 @@ bool Console::isWatingForInput() const
     return _waiting_for_input;
 }
 
+bool Console::isWatingForReturn() const
+{
+    return _waiting_for_return;
+}
+
+bool Console::isHelpVisible() const
+{
+    return _help_visible;
+}
+
 void Console::setLog(const std::string& value)
 {
     _log = value;
@@ -39,6 +53,24 @@ void Console::setWaitingForInput(bool value)
     {
         _waiting_for_input = value;
         emit waitingForInputChanged();
+    }
+}
+
+void Console::setWaitingForReturn(bool value)
+{
+    if(_waiting_for_return != value)
+    {
+        _waiting_for_return = value;
+        emit waitingForReturnChanged();
+    }
+}
+
+void Console::setHelpVisible(bool value)
+{
+    if(_help_visible != value)
+    {
+        _help_visible = value;
+        emit helpVisibleChanged();
     }
 }
 
@@ -58,7 +90,7 @@ std::string Console::replaceTag(const std::string& text,
         ss << std::string(std::begin(buffer), open_tag_pos)
            << colour_code
            << std::string(open_tag_pos + open_tag.length(), close_tag_pos)
-           << "\033[0m"
+           << "</font>"
            << std::string(close_tag_pos + close_tag.length(), std::end(buffer));
 
         buffer = ss.str();
@@ -73,12 +105,12 @@ std::string Console::replaceTag(const std::string& text,
 std::string Console::parseMarkup(const std::string& text) const
 {
     std::string buffer = text;
-    buffer = replaceTag(buffer, "[e]", "[/e]", "\033[31m"); // enemy name
-    buffer = replaceTag(buffer, "[c]", "[/c]", "\033[32m"); // command
-    buffer = replaceTag(buffer, "[i]", "[/i]", "\033[34m"); // item
-    buffer = replaceTag(buffer, "[l]", "[/l]", "\033[33m"); // local command
-    buffer = replaceTag(buffer, "[o]", "[/o]", "\033[35m"); // option
-    buffer = replaceTag(buffer, "[p]", "[/p]", "\033[36m"); // player name
+    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
+    buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
+    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"blue\">"); // item
+    buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
+    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"purple\">"); // option
+    buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name
     return buffer;
 }
 
@@ -100,84 +132,46 @@ void Console::restoreLog()
     emit visibleTextChanged();
 }
 
-int Console::showHelpPage(int page_number, int total_pages, const std::string &text)
+void Console::showHelpPage(int page_number, int total_pages, const std::string& text)
 {
     clearVisibleText();
-    std::string parsed_text = parseMarkup(text);
-    std::cout << parsed_text
-              << "\n\nPage " << page_number << "/" << total_pages
-              << "\nEnter a page number to see that page, or 0 to exit.\n";
-
-    bool invalid_input = true;
-    int new_page = 0;
-    while(invalid_input)
-    {
-        std::string input;
-        std::getline(std::cin, input);
-        try
-        {
-            new_page = std::stoi(input);
-
-            if(new_page < 0 || new_page > total_pages)
-            {
-                throw std::out_of_range("Page range");
-            }
-            else
-            {
-                invalid_input = false;
-            }
-        }
-        catch(const std::logic_error&)
-        {
-            std::cout << "Invalid page number.\n";
-        }
-    }
-
-    return new_page;
-}
-
-void Console::waitForAnyKey()
-{
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    _log += "\n";
-}
-
-std::string Console::waitForInput()
-{
-      _waiting_for_input = true;
-      return "";
-
-//    writeLine();
-//    std::cout << "\033[33m>\033[0m ";
-//    std::string input;
-//    std::getline(std::cin, input);
-//    _log += "\033[33m>\033[0m " + input + "\n";
-      //    return input;
+    std::string page = utils::createString(parseMarkup(text),
+                                           "<br/><br />Page ", page_number, "/", total_pages,
+                                           "<br />Use arrow keys to navigate the pages.",
+                                           "<br />Press escape to exit.");
+    _visible_text = QString::fromStdString(page);
+    emit visibleTextChanged();
 }
 
 void Console::writeError(const std::string& error)
 {
-    std::cout << "\033[0;91m" << error << "\033[0m";
-    writeLine();
+    _log += "<font color=\"red\">" + error + "</font><br />";
+    restoreLog();
 }
 
 void Console::writeLine()
 {
-    _log += "\n";
+    _log += "<br />";
     restoreLog();
 }
 
 void Console::writeText(const std::string &text)
 {
     std::string parsed_text = parseMarkup(text);
-    _log += parsed_text;
-    _log += "\n";
+    _log += parsed_text + "<br />";
     restoreLog();
 }
 
 void Console::obtainUserInput(const QString& input)
 {
     setWaitingForInput(false);
-    writeText("\n> " + input.toStdString());
-    emit inputReady(input.toStdString());
+    writeText("<br /><font color=\"gold\">></font> " + input.toStdString());
+    emit inputReady(input);
+}
+
+void Console::obtainReturn()
+{
+    setWaitingForReturn(false);
+    writeText("<br />");
+    emit returnReady();
 }

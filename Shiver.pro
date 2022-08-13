@@ -17,6 +17,7 @@ SOURCES += \
         System/scriptingengine.cpp \
         Utils/utils.cpp \
         game.cpp \
+        gamewindow.cpp \
         main.cpp
 
 # Default rules for deployment.
@@ -28,6 +29,7 @@ HEADERS += \
     Enums/command.h \
     Enums/direction.h \
     Enums/elixirtype.h \
+    Enums/inputmode.h \
     Models/choice.h \
     Models/combatstate.h \
     Models/enemy.h \
@@ -40,7 +42,8 @@ HEADERS += \
     System/savestatemanager.h \
     System/scriptingengine.h \
     Utils/utils.h \
-    game.h
+    game.h \
+    gamewindow.h
 
 RESOURCES += \
     Resources/resources.qrc

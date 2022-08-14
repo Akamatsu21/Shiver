@@ -13,13 +13,15 @@ export const events =
     },
     event44:
     {
-        description: "You go east. You can see a bulky door in front of you. You try to open it, but it won't even budge.",
-        yes_no_choice:
-        {
-            question: "Would you like to try and break it down?",
-            yes: 105,
-            no: 75
-        }
+        description: "You go east. You can see a bulky door in front of you. You try to open it, but it won't even budge. You may give up and go back [c]west[/c], or try to [l]break[/l] down the door.",
+        west: 75,
+        locals:
+        [
+            {
+                command: "break",
+                redirect: 105
+            }
+        ]
     },
     event75:
     {

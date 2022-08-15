@@ -63,6 +63,7 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        ss << game_state._event_enemy_name << "\n"
           << game_state._event_enemy_constitution << "\n";
     }
+    ss << game_state._event_gold_present << "\n";
     ss << game_state._event_items_present << "\n";
     if(game_state._event_items_present)
     {
@@ -146,7 +147,8 @@ GameState SaveStateManager::parseSaveFileContents()
         ss >> game_state._event_enemy_constitution;
     }
 
-    ss >> game_state._event_items_present;
+    ss >> game_state._event_gold_present
+       >> game_state._event_items_present;
     if(game_state._event_items_present)
     {
         ss >> game_state._event_item_limit;

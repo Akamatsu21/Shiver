@@ -18,6 +18,7 @@ ID
 Enemy present
 Enemy name
 Enemy constitution
+Gold present
 Item present
 Item Limit
 

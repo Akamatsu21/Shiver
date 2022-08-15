@@ -21,6 +21,7 @@ struct GameState
     bool _event_enemy_present;
     std::string _event_enemy_name;
     int _event_enemy_constitution;
+    bool _event_gold_present;
     bool _event_items_present;
     int _event_item_limit;
 

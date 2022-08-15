@@ -16,7 +16,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
 void ScriptingEngine::loadModules()
 {
     _js_engine.installExtensions(QJSEngine::AllExtensions);
-    _event_list = _js_engine.importModule(":js/test.jsm").property("events");
+    _event_list = _js_engine.importModule(":js/events.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
 
     if(_event_list.isError() || _help_pages.isError())
@@ -87,15 +87,25 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             QJSValue enemy = enemies.property(i);
-            QJSValue on_death_callback = enemy.hasProperty("onDeath")
-                                         ? enemy.property("onDeath")
+            QJSValue death_text = enemy.hasProperty("death_text")
+                                  ? getObjectProperty(enemy, "death_text")
+                                  : QJSValue("");
+            QJSValue on_death_callback = enemy.hasProperty("on_death")
+                                         ? enemy.property("on_death")
                                          : QJSValue(false);
 
             event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
                            getObjectProperty(enemy, "agility").toInt(),
                            getObjectProperty(enemy, "constitution").toInt(),
+                           death_text.toString().toStdString(),
                            on_death_callback);
         }
+    }
+
+    if(event_object.hasProperty("gold"))
+    {
+        event.setHasGold(true);
+        event.setGold(getObjectProperty(event_object, "gold").toInt());
     }
 
     if(event_object.hasProperty("items"))

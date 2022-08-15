@@ -34,7 +34,7 @@ export const events =
                 name: "Orc",
                 agility: 5,
                 constitution: 1,
-                onDeath: function()
+                on_death: function()
                 {
                     game_vars.incrementCounter("orc_kills", +1);
                 }
@@ -54,7 +54,8 @@ export const events =
             {
                 name: "Goblin",
                 agility: 1,
-                constitution: 1
+                constitution: 1,
+                death_text: "Suddenly, you hear another monster approaching..."
             },
             {
                 name: "Griffon",

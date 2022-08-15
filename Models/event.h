@@ -17,6 +17,8 @@ class Event
     std::string _description;
     std::map<Direction, int> _destinations;
     std::queue<Enemy> _enemies;
+    int _gold;
+    bool _has_gold;
     std::vector<std::string> _items;
     int _item_limit;
     Choice _choice;
@@ -32,6 +34,8 @@ public:
     int getDestination(Direction direction) const;
     bool isDirectionAvailable(Direction direction) const;
     bool hasEnemies() const;
+    bool hasGold() const;
+    int getGold() const;
     bool hasItems() const;
     bool hasItem(const std::string& item) const;
     std::string getItemList() const;
@@ -44,16 +48,19 @@ public:
     std::vector<std::string> getLocalCommands() const;
     int getLocalCommandRedirect(const std::string& command) const;
 
-    void setRedirect(int redirect);
-    void setNewRoom(bool new_room);
-    void setDescription(const std::string& description);
+    void setRedirect(int value);
+    void setNewRoom(bool value);
+    void setDescription(const std::string& value);
     void setDestination(Direction direction, int destination);
-    void setItemLimit(int limit);
+    void setHasGold(bool value);
+    void setGold(int value);
+    void setItemLimit(int value);
 
     Enemy getCurrentEnemy() const;
     Enemy& getCurrentEnemy();
     void addEnemy(const std::string& name, int agility,
-                  int constitution, QJSValue on_death);
+                  int constitution, const std::string& death_text,
+                  QJSValue on_death);
     void defeatCurrentEnemy();
     void defeatAllEnemies();
 

@@ -172,6 +172,6 @@ void Console::obtainUserInput(const QString& input)
 void Console::obtainReturn()
 {
     setWaitingForReturn(false);
-    writeText("<br />");
+    writeLine();
     emit returnReady();
 }

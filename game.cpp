@@ -192,7 +192,15 @@ bool Game::handleLocalCommand(const std::string& input)
                                command) != std::end(local_commands);
         if(valid)
         {
-            return true;
+            if(_combat_state._combat_in_progress)
+            {
+                _console.writeText("You have to defeat all enemies first.");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 
@@ -315,6 +323,21 @@ void Game::handleTakeCommand(const std::string& item)
     else if(item.empty())
     {
         _console.writeText("Specify which item to take.");
+        return;
+    }
+
+    if(utils::toLower(item) == "gold")
+    {
+        if(_current_event.hasGold())
+        {
+            _player->modifyGold(_current_event.getGold());
+            _current_event.setHasGold(false);
+            _console.writeText(utils::createString("You picked up ", _current_event.getGold(), " gold."));
+        }
+        else
+        {
+            _console.writeText("No gold to pick up here.");
+        }
         return;
     }
 
@@ -550,6 +573,10 @@ void Game::checkForDeath()
         {
             std::string msg = utils::createString("You have defeated [e]",
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
+            if(!_current_event.getCurrentEnemy().getDeathText().empty())
+            {
+                msg += "<br />" + _current_event.getCurrentEnemy().getDeathText();
+            }
             _console.writeText(msg);
             _current_event.getCurrentEnemy().triggerOnDeathCallback();
             _current_event.defeatCurrentEnemy();
@@ -637,6 +664,7 @@ GameState Game::createGameState()
         game_state._event_enemy_name = _current_event.getCurrentEnemy().getName();
         game_state._event_enemy_constitution = _current_event.getCurrentEnemy().getConstitution();
     }
+    game_state._event_gold_present = _current_event.hasGold();
     game_state._event_items_present = _current_event.hasItems();
     if(_current_event.hasItems())
     {
@@ -757,6 +785,8 @@ void Game::restoreGameState(const GameState& game_state)
             _current_event.defeatAllEnemies();
         }
     }
+
+    _current_event.setHasGold(game_state._event_gold_present);
 
     if(game_state._event_items_present)
     {
@@ -923,7 +953,9 @@ InputMode Game::resolveGameInput(const std::string& user_input)
 InputMode Game::resolveGameStartInput()
 {
     _game_running = true;
-    return updateCurrentEvent(1);
+    InputMode mode = updateCurrentEvent(1);
+    performGameChecks();
+    return mode;
 }
 
 InputMode Game::resolveLoadInput(const std::string& user_input)
@@ -954,6 +986,7 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
         _console.writeLine();
         mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer),
                                   _current_event.leadsToNewRoom());
+        performGameChecks();
     }
 
     return mode;
@@ -961,8 +994,10 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
 
 InputMode Game::resolveRedirectInput()
 {
-    return updateCurrentEvent(_current_event.getRedirect(),
-                       _current_event.leadsToNewRoom());
+    InputMode mode = updateCurrentEvent(_current_event.getRedirect(),
+                                        _current_event.leadsToNewRoom());
+    performGameChecks();
+    return mode;
 }
 
 InputMode Game::resolveSaveDelInput(const std::string& user_input)
@@ -1049,6 +1084,7 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
         _console.writeLine();
         mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer ? "yes" : "no"),
                                   _current_event.leadsToNewRoom());
+        performGameChecks();
     }
 
     return mode;

@@ -3,11 +3,13 @@
 Enemy::Enemy(const std::string& name,
              int agility,
              int constitution,
+             const std::string& death_text,
              QJSValue on_death):
     _name(name),
     _agility(agility),
     _constitution(constitution),
     _starting_constitution(constitution),
+    _death_text(death_text),
     _on_death_callback(on_death)
 {
 
@@ -26,6 +28,11 @@ int Enemy::getAgility() const
 int Enemy::getConstitution() const
 {
     return _constitution;
+}
+
+std::string Enemy::getDeathText() const
+{
+    return _death_text;
 }
 
 void Enemy::setConstitution(int value)

@@ -11,6 +11,8 @@ Event::Event(int id):
     _description(""),
     _destinations{},
     _enemies{},
+    _gold(0),
+    _has_gold(false),
     _items{},
     _item_limit(0),
     _choice(),
@@ -52,6 +54,16 @@ bool Event::isDirectionAvailable(Direction direction) const
 bool Event::hasEnemies() const
 {
     return !_enemies.empty();
+}
+
+bool Event::hasGold() const
+{
+    return _has_gold;
+}
+
+int Event::getGold() const
+{
+    return _gold;
 }
 
 bool Event::hasItems() const
@@ -130,19 +142,19 @@ int Event::getLocalCommandRedirect(const std::string& command) const
     return _local_commands.at(command);
 }
 
-void Event::setRedirect(int redirect)
+void Event::setRedirect(int value)
 {
-    _redirect = redirect;
+    _redirect = value;
 }
 
-void Event::setNewRoom(bool new_room)
+void Event::setNewRoom(bool value)
 {
-    _new_room = new_room;
+    _new_room = value;
 }
 
-void Event::setDescription(const std::string& description)
+void Event::setDescription(const std::string& value)
 {
-    _description = description;
+    _description = value;
 }
 
 void Event::setDestination(Direction direction, int destination)
@@ -150,9 +162,19 @@ void Event::setDestination(Direction direction, int destination)
     _destinations[direction] = destination;
 }
 
-void Event::setItemLimit(int limit)
+void Event::setHasGold(bool value)
 {
-    _item_limit = limit;
+    _has_gold = value;
+}
+
+void Event::setGold(int value)
+{
+    _gold = value;
+}
+
+void Event::setItemLimit(int value)
+{
+    _item_limit = value;
 }
 
 Enemy Event::getCurrentEnemy() const
@@ -166,9 +188,10 @@ Enemy& Event::getCurrentEnemy()
 }
 
 void Event::addEnemy(const std::string& name, int agility,
-                     int constitution, QJSValue on_death)
+                     int constitution, const std::string& death_text,
+                     QJSValue on_death)
 {
-    _enemies.emplace(name, agility, constitution, on_death);
+    _enemies.emplace(name, agility, constitution, death_text, on_death);
 }
 
 void Event::defeatCurrentEnemy()

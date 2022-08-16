@@ -3,7 +3,8 @@ export const events =
     event1:
     {
         description: "The entrance to the dungeon is wide, covered in moss and lush bushes. You check your clothing and equipment. Remember to light the lantern!<br /><br />You enter the corridor. It's so tall you don't even need to bend. It leads straight towards the north. Soon you reach an intersection. It's shaped like the letter T. The roads lead towards [c]west[/c], [c]east[/c] and south (where you came from).",
-        redirect: 25
+        redirect: 25,
+        new_room: false
     },
     event25:
     {
@@ -14,7 +15,15 @@ export const events =
     event29:
     {
         description: "You trip over a pebble. Your sword hits a rock and makes a sound. [e]Orc[/e] lifts its head. It's noticed you. It throws itself into battle.",
-        redirect: 116
+        redirect: 116,
+        new_room: false
+    },
+    event39:
+    {
+        description: "You reach an intersection. Its paths split into the [c]west[/c], [c]north[/c] and [c]south[/c].",
+        north: 228,
+        south: 146,
+        west: 331
     },
     event44:
     {
@@ -24,9 +33,17 @@ export const events =
         [
             {
                 command: "break",
-                redirect: 105
+                redirect: 105,
+                new_room: false
             }
         ]
+    },
+    event50:
+    {
+        description: "You approach an intersection. You may go [c]north[/c], [c]west[/c] or [c]east[/c].",
+        north: 310,
+        east: 130,
+        west: 64
     },
     event56:
     {
@@ -64,9 +81,18 @@ export const events =
         [
             {
                 command: "leave",
-                redirect: 120
+                redirect: 120,
+                new_room: true
             },
         ]
+    },
+    event102:
+    {
+        description: "You reach an intersection. The corridors spread in all directions.",
+        north: 268,
+        south: 351,
+        east: 374,
+        west: 123
     },
     event105:
     {
@@ -79,7 +105,9 @@ export const events =
         {
             question: "Would you like to try again?",
             yes: 56,
-            no: 75
+            yes_new_room: false,
+            no: 75,
+            no_new_room: true
         }
     },
     event116:
@@ -98,18 +126,37 @@ export const events =
         [
             {
                 command: "leave",
-                redirect: 120
+                redirect: 120,
+                new_room: true
             },
             {
                 command: "look",
-                redirect: 89
+                redirect: 89,
+                new_room: false
             }
         ]
     },
     event120:
     {
         description: "You go west. The corridor takes a gentle turn to the right and is now leading north. You see an intersection.",
-        redirect: 64
+        redirect: 64,
+        new_room: false
+    },
+    event180:
+    {
+        description: "You search the room once again. In the [e]Orc[/e]'s bag, which you didn't have time to search, you find [i]Key#45[/i]. The number 45 is engraved on the key. You may take it with you. You may now [l]leave[/l] the chamber, leaving the door wide open.",
+        items:
+        [
+            "Key#45"
+        ],
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 120,
+                new_room: true
+            }
+        ]
     },
     event200:
     {
@@ -142,6 +189,67 @@ export const events =
             return game_vars.getFlag("200_door_open");
         }
     },
+    event224:
+    {
+        description: function()
+        {
+            let desc = "After a moment of walking, the corridor turns east. You move on. In the southern wall you notice a door.";
+            if(game_vars.getFlag("200_door_open"))
+            {
+                desc += " It's open.";
+            }
+            else
+            {
+                desc += " It's closed.";
+            }
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("200_door_open"))
+            {
+                return 180;
+            }
+            else
+            {
+                return 301;
+            }
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("200_door_open");
+        }
+    },
+    event264:
+    {
+        description: "The stone rubble is quite difficult to get through. Fortunately, the corridor does not have many turns, and instead leads straight to the [c]north[/c].",
+        north: 102
+    },
+    event284:
+    {
+        description: function()
+        {
+            let desc = "The corridor is progressively getting narrower as you keep going [c]east[/c]. Long stalactites are hanging down the ceiling. They could fall off any moment now...<br /><br />";
+            if(player.performLuckCheck())
+            {
+                desc += "Luck check successful!<br />Everything is fine.";
+            }
+            else
+            {
+                player.modifyConstitution(-2);
+                desc += "Luck check failed!<br />You take 2 damage."
+            }
+
+            return desc;
+        },
+        east: 50
+    },
+    event296:
+    {
+        description: "The corridor leads west, and then turns to the [c]north[/c]. At the turn, you may [c]eat[/c] a ration. You keep going. There is an intersection up ahead.",
+        north: 39,
+        rations: true
+    },
     event301:
     {
         description: "You may try to [l]open[/l] the door, or just keep going [c]west[/c].",
@@ -150,7 +258,8 @@ export const events =
         [
             {
                 command: "open",
-                redirect: 364
+                redirect: 364,
+                new_room: true
             }
         ]
     },
@@ -165,11 +274,13 @@ export const events =
         [
             {
                 command: "attack",
-                redirect: 116
+                redirect: 116,
+                new_room: false
             },
             {
                 command: "steal",
-                redirect: 29
+                redirect: 29,
+                new_room: false
             }
         ]
     }

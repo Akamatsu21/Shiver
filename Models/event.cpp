@@ -15,6 +15,7 @@ Event::Event(int id):
     _has_gold(false),
     _items{},
     _item_limit(0),
+    _rations_enabled(false),
     _choice(),
     _local_commands{}
 {
@@ -112,6 +113,11 @@ int Event::getItemLimit() const
     return _item_limit;
 }
 
+bool Event::rationsEnabled() const
+{
+    return _rations_enabled;
+}
+
 bool Event::hasYesNoChoice() const
 {
     return _choice._type == ChoiceType::YES_NO;
@@ -139,7 +145,12 @@ std::vector<std::string> Event::getLocalCommands() const
 
 int Event::getLocalCommandRedirect(const std::string& command) const
 {
-    return _local_commands.at(command);
+    return _local_commands.at(command).first;
+}
+
+bool Event::getLocalCommandNewRoom(const std::string& command) const
+{
+    return _local_commands.at(command).second;
 }
 
 void Event::setRedirect(int value)
@@ -175,6 +186,11 @@ void Event::setGold(int value)
 void Event::setItemLimit(int value)
 {
     _item_limit = value;
+}
+
+void Event::setRationsEnabled(bool value)
+{
+    _rations_enabled = value;
 }
 
 Enemy Event::getCurrentEnemy() const
@@ -226,12 +242,12 @@ void Event::setChoice(ChoiceType type, const std::string& question)
     _choice._question = question;
 }
 
-void Event::addChoiceOption(const std::string& answer, int redirect)
+void Event::addChoiceOption(const std::string& answer, int redirect, bool new_room)
 {
-    _choice._options[answer] = redirect;
+    _choice._options[answer] = {redirect, new_room};
 }
 
-void Event::addLocalCommand(const std::string& command, int redirect)
+void Event::addLocalCommand(const std::string& command, int redirect, bool new_room)
 {
-    _local_commands[command] = redirect;
+    _local_commands[command] = {redirect, new_room};
 }

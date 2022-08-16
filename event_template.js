@@ -27,11 +27,14 @@ eventX:
         "Item2"
     ],
     item_limit: 1,
+    rations: true,
     yes_no_choice:
     {
         question: "Make a choice",
         no: 11,
-        yes: 12
+        no_new_room: true,
+        yes: 12,
+        yes_new_room: false,
     },
     choice:
     {
@@ -40,11 +43,13 @@ eventX:
         [
             {
                 answer: "option1",
-                redirect: 13
+                redirect: 13,
+                new_room: false
             },
             {
                 answer: "option2",
-                redirect: 14
+                redirect: 14,
+                new_room: true
             }
         ]
     },
@@ -52,7 +57,8 @@ eventX:
     [
         {
             command: "local_command",
-            redirect: 100
+            redirect: 100,
+            new_room: true
         }
     ]
 }

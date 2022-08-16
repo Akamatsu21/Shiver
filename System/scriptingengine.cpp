@@ -63,10 +63,6 @@ Event ScriptingEngine::parseEvent(int id)
     if(event_object.hasProperty("redirect"))
     {
         event.setRedirect(getObjectProperty(event_object, "redirect").toInt());
-    }
-
-    if(event_object.hasProperty("new_room"))
-    {
         event.setNewRoom(getObjectProperty(event_object, "new_room").toBool());
     }
 
@@ -122,12 +118,21 @@ Event ScriptingEngine::parseEvent(int id)
         }
     }
 
+    if(event_object.hasProperty("rations"))
+    {
+        event.setRationsEnabled(getObjectProperty(event_object, "rations").toBool());
+    }
+
     if(event_object.hasProperty("yes_no_choice"))
     {
         QJSValue choice = getObjectProperty(event_object, "yes_no_choice");
         event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
-        event.addChoiceOption("yes", getObjectProperty(choice, "yes").toInt());
-        event.addChoiceOption("no", getObjectProperty(choice, "no").toInt());
+        event.addChoiceOption("yes",
+                              getObjectProperty(choice, "yes").toInt(),
+                              getObjectProperty(choice, "yes_new_room").toBool());
+        event.addChoiceOption("no",
+                              getObjectProperty(choice, "no").toInt(),
+                              getObjectProperty(choice, "no_new_room").toBool());
     }
     else if(event_object.hasProperty("choice"))
     {
@@ -140,7 +145,8 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             event.addChoiceOption(getObjectProperty(options.property(i), "answer").toString().toStdString(),
-                                  getObjectProperty(options.property(i), "redirect").toInt());
+                                  getObjectProperty(options.property(i), "redirect").toInt(),
+                                  getObjectProperty(options.property(i), "new_room").toBool());
         }
     }
 
@@ -152,7 +158,8 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             event.addLocalCommand(getObjectProperty(locals.property(i), "command").toString().toStdString(),
-                                  getObjectProperty(locals.property(i), "redirect").toInt());
+                                  getObjectProperty(locals.property(i), "redirect").toInt(),
+                                  getObjectProperty(locals.property(i), "new_room").toBool());
         }
     }
 

@@ -105,8 +105,8 @@ std::string Console::replaceTag(const std::string& text,
 std::string Console::parseMarkup(const std::string& text) const
 {
     std::string buffer = text;
-    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
     buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
+    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
     buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"blue\">"); // item
     buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
     buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"purple\">"); // option

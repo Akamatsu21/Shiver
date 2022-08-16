@@ -21,6 +21,7 @@ Enemy constitution
 Gold present
 Item present
 Item Limit
+Rations enabled
 
 // Combat state
 Combat in progress

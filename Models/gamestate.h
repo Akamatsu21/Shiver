@@ -24,6 +24,7 @@ struct GameState
     bool _event_gold_present;
     bool _event_items_present;
     int _event_item_limit;
+    bool _event_rations_enabled;
 
     bool _combat_in_progress;
     int _combat_round;

@@ -21,8 +21,9 @@ class Event
     bool _has_gold;
     std::vector<std::string> _items;
     int _item_limit;
+    bool _rations_enabled;
     Choice _choice;
-    std::map<std::string, int> _local_commands;
+    std::map<std::string, std::pair<int, bool>> _local_commands;
 
 public:
     Event(int id);
@@ -41,12 +42,14 @@ public:
     std::string getItemList() const;
     std::string findItem(const std::string& item) const;
     int getItemLimit() const;
+    bool rationsEnabled() const;
     bool hasYesNoChoice() const;
     bool hasMultiChoice() const;
     Choice getChoice() const;
     bool hasLocalCommands() const;
     std::vector<std::string> getLocalCommands() const;
     int getLocalCommandRedirect(const std::string& command) const;
+    bool getLocalCommandNewRoom(const std::string& command) const;
 
     void setRedirect(int value);
     void setNewRoom(bool value);
@@ -55,6 +58,7 @@ public:
     void setHasGold(bool value);
     void setGold(int value);
     void setItemLimit(int value);
+    void setRationsEnabled(bool value);
 
     Enemy getCurrentEnemy() const;
     Enemy& getCurrentEnemy();
@@ -68,8 +72,8 @@ public:
     void takeItem();
 
     void setChoice(ChoiceType type, const std::string& question);
-    void addChoiceOption(const std::string& answer, int redirect);
-    void addLocalCommand(const std::string& command, int redirect);
+    void addChoiceOption(const std::string& answer, int redirect, bool new_room);
+    void addLocalCommand(const std::string& command, int redirect, bool new_room);
 };
 
 #endif // EVENT_H

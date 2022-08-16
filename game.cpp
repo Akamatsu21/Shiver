@@ -110,9 +110,15 @@ void Game::handleEatCommand()
         _console.writeText("You have to defeat all enemies before you can eat.");
         return;
     }
+    else if(!_current_event.rationsEnabled())
+    {
+        _console.writeText("Eating not allowed in this location.");
+        return;
+    }
 
     if(_player->eatRation())
     {
+        _current_event.setRationsEnabled(false);
         _console.writeText("You consume a Ration and recover 4 Constitution.");
     }
     else
@@ -670,6 +676,7 @@ GameState Game::createGameState()
     {
         game_state._event_item_limit = _current_event.getItemLimit();
     }
+    game_state._event_rations_enabled = _current_event.rationsEnabled();
 
     game_state._combat_in_progress = _combat_state._combat_in_progress;
     if(_combat_state._combat_in_progress)
@@ -787,6 +794,7 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _current_event.setHasGold(game_state._event_gold_present);
+    _current_event.setRationsEnabled(game_state._event_rations_enabled);
 
     if(game_state._event_items_present)
     {
@@ -883,7 +891,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         if(handleDirectionCommand(utils::commandToDirection(command)))
         {
             perform_game_checks = true;
-            mode = updateCurrentEvent(_current_event.getDestination(utils::commandToDirection(command)));
+            mode = updateCurrentEvent(_current_event.getDestination(utils::commandToDirection(command)), true);
         }
         break;
     case Command::FIGHT:
@@ -933,7 +941,10 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         if(handleLocalCommand(user_input))
         {
             perform_game_checks = true;
-            mode = updateCurrentEvent(_current_event.getLocalCommandRedirect(utils::toLower(user_input)));
+            std::string local_command = utils::toLower(user_input);
+            _console.writeLine();
+            mode = updateCurrentEvent(_current_event.getLocalCommandRedirect(local_command),
+                                      _current_event.getLocalCommandNewRoom(local_command));
         }
         else
         {
@@ -953,7 +964,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
 InputMode Game::resolveGameStartInput()
 {
     _game_running = true;
-    InputMode mode = updateCurrentEvent(1);
+    InputMode mode = updateCurrentEvent(1, true);
     performGameChecks();
     return mode;
 }
@@ -984,8 +995,8 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
     if(valid)
     {
         _console.writeLine();
-        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer),
-                                  _current_event.leadsToNewRoom());
+        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer).first,
+                                  _current_event.getChoice()._options.at(answer).second);
         performGameChecks();
     }
 
@@ -1082,8 +1093,9 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
     if(valid)
     {
         _console.writeLine();
-        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer ? "yes" : "no"),
-                                  _current_event.leadsToNewRoom());
+        std::string answer_string = answer ? "yes" : "no";
+        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer_string).first,
+                                  _current_event.getChoice()._options.at(answer_string).second);
         performGameChecks();
     }
 

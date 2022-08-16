@@ -69,6 +69,7 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     {
        ss << game_state._event_item_limit << "\n";
     }
+    ss << game_state._event_rations_enabled << "\n";
 
     // Combat status.
     ss << game_state._combat_in_progress << "\n";
@@ -153,6 +154,7 @@ GameState SaveStateManager::parseSaveFileContents()
     {
         ss >> game_state._event_item_limit;
     }
+    ss >> game_state._event_rations_enabled;
 
     ss >> game_state._combat_in_progress;
     if(game_state._combat_in_progress)

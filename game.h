@@ -66,7 +66,7 @@ class Game: public QObject
     std::pair<bool, bool> resolveYesNoQuestion(const std::string& user_input);
     std::pair<bool, std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
                                                             const std::string& user_input);
-    InputMode updateCurrentEvent(int id, bool new_room = true);
+    InputMode updateCurrentEvent(int id, bool new_room);
     void saveGame();
 
     // Game checks
@@ -101,7 +101,6 @@ public:
 
 signals:
     void gameOver();
-
 };
 
 #endif // GAME_H

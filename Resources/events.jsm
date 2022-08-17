@@ -18,6 +18,24 @@ export const events =
         redirect: 116,
         new_room: false
     },
+    event31:
+    {
+        description: "Lower your lantern. Move the corpse with your sword. See - you found 5 [i]gold[/i]! If that's not enough, you can still [l]inspect[/l] the chamber. Otherwise, just [l]leave[/l].",
+        gold: 5,
+        locals:
+        [
+            {
+                command: "inspect",
+                redirect: 119,
+                new_room: false
+            },
+            {
+                command: "leave",
+                redirect: 102,
+                new_room: true
+            }
+        ]
+    },
     event39:
     {
         description: "You reach an intersection. Its paths split into the [c]west[/c], [c]north[/c] and [c]south[/c].",
@@ -57,7 +75,7 @@ export const events =
     },
     event64:
     {
-        description: "You approach the intersection. You can choose any of the four directions.",
+        description: "You approach an intersection. You can choose any of the four directions.",
         north: 264,
         south: 224,
         east: 284,
@@ -136,11 +154,49 @@ export const events =
             }
         ]
     },
+    event119:
+    {
+        description: "What was the beast trying to cover up so desperately? You touch the wall at the spot that the hairy [e]Ogre[/e] was pressing its back against. Suddenly, part of the wall moves. There is a secret stash here! Inside, there is a long [i]fireproof rope[/i] with a hook, an empty [i]decrepit flask[/i] and a [i]Werewolf's scalp[/i]. You may only take up to two of these items. You may also [l]loot[/l] the body or [l]leave[/l] the chamber.",
+        items:
+        [
+            "Fireproof Rope",
+            "Decrepit Flask",
+            "Werewolf's Scalp"
+        ],
+        item_limit: 2,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 102,
+                new_room: true
+            },
+            {
+                command: "loot",
+                redirect: 31,
+                new_room: false
+            }
+        ]
+    },
     event120:
     {
-        description: "You go west. The corridor takes a gentle turn to the right and is now leading north. You see an intersection.",
-        redirect: 64,
-        new_room: false
+        description: "You go west. The corridor takes a gentle turn to the right and is now leading [c]north[/c]. You see an intersection.",
+        north: 64
+    },
+    event123:
+    {
+        description: "The corridor continues west, and then turns [c]south[/c]. There is an intersection ahead.",
+        south: 39
+    },
+    event130:
+    {
+        description: "The corridor is almost 5 feet wide, so you can walk comfortable. You stretch your bones. After walking only a hundred feet towards the [c]east[/c], you see another intersection.",
+        east: 212
+    },
+    event146:
+    {
+        description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
+        east: 64
     },
     event180:
     {
@@ -149,6 +205,7 @@ export const events =
         [
             "Key#45"
         ],
+        item_limit: 1,
         locals:
         [
             {
@@ -220,10 +277,49 @@ export const events =
             return game_vars.getFlag("200_door_open");
         }
     },
+    event228:
+    {
+        description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
+        east: 102
+    },
     event264:
     {
         description: "The stone rubble is quite difficult to get through. Fortunately, the corridor does not have many turns, and instead leads straight to the [c]north[/c].",
         north: 102
+    },
+    event268:
+    {
+        description: function()
+        {
+            let desc = "A short tunnel ends with a decrepit old door.";
+            if(game_vars.getFlag("268_door_open"))
+            {
+                desc += " It's open. You've already visited this place. You decide to go back [c]south[/c].";
+            }
+            else
+            {
+                desc += " It's closed. You should be able to [l]open[/l] it. Alternatively, you may go back [c]south[/c].";
+            }
+            return desc;
+        },
+        south: 102,
+        locals: function()
+        {
+            if(game_vars.getFlag("268_door_open"))
+            {
+                return [];
+            }
+            else
+            {
+                return [
+                    {
+                        command: "open",
+                        redirect: 317,
+                        new_room: true
+                    }
+                ];
+            }
+        }
     },
     event284:
     {
@@ -263,6 +359,103 @@ export const events =
             }
         ]
     },
+    event310:
+    {
+        description: function()
+        {
+            let desc = "Only ten feet away from you, there is a rotten wooden door.";
+            if(game_vars.getFlag("310_door_open"))
+            {
+                desc += " It's open. You've already visited this place.";
+            }
+            else
+            {
+                desc += " It's closed.";
+            }
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("310_door_open"))
+            {
+                return 67;
+            }
+            else
+            {
+                return 17;
+            }
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("310_door_open");
+        }
+    },
+    event317:
+    {
+        description: function()
+        {
+            game_vars.setFlag("268_door_open", true);
+            return "The door gives in. Inside, a terrifying stench emanates. In the faint light of an oil lamp placed on a bench, you can see someone's remains scattered around the whole room. You look closely. All that's left is bones! You turn your face in disgust. But what were you expecting here? Nice flowers? Dancing elves? Melancholic music? This, my friend, is what the dungeons is like - the kingdom of evil. And that's why you're here. You must strip the dungeon's mystery naked. Come on - dive into inspecting this corpse!<br /><br />Be quiet for a moment... Can you hear those quiet steps? They are getting louder and louder... \"Dear king Almanhagor, this noise is giving me a headache!\" you think. The sound of the steps is replaced by the noise of air flowing through monstrous nostrils. An [e]Ogre[/e] is standing at the entrance. You immediately draw your sword. You press your back against a wall. [e]Ogre[/e] runs into the chamber... But it doesn't attack you. It reaches the opposite wall and spreads its arms. as if it was hiding something behind its back. It bares its teeth and flails a long bone it's just picked up from the ground. You can see terror in its eyes. Now it's your move. Slowly, while pushing all the muck aside with your legs, you approach the monster.";
+        },
+        enemies:
+        [
+            {
+                name: "Ogre",
+                agility: 8,
+                constitution: 10,
+                death_text: "[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse."
+            }
+        ],
+        locals:
+        [
+            {
+                command: "inspect",
+                redirect: 119,
+                new_room: false
+            },
+            {
+                command: "loot",
+                redirect: 31,
+                new_room: false
+            }
+        ]
+    },
+    event331:
+    {
+        description: function()
+        {
+            let desc = "A very short tunnel leads into a room.";
+            if(game_vars.getFlag("331_door_open"))
+            {
+                desc += " You've already visited this place.";
+            }
+            else
+            {
+                desc += " It looks like you can come in.";
+            }
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("331_door_open"))
+            {
+                return 59;
+            }
+            else
+            {
+                return 11;
+            }
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("331_door_open");
+        }
+    },
+    event351:
+    {
+        description: "You squeeze through the corridor, largely inhibited by the stone rubble lying around. You move further [c]south[/c].",
+        south: 64
+    },
     event364:
     {
         description: function()
@@ -283,5 +476,11 @@ export const events =
                 new_room: false
             }
         ]
+    },
+    event374:
+    {
+        description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may eat a ration while you navigate through the twists.",
+        north: 178,
+        rations: true
     }
 };

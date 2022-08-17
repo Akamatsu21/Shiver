@@ -13,6 +13,8 @@ class ScriptingEngine : public QObject
 {
     Q_OBJECT
 
+    GameVariables* _game_variables_obj;
+
     QJSEngine _js_engine;
     QJSValue _event_list;
     QJSValue _game_vars;

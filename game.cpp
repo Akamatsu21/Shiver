@@ -200,7 +200,6 @@ bool Game::handleLocalCommand(const std::string& input)
         {
             if(_combat_state._combat_in_progress)
             {
-                _console.writeText("You have to defeat all enemies first.");
                 return false;
             }
             else
@@ -339,6 +338,10 @@ void Game::handleTakeCommand(const std::string& item)
             _player->modifyGold(_current_event.getGold());
             _current_event.setHasGold(false);
             _console.writeText(utils::createString("You picked up ", _current_event.getGold(), " gold."));
+
+            QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
+                                                                       "_gold_taken"));
+            _game_vars->setFlag(flag, true);
         }
         else
         {
@@ -367,6 +370,10 @@ void Game::handleTakeCommand(const std::string& item)
             _current_event.takeItem();
             _player->addItem(found_item);
             _console.writeText(utils::createString("[i]", found_item, "[/i] added to your inventory."));
+
+            QVariant counter = QString::fromStdString(utils::createString(_current_event.getId(),
+                                                                          "_items_taken"));
+            _game_vars->incrementCounter(counter, +1);
         }
     }
 }

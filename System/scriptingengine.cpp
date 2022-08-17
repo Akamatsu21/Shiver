@@ -5,6 +5,7 @@
 
 ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),
+    _game_variables_obj(nullptr),
     _js_engine(),
     _event_list(),
     _game_vars(),
@@ -27,6 +28,7 @@ void ScriptingEngine::loadModules()
 
 void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
 {
+    _game_variables_obj = game_vars;
     _game_vars = _js_engine.newQObject(game_vars);
     _js_engine.globalObject().setProperty("game_vars", _game_vars);
 }
@@ -51,6 +53,8 @@ QJSValue ScriptingEngine::getObjectProperty(const QJSValue& object, const QStrin
 
 Event ScriptingEngine::parseEvent(int id)
 {
+    assert(_game_variables_obj != nullptr);
+
     QString event_id = "event" + QString::number(id);
     assert(_event_list.hasProperty(event_id));
 
@@ -100,14 +104,26 @@ Event ScriptingEngine::parseEvent(int id)
 
     if(event_object.hasProperty("gold"))
     {
-        event.setHasGold(true);
-        event.setGold(getObjectProperty(event_object, "gold").toInt());
+        QVariant flag = QString::fromStdString(utils::createString(id, "_gold_taken"));
+        if(_game_variables_obj->getFlag(flag))
+        {
+            event.setHasGold(false);
+        }
+        else
+        {
+            event.setHasGold(true);
+            event.setGold(getObjectProperty(event_object, "gold").toInt());
+        }
     }
 
     if(event_object.hasProperty("items"))
     {
         assert(event_object.hasProperty("item_limit"));
-        event.setItemLimit(getObjectProperty(event_object, "item_limit").toInt());
+
+        QVariant counter = QString::fromStdString(utils::createString(id, "_items_taken"));
+        int items_allowed = getObjectProperty(event_object, "item_limit").toInt();
+        int items_taken = _game_variables_obj->getCounter(counter);
+        event.setItemLimit(items_allowed - items_taken);
 
         QJSValue items = getObjectProperty(event_object, "items");
         assert(items.isArray());

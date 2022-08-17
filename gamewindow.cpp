@@ -18,11 +18,6 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
     connect(qml_engine.rootObjects().at(0), SIGNAL(escapeReceived()),
             this, SLOT(onLeaveHelp()));
 
-    connect(qml_engine.rootObjects().at(0), SIGNAL(inputReceived(QString)),
-            &_console, SLOT(obtainUserInput(QString)));
-    connect(qml_engine.rootObjects().at(0), SIGNAL(returnReceived()),
-            &_console, SLOT(obtainReturn()));
-
     connect(&_console, &Console::inputReady,
             this, &GameWindow::onUserInputReceived);
     connect(&_console, &Console::returnReady,

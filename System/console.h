@@ -18,6 +18,9 @@ class Console: public QObject
     bool _waiting_for_return;
     bool _help_visible;
 
+    std::vector<std::string> _input_history;
+    std::vector<std::string>::iterator _history_it;
+
     std::string replaceTag(const std::string& text,
                            const std::string& open_tag,
                            const std::string& close_tag,
@@ -48,6 +51,8 @@ public:
     void writeText(const std::string& text);
 
 public slots:
+    void moveHistoryUp();
+    void moveHistoryDown();
     void obtainUserInput(const QString& input);
     void obtainReturn();
 
@@ -56,6 +61,7 @@ signals:
     void waitingForInputChanged();
     void waitingForReturnChanged();
     void helpVisibleChanged();
+    void changeInputTextField(const QString& text);
     void inputReady(const QString& input);
     void returnReady();
 };

@@ -33,7 +33,7 @@ bool SaveStateManager::saveFileExists(const std::string& save_slot) const
 std::string SaveStateManager::listSaveFiles() const
 {
     QStringList save_list = _save_dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
-    return save_list.join("\n").toStdString();
+    return save_list.join("<br />").toStdString();
 }
 
 void SaveStateManager::createSaveFileContents(const GameState& game_state)

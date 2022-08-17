@@ -9,11 +9,19 @@ Window
     height: 1000
     visible: true
     title: "Shiver"
-    signal inputReceived(input: string)
-    signal returnReceived()
     signal leftArrowReceived()
     signal rightArrowReceived()
     signal escapeReceived()
+
+    Connections
+    {
+        target: terminalController
+
+        function onChangeInputTextField(text)
+        {
+            user_input.text = text;
+        }
+    }
 
     ScrollView
     {
@@ -35,7 +43,21 @@ Window
         {
             if(terminalController.waitingForReturn)
             {
-                returnReceived();
+                terminalController.obtainReturn();
+            }
+        }
+        Keys.onUpPressed:
+        {
+            if(terminalController.waitingForInput)
+            {
+                terminalController.moveHistoryUp();
+            }
+        }
+        Keys.onDownPressed:
+        {
+            if(terminalController.waitingForInput)
+            {
+                terminalController.moveHistoryDown();
             }
         }
         Keys.onLeftPressed:
@@ -117,7 +139,7 @@ Window
 
             Keys.onReturnPressed:
             {
-                inputReceived(text);
+                terminalController.obtainUserInput(text);
                 text = "";
                 if(terminal.contentHeight >= main_window.height)
                 {

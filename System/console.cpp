@@ -12,7 +12,9 @@ Console::Console(QObject* parent):
     _visible_text(""),
     _waiting_for_input(false),
     _waiting_for_return(false),
-    _help_visible(false)
+    _help_visible(false),
+    _input_history{},
+    _history_it(std::begin(_input_history))
 {
 
 }
@@ -162,10 +164,37 @@ void Console::writeText(const std::string &text)
     restoreLog();
 }
 
+void Console::moveHistoryUp()
+{
+    if(_history_it != std::begin(_input_history))
+    {
+        --_history_it;
+        emit changeInputTextField(QString::fromStdString(*_history_it));
+    }
+}
+
+void Console::moveHistoryDown()
+{
+    if(_history_it != std::end(_input_history))
+    {
+        ++_history_it;
+        if(_history_it != std::end(_input_history))
+        {
+            emit changeInputTextField(QString::fromStdString(*_history_it));
+        }
+        else
+        {
+            emit changeInputTextField("");
+        }
+    }
+}
+
 void Console::obtainUserInput(const QString& input)
 {
     setWaitingForInput(false);
     writeText("<br /><font color=\"gold\">></font> " + input.toStdString());
+    _input_history.push_back(input.toStdString());
+    _history_it = std::end(_input_history);
     emit inputReady(input);
 }
 

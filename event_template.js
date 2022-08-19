@@ -33,8 +33,16 @@ eventX:
         question: "Make a choice",
         no: 11,
         no_new_room: true,
+        on_no: function()
+        {
+            // Trigger to execute on no.
+        },
         yes: 12,
         yes_new_room: false,
+        on_yes: function()
+        {
+            // Trigger to execute on yes.
+        },
     },
     choice:
     {
@@ -49,7 +57,11 @@ eventX:
             {
                 answer: "option2",
                 redirect: 14,
-                new_room: true
+                new_room: true,
+                on_option: function()
+                {
+                    // Trigger to execute on option selected.
+                }
             }
         ]
     },
@@ -58,7 +70,11 @@ eventX:
         {
             command: "local_command",
             redirect: 100,
-            new_room: true
+            new_room: true,
+            on_command: function()
+            {
+                // Trigger to execute on command typed.
+            }
         }
     ]
 }

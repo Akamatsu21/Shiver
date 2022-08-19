@@ -61,6 +61,7 @@ public:
     void addItem(const std::string& item);
     Q_INVOKABLE void addItem(const QVariant& item);
     void removeItem(const std::string& item);
+    Q_INVOKABLE void removeItem(const QVariant& item);
     Q_INVOKABLE bool performLuckCheck();
 };
 

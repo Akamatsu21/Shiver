@@ -128,9 +128,19 @@ bool Event::hasMultiChoice() const
     return _choice._type == ChoiceType::MULTI;
 }
 
-Choice Event::getChoice() const
+std::string Event::getChoiceQuestion() const
 {
-    return _choice;
+    return _choice._question;
+}
+
+std::vector<std::string> Event::getChoiceOptions() const
+{
+    return utils::getKeys(_choice._options);
+}
+
+UserOption Event::getChoiceOption(const std::string& option) const
+{
+    return _choice._options.at(option);
 }
 
 bool Event::hasLocalCommands() const
@@ -143,14 +153,9 @@ std::vector<std::string> Event::getLocalCommands() const
     return utils::getKeys(_local_commands);
 }
 
-int Event::getLocalCommandRedirect(const std::string& command) const
+UserOption Event::getLocalCommand(const std::string& command) const
 {
-    return _local_commands.at(command).first;
-}
-
-bool Event::getLocalCommandNewRoom(const std::string& command) const
-{
-    return _local_commands.at(command).second;
+    return _local_commands.at(command);
 }
 
 void Event::setRedirect(int value)
@@ -242,12 +247,28 @@ void Event::setChoice(ChoiceType type, const std::string& question)
     _choice._question = question;
 }
 
-void Event::addChoiceOption(const std::string& answer, int redirect, bool new_room)
+void Event::addChoiceOption(const std::string& answer, int redirect, bool new_room, QJSValue callback)
 {
-    _choice._options[answer] = {redirect, new_room};
+    _choice._options[answer] = {redirect, new_room, callback};
 }
 
-void Event::addLocalCommand(const std::string& command, int redirect, bool new_room)
+void Event::triggerChoiceOptionCallback(const std::string& option)
 {
-    _local_commands[command] = {redirect, new_room};
+    if(getChoiceOption(option)._callback.isCallable())
+    {
+        getChoiceOption(option)._callback.call();
+    }
+}
+
+void Event::addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback)
+{
+    _local_commands[command] = {redirect, new_room, callback};
+}
+
+void Event::triggerLocalCommandCallback(const std::string& command)
+{
+    if(getLocalCommand(command)._callback.isCallable())
+    {
+        getLocalCommand(command)._callback.call();
+    }
 }

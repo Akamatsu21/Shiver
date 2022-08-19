@@ -292,6 +292,11 @@ void Player::removeItem(const std::string& item)
     _inventory.erase(std::find(std::begin(_inventory), std::end(_inventory), item));
 }
 
+void Player::removeItem(const QVariant& item)
+{
+    removeItem(item.toString().toStdString());
+}
+
 bool Player::performLuckCheck()
 {
     if(getLuck() == 0)

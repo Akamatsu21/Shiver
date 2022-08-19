@@ -6,6 +6,48 @@ export const events =
         redirect: 25,
         new_room: false
     },
+    event11:
+    {
+        description: function()
+        {
+            game_vars.setFlag("331_visited", true);
+            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll fell yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are any strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
+        },
+        choice:
+        {
+            question: "So, decide now. Do you go straight for the [o]water[/o] or would you rather attack the [o]creature[/o]?",
+            options:
+            [
+                {
+                    answer: "creature",
+                    redirect: 192,
+                    new_room: false
+                },
+                {
+                    answer: "water",
+                    redirect: 45,
+                    new_room: false
+                }
+            ]
+        },
+    },
+    event17:
+    {
+        description: "You may [l]open[/l] them and see what lies beyond. Alternatively, you may turn back and [l]leave[/l].",
+        locals:
+        [
+            {
+                command: "open", // TODO: set flag to true
+                redirect: 265,
+                new_room: true
+            },
+            {
+                command: "leave",
+                redirect: 50,
+                new_room: true
+            }
+        ]
+    },
     event25:
     {
         description: "There is an elderly man sitting on a stone. He recommends you go to the [c]west[/c], and then turn right on the next few intersections.",
@@ -56,6 +98,27 @@ export const events =
             }
         ]
     },
+    event45:
+    {
+        description: function()
+        {
+            player.modifyLuck(+2);
+            return "You approach the fountain. You take some [i]magical water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
+        },
+        items:
+        [
+            "Magical Water"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 251,
+                new_room: false
+            }
+        ]
+    },
     event50:
     {
         description: "You approach an intersection. You may go [c]north[/c], [c]west[/c] or [c]east[/c].",
@@ -80,6 +143,18 @@ export const events =
         south: 224,
         east: 284,
         west: 296
+    },
+    event67:
+    {
+        description: "You have no other choice but to turn back and [l]leave[/l].",
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 50,
+                new_room: true
+            }
+        ]
     },
     event75:
     {
@@ -198,6 +273,12 @@ export const events =
         description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
         east: 64
     },
+    event178:
+    {
+        description: "It's getting more and more difficult to lift your feet from the muddy sludge. The air is getting humid. The corridor is gradually widening, until finally you reach the shore of an underground lake. The area is full of plants with thick, wide leaves. The roof is very high up. In a few places thin rays of light are piercing through it. You look around. Is this a dead end? You don't see any exits, other than the corridor you came from.",
+        redirect: 15,
+        new_room: false
+    },
     event180:
     {
         description: "You search the room once again. In the [e]Orc[/e]'s bag, which you didn't have time to search, you find [i]Key#45[/i]. The number 45 is engraved on the key. You may take it with you. You may now [l]leave[/l] the chamber, leaving the door wide open.",
@@ -214,6 +295,113 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event192:
+    {
+        description: function()
+        {
+            let desc = "\"What if I try to get something out of this clown?\" you think. You reach for your sword. Eh, what need is there for the sword? Your fists will be more than enough. You approach the creature and take a swing. It's suddenly gone. On top of that, metal bars fall in front of the entrance through which you got into this room. You look around, but you can't find another exit. You approach the fountain. Indeed, you can see some mysterious items: a monster's [o]bone[/o], a [o]jar[/o] of All-Eaters (a constantly hungry species of a shellfish), a tin [o]butterfly[/o], a [o]spear[/o] and a small shiny [o]key[/o].";
+
+            if(player.hasItem("Decrepit Flask"))
+            {
+                desc += " Since you happen to have a flask, you may also take the [o]water[/o].";
+            }
+            else if(player.hasItem("Filled Flask")) // TODO: Update with actual name of the item
+            {
+                desc += " Since you happen to have a flask, you may also take the [o]water[/o]. However, your flask is currently full. If you choose this option, you must empty it.";
+            }
+            else
+            {
+                desc += "If you had a flask, you might also have been able to take some of the water..."
+            }
+
+            return desc;
+        },
+        choice:
+        {
+            question: function()
+            {
+                if(player.hasItem("Decrepit Flask") || player.hasItem("Filled Flask"))
+                {
+                    return "So: do you want the [o]water[/o] or one of the items? Remember that you can only take one thing.";
+                }
+                else
+                {
+                    return "So: which item do you want? Remember that you can only take one thing."
+                }
+            },
+            options: function()
+            {
+                let opt = [
+                    {
+                        answer: "bone",
+                        redirect: 220,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            player.addItem("Monster's Bone");
+                        }
+                    },
+                    {
+                        answer: "butterfly",
+                        redirect: 220,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            player.addItem("Tin Butterfly");
+                        }
+                    },
+                    {
+                        answer: "jar",
+                        redirect: 220,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            player.addItem("Jar of All-Eaters");
+                        }
+                    },
+                    {
+                        answer: "key",
+                        redirect: 220,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            player.addItem("Small Shiny Key");
+                        }
+                    },
+                    {
+                        answer: "spear",
+                        redirect: 220,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            player.addItem("Spear");
+                        }
+                    }
+                ];
+
+                if(player.hasItem("Decrepit Flask") || player.hasItem("Filled Flask"))
+                {
+                    opt.push({
+                        answer: "water",
+                        redirect: 306,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            if(player.hasItem("Filled Flask"))
+                            {
+                                player.removeItem("Filled Flask");
+                                player.addItem("Decrepit Flask");
+                                terminal.message("You empty your flask onto the floor.");
+                            }
+                            player.addItem("Magical Water");
+                        }
+                    });
+                }
+
+                return opt;
+            }
+        }
     },
     event200:
     {
@@ -245,6 +433,14 @@ export const events =
         {
             return game_vars.getFlag("200_door_open");
         }
+    },
+    event212:
+    {
+        description: "You reach a large square, where the paths lead in four directions. Which one do you choose?",
+        north: 38,
+        south: 336,
+        east: 82,
+        west: 287
     },
     event224:
     {
@@ -281,6 +477,12 @@ export const events =
     {
         description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
         east: 102
+    },
+    event251:
+    {
+        description: "You leave the way you came in.",
+        redirect: 39,
+        new_room: true
     },
     event264:
     {
@@ -425,7 +627,7 @@ export const events =
         description: function()
         {
             let desc = "A very short tunnel leads into a room.";
-            if(game_vars.getFlag("331_door_open"))
+            if(game_vars.getFlag("331_visited"))
             {
                 desc += " You've already visited this place.";
             }
@@ -437,7 +639,7 @@ export const events =
         },
         redirect: function()
         {
-            if(game_vars.getFlag("331_door_open"))
+            if(game_vars.getFlag("331_visited"))
             {
                 return 59;
             }
@@ -448,7 +650,7 @@ export const events =
         },
         new_room: function()
         {
-            return game_vars.getFlag("331_door_open");
+            return game_vars.getFlag("331_visited");
         }
     },
     event351:

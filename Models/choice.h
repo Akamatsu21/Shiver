@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <QJSValue>
 
 enum class ChoiceType
 {
@@ -11,11 +12,18 @@ enum class ChoiceType
     MULTI
 };
 
+struct UserOption
+{
+    int _redirect;
+    bool _new_room;
+    QJSValue _callback;
+};
+
 struct Choice
 {
     ChoiceType _type = ChoiceType::NONE;
     std::string _question;
-    std::map<std::string, std::pair<int, bool>> _options;
+    std::map<std::string, UserOption> _options;
 };
 
 #endif // CHOICE_H

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <QVariant>
 
 #include "Utils/utils.h"
 
@@ -162,6 +163,11 @@ void Console::writeText(const std::string &text)
     std::string parsed_text = parseMarkup(text);
     _log += parsed_text + "<br />";
     restoreLog();
+}
+
+void Console::message(const QVariant& text)
+{
+    writeText(text.toString().toStdString());
 }
 
 void Console::moveHistoryUp()

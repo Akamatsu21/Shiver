@@ -49,6 +49,7 @@ public:
     void writeError(const std::string& error);
     void writeLine();
     void writeText(const std::string& text);
+    Q_INVOKABLE void message(const QVariant& text);
 
 public slots:
     void moveHistoryUp();

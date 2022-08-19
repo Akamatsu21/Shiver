@@ -37,6 +37,7 @@ void Game::setup()
     {
         _save_state_manager.initDirectories();
         _scripting_engine->loadModules();
+        _scripting_engine->registerConsole(&_console);
         _scripting_engine->registerGameVariables(_game_vars);
         _help_pages = _scripting_engine->parseHelpPages();
     }
@@ -536,13 +537,13 @@ InputMode Game::updateCurrentEvent(int id, bool new_room)
     else if(_current_event.hasYesNoChoice())
     {
         _console.writeLine();
-        _console.writeText(_current_event.getChoice()._question);
+        _console.writeText(_current_event.getChoiceQuestion());
         mode = InputMode::YES_NO_CHOICE;
     }
     else if(_current_event.hasMultiChoice())
     {
         _console.writeLine();
-        _console.writeText(_current_event.getChoice()._question);
+        _console.writeText(_current_event.getChoiceQuestion());
         mode = InputMode::MULTI_CHOICE;
     }
 
@@ -948,10 +949,14 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         if(handleLocalCommand(user_input))
         {
             perform_game_checks = true;
-            std::string local_command = utils::toLower(user_input);
-            _console.writeLine();
-            mode = updateCurrentEvent(_current_event.getLocalCommandRedirect(local_command),
-                                      _current_event.getLocalCommandNewRoom(local_command));
+            _current_event.triggerLocalCommandCallback(utils::toLower(user_input));
+            UserOption local_command = _current_event.getLocalCommand(utils::toLower(user_input));
+
+            if(local_command._redirect != 0)
+            {
+                _console.writeLine();
+                mode = updateCurrentEvent(local_command._redirect, local_command._new_room);
+            }
         }
         else
         {
@@ -997,13 +1002,18 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
 {
     InputMode mode = InputMode::MULTI_CHOICE;
     auto [valid, answer] = resolveMultiChoiceQuestion(
-                utils::getKeys(_current_event.getChoice()._options),
-                user_input);
+                            _current_event.getChoiceOptions(),
+                            user_input);
     if(valid)
     {
-        _console.writeLine();
-        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer).first,
-                                  _current_event.getChoice()._options.at(answer).second);
+        _current_event.triggerChoiceOptionCallback(answer);
+        UserOption option = _current_event.getChoiceOption(answer);
+
+        if(option._redirect != 0)
+        {
+            _console.writeLine();
+            mode = updateCurrentEvent(option._redirect, option._new_room);
+        }
         performGameChecks();
     }
 
@@ -1099,10 +1109,15 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
     auto [valid, answer] = resolveYesNoQuestion(user_input);
     if(valid)
     {
-        _console.writeLine();
         std::string answer_string = answer ? "yes" : "no";
-        mode = updateCurrentEvent(_current_event.getChoice()._options.at(answer_string).first,
-                                  _current_event.getChoice()._options.at(answer_string).second);
+        _current_event.triggerChoiceOptionCallback(answer_string);
+        UserOption option = _current_event.getChoiceOption(answer_string);
+
+        if(option._redirect != 0)
+        {
+            _console.writeLine();
+            mode = updateCurrentEvent(option._redirect, option._new_room);
+        }
         performGameChecks();
     }
 

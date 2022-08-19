@@ -23,7 +23,7 @@ class Event
     int _item_limit;
     bool _rations_enabled;
     Choice _choice;
-    std::map<std::string, std::pair<int, bool>> _local_commands;
+    std::map<std::string, UserOption> _local_commands;
 
 public:
     Event(int id);
@@ -45,11 +45,12 @@ public:
     bool rationsEnabled() const;
     bool hasYesNoChoice() const;
     bool hasMultiChoice() const;
-    Choice getChoice() const;
+    std::string getChoiceQuestion() const;
+    std::vector<std::string> getChoiceOptions() const;
+    UserOption getChoiceOption(const std::string& option) const;
     bool hasLocalCommands() const;
     std::vector<std::string> getLocalCommands() const;
-    int getLocalCommandRedirect(const std::string& command) const;
-    bool getLocalCommandNewRoom(const std::string& command) const;
+    UserOption getLocalCommand(const std::string& command) const;
 
     void setRedirect(int value);
     void setNewRoom(bool value);
@@ -72,8 +73,11 @@ public:
     void takeItem();
 
     void setChoice(ChoiceType type, const std::string& question);
-    void addChoiceOption(const std::string& answer, int redirect, bool new_room);
-    void addLocalCommand(const std::string& command, int redirect, bool new_room);
+    void addChoiceOption(const std::string& answer, int redirect, bool new_room, QJSValue callback);
+    void triggerChoiceOptionCallback(const std::string& option);
+
+    void addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback);
+    void triggerLocalCommandCallback(const std::string& command);
 };
 
 #endif // EVENT_H

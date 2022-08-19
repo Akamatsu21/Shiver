@@ -1,12 +1,14 @@
 #include "scriptingengine.h"
 #include "Models/gamevariables.h"
 #include "Models/player.h"
+#include "System/console.h"
 #include "Utils/utils.h"
 
 ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),
     _game_variables_obj(nullptr),
     _js_engine(),
+    _console(),
     _event_list(),
     _game_vars(),
     _help_pages(),
@@ -24,6 +26,12 @@ void ScriptingEngine::loadModules()
     {
         throw std::runtime_error("Failure loading JS modules.");
     }
+}
+
+void ScriptingEngine::registerConsole(Console* console)
+{
+    _console = _js_engine.newQObject(console);
+    _js_engine.globalObject().setProperty("terminal", _console);
 }
 
 void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
@@ -143,12 +151,22 @@ Event ScriptingEngine::parseEvent(int id)
     {
         QJSValue choice = getObjectProperty(event_object, "yes_no_choice");
         event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
+
+        QJSValue on_no_callback = choice.hasProperty("on_no")
+                                  ? choice.property("on_no")
+                                  : QJSValue(false);
+        QJSValue on_yes_callback = choice.hasProperty("on_yes")
+                                   ? choice.property("on_yes")
+                                   : QJSValue(false);
+
         event.addChoiceOption("yes",
                               getObjectProperty(choice, "yes").toInt(),
-                              getObjectProperty(choice, "yes_new_room").toBool());
+                              getObjectProperty(choice, "yes_new_room").toBool(),
+                              on_no_callback);
         event.addChoiceOption("no",
                               getObjectProperty(choice, "no").toInt(),
-                              getObjectProperty(choice, "no_new_room").toBool());
+                              getObjectProperty(choice, "no_new_room").toBool(),
+                              on_yes_callback);
     }
     else if(event_object.hasProperty("choice"))
     {
@@ -160,9 +178,15 @@ Event ScriptingEngine::parseEvent(int id)
         int length = options.property("length").toInt();
         for(int i = 0; i < length; ++i)
         {
-            event.addChoiceOption(getObjectProperty(options.property(i), "answer").toString().toStdString(),
-                                  getObjectProperty(options.property(i), "redirect").toInt(),
-                                  getObjectProperty(options.property(i), "new_room").toBool());
+            QJSValue option = options.property(i);
+            QJSValue on_option_callback = option.hasProperty("on_option")
+                                          ? option.property("on_option")
+                                          : QJSValue(false);
+
+            event.addChoiceOption(getObjectProperty(option, "answer").toString().toStdString(),
+                                  getObjectProperty(option, "redirect").toInt(),
+                                  getObjectProperty(option, "new_room").toBool(),
+                                  on_option_callback);
         }
     }
 
@@ -173,9 +197,15 @@ Event ScriptingEngine::parseEvent(int id)
         int length = locals.property("length").toInt();
         for(int i = 0; i < length; ++i)
         {
-            event.addLocalCommand(getObjectProperty(locals.property(i), "command").toString().toStdString(),
-                                  getObjectProperty(locals.property(i), "redirect").toInt(),
-                                  getObjectProperty(locals.property(i), "new_room").toBool());
+            QJSValue command = locals.property(i);
+            QJSValue on_command_callback = command.hasProperty("on_command")
+                                           ? command.property("on_command")
+                                           : QJSValue(false);
+
+            event.addLocalCommand(getObjectProperty(command, "command").toString().toStdString(),
+                                  getObjectProperty(command, "redirect").toInt(),
+                                  getObjectProperty(command, "new_room").toBool(),
+                                  on_command_callback);
         }
     }
 

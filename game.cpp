@@ -1193,5 +1193,5 @@ void Game::updateEventRedirect(int id, bool new_room)
 void Game::onStopCombat()
 {
     _combat_state._combat_in_progress = false;
-    _current_event.defeatCurrentEnemy();
+    _current_event.defeatAllEnemies();
 }

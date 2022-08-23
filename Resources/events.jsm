@@ -37,13 +37,30 @@ export const events =
         north: 197,
         east: 39
     },
+    event15:
+    {   // TODO swimming counter
+        description: "If you're not excited about the idea of entering the water, you may just simply [l]search[/l] around. Alternatively, you may take on the challenge of [l]swim[/l]ming through the lake.",
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 241,
+                new_room: false
+            },
+            {
+                command: "swim",
+                redirect: 113,
+                new_room: true
+            }
+        ]
+    },
     event17:
     {
         description: "You may [l]open[/l] it and see what lies beyond. Alternatively, you may turn back and [l]leave[/l].",
         locals:
         [
             {
-                command: "open", // TODO: set flag to true
+                command: "open",
                 redirect: 265,
                 new_room: true
             },
@@ -83,6 +100,34 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event38:
+    {
+        description: function()
+        {
+            let desc = "The corridor initially leads north, but then turns slightly towards the east. It widens a bit and ends with stairs leading down. You stand in front of a door covered in a multitude of decorative symbols.";
+            if(game_vars.getFlag("38_door_open"))
+            {
+                desc += " It's open. You've already visited this place.";
+            }
+            else
+            {
+                desc += " It's closed.";
+            }
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("38_door_open"))
+            {
+                return 167;
+            }
+            else
+            {
+                return 328;
+            }
+        },
+        new_room: false
     },
     event39:
     {
@@ -144,11 +189,7 @@ export const events =
     },
     event59:
     {
-        description: function()
-        {
-            let desc = "You enter, but you don't find anything here.";
-            return desc;
-        },
+        description: "You enter, but you don't find anything here.",
         redirect: function()
         {
             if(game_vars.getFlag("163_passage_discovered"))
@@ -203,6 +244,26 @@ export const events =
             no_new_room: false,
             yes: 340,
             yes_new_room: false
+        }
+    },
+    event82:
+    {
+        description: "You only make a few steps, then suddenly the corridor turns south and ends. The passage is blocked by rocks. Maybe the monsters have built another path? You could [l]search[/l] for it, or go back [c]west[/c] towards the intersection.",
+        west: 212,
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 155,
+                new_room: false
+            }
+        ]
+    },
+    event83:
+    {
+        description: function()
+        {
+            let desc = "The host offers to share the drink on the table with you. "
         }
     },
     event89:
@@ -644,6 +705,42 @@ export const events =
         description: "The stone rubble is quite difficult to get through. Fortunately, the corridor does not have many turns, and instead leads straight to the [c]north[/c].",
         north: 102
     },
+    event265:
+    {
+        description: function()
+        {
+            game_vars.setFlag("310_door_open", true);
+            let desc = "The door opens by itself. Byt itself? Oh no! \"Come in, come in, mate! We've been waiting for you\" an incredibly obese, hairy individual shows you the way. He leads you to the other end of the cavern. At a round table, there are another five men of similar stature. \"Dear traveller\" the host begins. \"Here you have five wonderful men. The best pranksters in the entire maze.\" You look at them, but somehow cannot count to five. You count \"One, two, three...\" but then the first one's gone. Start again: \"One, two, three, fo...\" and something's wrong again - where did the third one go? Did he just disappear? The pranksters have noticed your confusion and they are laughing so hard the roof starts to shake. The chalices standing in front of every one of them, as well as a decorative vase (that looks more like a watering can) with some drink inside, are clattering. You begin once again: \"One, two, three, four...\" and the same thing happens. You counted up to four, but now you see only two. Enough is enough! You're angry. You draw your sword and stare down the pranksters. They are constantly appearing and disappearing. How to hit them? You choose prankster no. 5 as your target...<br /><br />";
+
+            let pranksters_left = 5;
+            for(let i = 0; i < 3; ++i)
+            {
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                let result = system.rollD6(1);
+                if(result === 5)
+                {
+                    --pranksters_left;
+                    desc += "You hit him! He's dead meat.<br /><br/>";
+                }
+                else
+                {
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                }
+            }
+            game_vars.setCounter("265_pranksters_left", pranksters_left);
+
+            desc += "\"My friend, please leave them alone!\" screams the host.";
+            return desc;
+        },
+        yes_no_choice:
+        {
+            question: "Will you listen to him?",
+            no: 359,
+            no_new_room: false,
+            yes: 83,
+            yes_new_room: false
+        }
+    },
     event268:
     {
         description: function()
@@ -707,6 +804,11 @@ export const events =
             return desc;
         },
         east: 50
+    },
+    event287:
+    {
+        description: "After some time, you see an intersection in the distance. The corridor continues [c]west[/c].",
+        west: 50
     },
     event296:
     {
@@ -825,6 +927,47 @@ export const events =
             }
         },
         new_room: true
+    },
+    event336:
+    {
+        description: function()
+        {
+            let desc = "You notice a door ahead. You come closer.";
+            if(game_vars.getFlag("336_door_open"))
+            {
+                desc += " It's open. You've already visited this place, but you can [l]enter[/l] again.";
+            }
+            else
+            {
+                desc += " It's closed. You could [l]open[/l] it.";
+            }
+            desc += " If you don't want to, go back [c]north[/c].";
+            return desc;
+        },
+        north: 212,
+        locals: function()
+        {
+            if(game_vars.getFlag("336_door_open"))
+            {
+                return [
+                    {
+                        command: "enter",
+                        redirect: 6,
+                        new_room: true
+                    }
+                ];
+            }
+            else
+            {
+                return [
+                    {
+                        command: "open",
+                        redirect: 21,
+                        new_room: true
+                    }
+                ];
+            }
+        }
     },
     event340:
     {

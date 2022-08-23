@@ -1,6 +1,7 @@
 #include "scriptapi.h"
 #include "combatstate.h"
 #include "event.h"
+#include "Utils/utils.h"
 
 ScriptApi::ScriptApi(QObject* parent, const Event& event, const CombatState& combat_state):
     QObject(parent),
@@ -28,4 +29,9 @@ int ScriptApi::getCurrentPlayerScore() const
 int ScriptApi::getCurrentRound() const
 {
     return _combat_state._combat_round;
+}
+
+int ScriptApi::rollD6(int count) const
+{
+    return utils::rollD6(count);
 }

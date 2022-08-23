@@ -10,26 +10,26 @@ class Enemy
     int _agility;
     int _constitution;
     const int _starting_constitution;
-    std::string _death_text;
 
     QJSValue _on_death_callback;
+    std::map<int, QJSValue> _on_round_end_callbacks;
 
 public:
     Enemy(const std::string& name,
           int agility,
           int constitution,
-          const std::string& death_text,
-          QJSValue on_death);
+          QJSValue on_death,
+          const std::map<int, QJSValue>& on_round_end);
 
     std::string getName() const;
     int getAgility() const;
     int getConstitution() const;
-    std::string getDeathText() const;
 
     void setConstitution(int value);
 
     void modifyConstitution(int value);
     void triggerOnDeathCallback();
+    void triggerOnRoundEndCallback(int round);
 };
 
 #endif // ENEMY_H

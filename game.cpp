@@ -9,6 +9,7 @@
 #include "Models/gamestate.h"
 #include "Models/gamevariables.h"
 #include "Models/player.h"
+#include "Models/scriptapi.h"
 #include "System/commandparser.h"
 #include "System/console.h"
 #include "System/scriptingengine.h"
@@ -26,7 +27,8 @@ Game::Game(QObject* parent, Console& console):
     _combat_state{false, 0, 0, 0},
     _generated_stats{0, 0, 0},
     _current_help_page(0),
-    _save_file("")
+    _save_file(""),
+   _script_api(new ScriptApi(this, _current_event, _combat_state))
 {
 
 }
@@ -37,7 +39,7 @@ void Game::setup()
     {
         _save_state_manager.initDirectories();
         _scripting_engine->loadModules();
-        _scripting_engine->registerConsole(&_console);
+        _scripting_engine->registerScriptApi(_script_api);
         _scripting_engine->registerGameVariables(_game_vars);
         _help_pages = _scripting_engine->parseHelpPages();
     }
@@ -48,6 +50,11 @@ void Game::setup()
         _console.writeError("Game terminated.");
         emit gameOver();
     }
+}
+
+ScriptApi* Game::getScriptApi()
+{
+    return _script_api;
 }
 
 bool Game::handleDirectionCommand(Direction direction)
@@ -150,6 +157,7 @@ bool Game::handleFightCommand()
 
     resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
     displayCombatStatus();
+    _current_event.getCurrentEnemy().triggerOnRoundEndCallback(_combat_state._combat_round);
     return true;
 }
 
@@ -236,6 +244,7 @@ bool Game::handleLuckyCommand()
     _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
     resolveDamage(player_win, damage);
     displayCombatStatus();
+    _current_event.getCurrentEnemy().triggerOnRoundEndCallback(_combat_state._combat_round);
     return true;
 }
 
@@ -530,6 +539,18 @@ InputMode Game::updateCurrentEvent(int id, bool new_room)
     }
     displayCurrentEvent();
 
+    if(!_combat_state._combat_in_progress)
+    {
+        mode = updateRoomExit(mode);
+    }
+
+    return mode;
+}
+
+InputMode Game::updateRoomExit(InputMode default_mode)
+{
+    InputMode mode = default_mode;
+
     if(_current_event.getRedirect() != 0)
     {
         mode = InputMode::KEY_REDIRECT;
@@ -587,10 +608,6 @@ void Game::checkForDeath()
         {
             std::string msg = utils::createString("You have defeated [e]",
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
-            if(!_current_event.getCurrentEnemy().getDeathText().empty())
-            {
-                msg += "<br />" + _current_event.getCurrentEnemy().getDeathText();
-            }
             _console.writeText(msg);
             _current_event.getCurrentEnemy().triggerOnDeathCallback();
             _current_event.defeatCurrentEnemy();
@@ -644,7 +661,6 @@ void Game::handleCombatRound()
             tie = false;
         }
     } while(tie);
-
 }
 
 void Game::performGameChecks()
@@ -858,7 +874,6 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
     int damage = 2;
     auto [valid, answer] = resolveYesNoQuestion(user_input);
 
-
     if(valid)
     {
         if(answer)
@@ -873,6 +888,7 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
         _current_event.defeatAllEnemies();
         _combat_state._combat_in_progress = false;
         _console.writeText("You have escaped!");
+        mode = updateRoomExit(mode);
     }
 
     return mode;
@@ -967,7 +983,12 @@ InputMode Game::resolveGameInput(const std::string& user_input)
 
     if(perform_game_checks)
     {
+        bool combat_happened = _combat_state._combat_in_progress;
         performGameChecks();
+        if(combat_happened && !_combat_state._combat_in_progress)
+        {
+            mode = updateRoomExit(mode);
+        }
     }
 
     return mode;
@@ -1161,4 +1182,16 @@ void Game::exitHelpPage()
 {
     _current_help_page = 0;
     _console.restoreLog();
+}
+
+void Game::updateEventRedirect(int id, bool new_room)
+{
+    _current_event.setRedirect(id);
+    _current_event.setNewRoom(new_room);
+}
+
+void Game::onStopCombat()
+{
+    _combat_state._combat_in_progress = false;
+    _current_event.defeatCurrentEnemy();
 }

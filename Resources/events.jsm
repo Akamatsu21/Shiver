@@ -11,7 +11,7 @@ export const events =
         description: function()
         {
             game_vars.setFlag("331_visited", true);
-            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll fell yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are any strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
+            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word resounds and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll fell yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are many strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
         },
         choice:
         {
@@ -31,9 +31,15 @@ export const events =
             ]
         },
     },
+    event14:
+    {
+        description: "You may leave through the [c]north[/c] exit of the [c]east[/c] exit.",
+        north: 197,
+        east: 39
+    },
     event17:
     {
-        description: "You may [l]open[/l] them and see what lies beyond. Alternatively, you may turn back and [l]leave[/l].",
+        description: "You may [l]open[/l] it and see what lies beyond. Alternatively, you may turn back and [l]leave[/l].",
         locals:
         [
             {
@@ -136,6 +142,26 @@ export const events =
         redirect: 75,
         new_room: true
     },
+    event59:
+    {
+        description: function()
+        {
+            let desc = "You enter, but you don't find anything here.";
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("163_passage_discovered"))
+            {
+                return 14;
+            }
+            else
+            {
+                return 70;
+            }
+        },
+        new_room: false
+    },
     event64:
     {
         description: "You approach an intersection. You can choose any of the four directions.",
@@ -156,11 +182,28 @@ export const events =
             }
         ]
     },
+    event70:
+    {
+        description: "You may leave through the [c]east[/c] exit.",
+        east: 39
+    },
     event75:
     {
         description: "You back off and go back towards the intersection. You pass the elderly man.",
         redirect: 200,
         new_room: true
+    },
+    event77:
+    {
+        description: "You quickly gain advantage over the monster.",
+        yes_no_choice:
+        {
+            question: "Do you want to force him to lift the metal bars?",
+            no: 163,
+            no_new_room: false,
+            yes: 340,
+            yes_new_room: false
+        }
     },
     event89:
     {
@@ -203,6 +246,38 @@ export const events =
             no_new_room: true
         }
     },
+    event109:
+    {
+        description: "Suddenly, a disgusting monster appears out of nowhere. It's [e]Kormaa[/e]. You have no other choice but to fight.",
+        enemies:
+        [
+            {
+                name: "Kormaa",
+                agility: 7,
+                constitution: 8,
+                on_round_end:
+                [
+                    {
+                        round: 1,
+                        callback: function()
+                        {
+                            game_vars.setCounter("kormaa_constitution", system.getCurrentEnemyConstitution());
+                            system.stopCombat();
+                            if(system.getCurrentPlayerScore() > system.getCurrentEnemyScore())
+                            {
+                                system.redirect(77, false);
+                            }
+                            else
+                            {
+                                system.message("You attempt to gain advantage, but fail!");
+                                system.redirect(163, false);
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    },
     event116:
     {
         description: "You run into the corner of the cavern. Pebbles shuffle around under your feet. [e]Orc[/e] watches you carefully and advances. You have no choice but to fight.",
@@ -212,7 +287,10 @@ export const events =
                 name: "Orc",
                 agility: 6,
                 constitution: 4,
-                death_text: "You may [l]look[/l] around the room if you wish. Otherwise, [l]leave[/l] the cavern."
+                on_death: function()
+                {
+                    system.message("You may [l]look[/l] around the room if you wish. Otherwise, [l]leave[/l] the cavern.");
+                }
             }
         ],
         locals:
@@ -265,13 +343,45 @@ export const events =
     },
     event130:
     {
-        description: "The corridor is almost 5 feet wide, so you can walk comfortable. You stretch your bones. After walking only a hundred feet towards the [c]east[/c], you see another intersection.",
+        description: "The corridor is almost 5 feet wide, so you can walk comfortably. You stretch your bones. After walking only a hundred feet towards the [c]east[/c], you see another intersection.",
         east: 212
+    },
+    event131:
+    {
+        description: function()
+        {
+            player.removeItem("Small Shiny Key");
+            return "Indeed, the metal bars are lifted up, but you can't get the key out. You will have to leave it here."
+        },
+        redirect: 251,
+        new_room: false
     },
     event146:
     {
         description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
         east: 64
+    },
+    event163:
+    {
+        description: "You decide to continue the battle until the end.",
+        north: 197,
+        enemies:
+        [
+            {
+                name: "Kormaa",
+                agility: 7,
+                constitution: function()
+                {
+                    return game_vars.getCounter("kormaa_constitution");
+                },
+                on_death: function()
+                {
+                    player.modifyLuck(+1);
+                    game_vars.setFlag("163_passage_discovered", true);
+                    system.message("After defeating the monster, you learn that the fountain is now empty. You observe the walls of the cavern carefully. On the [c]north[/c]ern side you discover a hole that was covered up with a boulder. There's your exit. You gain 1 Luck.");
+                }
+            }
+        ]
     },
     event178:
     {
@@ -312,7 +422,7 @@ export const events =
             }
             else
             {
-                desc += "If you had a flask, you might also have been able to take some of the water..."
+                desc += " If you had a flask, you might also have been able to take some of the water..."
             }
 
             return desc;
@@ -391,8 +501,11 @@ export const events =
                             if(player.hasItem("Filled Flask"))
                             {
                                 player.removeItem("Filled Flask");
-                                player.addItem("Decrepit Flask");
-                                terminal.message("You empty your flask onto the floor.");
+                                system.message("You empty your flask onto the floor.");
+                            }
+                            else
+                            {
+                                player.removeItem("Decrepit Flask");
                             }
                             player.addItem("Magical Water");
                         }
@@ -441,6 +554,48 @@ export const events =
         south: 336,
         east: 82,
         west: 287
+    },
+    event220:
+    {
+        description: function()
+        {
+            let desc = "[i]";
+            if(player.hasItem("Monster's Bone"))
+            {
+                desc += "Monster's Bone";
+            }
+            else if(player.hasItem("Jar of All-Eaters"))
+            {
+                desc += "Jar of All-Eaters";
+            }
+            else if(player.hasItem("Tin Butterfly"))
+            {
+                desc += "Tin Butterfly";
+            }
+            else if(player.hasItem("Spear"))
+            {
+                desc += "Spear";
+            }
+            else if(player.hasItem("Small Shiny Key"))
+            {
+                desc += "Small Shiny Key";
+            }
+
+            desc += "[/i] added to your inventory";
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Small Shiny Key"))
+            {
+                return 366;
+            }
+            else
+            {
+                return 109;
+            }
+        },
+        new_room: false
     },
     event224:
     {
@@ -523,6 +678,17 @@ export const events =
             }
         }
     },
+    event278:
+    {
+        description: function()
+        {
+            player.removeItem("Small Shiny Key");
+            player.addItem("Key#122");
+            return "You inspect the key. It has the number 122 engraved into it.<br />Item updated in inventory.";
+        },
+        redirect: 109,
+        new_room: false
+    },
     event284:
     {
         description: function()
@@ -561,6 +727,16 @@ export const events =
             }
         ]
     },
+    event306:
+    {
+        description: function()
+        {
+            player.modifyLuck(+2);
+            return "[i]Magical Water[/i] added to your inventory. You gain 2 Luck.";
+        },
+        redirect: 109,
+        new_room: false
+    },
     event310:
     {
         description: function()
@@ -587,17 +763,14 @@ export const events =
                 return 17;
             }
         },
-        new_room: function()
-        {
-            return game_vars.getFlag("310_door_open");
-        }
+        new_room: false
     },
     event317:
     {
         description: function()
         {
             game_vars.setFlag("268_door_open", true);
-            return "The door gives in. Inside, a terrifying stench emanates. In the faint light of an oil lamp placed on a bench, you can see someone's remains scattered around the whole room. You look closely. All that's left is bones! You turn your face in disgust. But what were you expecting here? Nice flowers? Dancing elves? Melancholic music? This, my friend, is what the dungeons is like - the kingdom of evil. And that's why you're here. You must strip the dungeon's mystery naked. Come on - dive into inspecting this corpse!<br /><br />Be quiet for a moment... Can you hear those quiet steps? They are getting louder and louder... \"Dear king Almanhagor, this noise is giving me a headache!\" you think. The sound of the steps is replaced by the noise of air flowing through monstrous nostrils. An [e]Ogre[/e] is standing at the entrance. You immediately draw your sword. You press your back against a wall. [e]Ogre[/e] runs into the chamber... But it doesn't attack you. It reaches the opposite wall and spreads its arms. as if it was hiding something behind its back. It bares its teeth and flails a long bone it's just picked up from the ground. You can see terror in its eyes. Now it's your move. Slowly, while pushing all the muck aside with your legs, you approach the monster.";
+            return "The door gives in. Inside, a terrifying stench emanates. In the faint light of an oil lamp placed on a bench, you can see someone's remains scattered around the whole room. You look closely. All that's left is bones! You turn your face in disgust. But what were you expecting here? Nice flowers? Dancing elves? Melancholic music? This, my friend, is what the dungeon is like - the kingdom of evil. And that's why you're here. You must strip the dungeon's mystery naked. Come on - dive into inspecting this corpse!<br /><br />Be quiet for a moment... Can you hear those quiet steps? They are getting louder and louder... \"Dear king Almanhagor, this noise is giving me a headache!\" you think. The sound of the steps is replaced by the noise of air flowing through monstrous nostrils. An [e]Ogre[/e] is standing at the entrance. You immediately draw your sword. You press your back against a wall. [e]Ogre[/e] runs into the chamber... But it doesn't attack you. It reaches the opposite wall and spreads its arms. As if it was hiding something behind its back. It bares its teeth and flails a long bone it's just picked up from the ground. You can see terror in its eyes. Now it's your move. Slowly, while pushing all the muck aside with your legs, you approach the monster.";
         },
         enemies:
         [
@@ -605,7 +778,10 @@ export const events =
                 name: "Ogre",
                 agility: 8,
                 constitution: 10,
-                death_text: "[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse."
+                on_death: function()
+                {
+                    system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse.");
+                }
             }
         ],
         locals:
@@ -648,10 +824,13 @@ export const events =
                 return 11;
             }
         },
-        new_room: function()
-        {
-            return game_vars.getFlag("331_visited");
-        }
+        new_room: true
+    },
+    event340:
+    {
+        description: "[e]Kormaa[/e] listens to your order and... runs away.",
+        redirect: 251,
+        new_room: false
     },
     event351:
     {
@@ -679,9 +858,21 @@ export const events =
             }
         ]
     },
+    event366:
+    {
+        description: "In the wall next to the entrance you came through, there is a lock.",
+        yes_no_choice:
+        {
+            question: "Would you like to try using your newfound key?",
+            yes: 131,
+            yes_new_room: false,
+            no: 278,
+            no_new_room: false
+        }
+    },
     event374:
     {
-        description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may eat a ration while you navigate through the twists.",
+        description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
         north: 178,
         rations: true
     }

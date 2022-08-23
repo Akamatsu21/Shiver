@@ -11,6 +11,7 @@ SOURCES += \
         Models/event.cpp \
         Models/gamevariables.cpp \
         Models/player.cpp \
+        Models/scriptapi.cpp \
         System/commandparser.cpp \
         System/console.cpp \
         System/savestatemanager.cpp \
@@ -37,6 +38,7 @@ HEADERS += \
     Models/gamestate.h \
     Models/gamevariables.h \
     Models/player.h \
+    Models/scriptapi.h \
     System/commandparser.h \
     System/console.h \
     System/savestatemanager.h \

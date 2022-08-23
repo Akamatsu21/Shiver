@@ -19,6 +19,7 @@ export const events =
     event2:
     {
         description: "Cave",
+        north: 17,
         south: 1,
         west: 3,
         east: 4
@@ -55,7 +56,10 @@ export const events =
                 name: "Goblin",
                 agility: 1,
                 constitution: 1,
-                death_text: "Suddenly, you hear another monster approaching..."
+                on_death: function()
+                {
+                    system.message("Suddenly, you hear another monster approaching...");
+                }
             },
             {
                 name: "Griffon",
@@ -215,5 +219,43 @@ export const events =
             }
         ],
         west: 5
+    },
+    event17:
+    {
+        description: "You face a Triceratops!",
+        enemies:
+        [
+            {
+                name: "Triceratops",
+                agility: 1,
+                constitution: 4,
+                on_death: function()
+                {
+                    if(system.getCurrentRound() % 2 == 0)
+                    {
+                        system.message("Defeated in an even number of rounds - you may proceed to the treasure!");
+                        system.redirect(19, false);
+                    }
+                    else
+                    {
+                        system.message("Defeated in an odd number of rounds - you're going to hell!");
+                        system.redirect(18, true);
+                    }
+                }
+            }
+        ]
+    },
+    event18:
+    {
+        description: "You're in hell!",
+        north: 18,
+        south: 18,
+        east: 18,
+        west: 18
+    },
+    event19:
+    {
+        description: "You see a big pile of treasure. Feel free to take the [i]gold[/i].",
+        gold: 100
     }
 };

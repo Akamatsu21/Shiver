@@ -13,6 +13,7 @@ class GameVariables;
 class Player;
 class QCoreApplication;
 class QQmlApplicationEngine;
+class ScriptApi;
 class ScriptingEngine;
 
 class Game: public QObject
@@ -35,6 +36,9 @@ class Game: public QObject
     std::tuple<int, int, int> _generated_stats;
     unsigned int _current_help_page;
     std::string _save_file;
+
+    // Object for exporting game information to JavaScript.
+    ScriptApi* _script_api;
 
     // Command handlers.
     bool handleDirectionCommand(Direction direction);
@@ -67,6 +71,7 @@ class Game: public QObject
     std::pair<bool, std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
                                                             const std::string& user_input);
     InputMode updateCurrentEvent(int id, bool new_room);
+    InputMode updateRoomExit(InputMode default_mode);
     void saveGame();
 
     // Game checks
@@ -81,6 +86,8 @@ class Game: public QObject
 public:
     Game(QObject* parent, Console& console);
     void setup();
+
+    ScriptApi* getScriptApi();
 
     InputMode resolveCharacterCreationInput(const std::string& user_input);
     InputMode resolveEscapeInput(const std::string& user_input);
@@ -98,6 +105,11 @@ public:
     void nextHelpPage();
     void previousHelpPage();
     void exitHelpPage();
+
+    void updateEventRedirect(int id, bool new_room);
+
+public slots:
+    void onStopCombat();
 
 signals:
     void gameOver();

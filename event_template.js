@@ -13,11 +13,20 @@ eventX:
             name: "Enemy Name",
             agility: 10,
             constitution: 10,
-            death_text: "This is what you see when you beat it.",
             on_death: function()
             {
                 // Trigger to execute on death.
-            }
+            },
+            on_round_end:
+            [
+                {
+                    round: 1,
+                    callback: function()
+                    {
+                        // Trigger to execute on end of round 1.
+                    }
+                }
+            ]
         }
     ],
     gold: 100,

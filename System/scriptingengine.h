@@ -6,9 +6,9 @@
 
 #include "Models/event.h"
 
-class Console;
 class GameVariables;
 class Player;
+class ScriptApi;
 
 class ScriptingEngine : public QObject
 {
@@ -17,7 +17,7 @@ class ScriptingEngine : public QObject
     GameVariables* _game_variables_obj;
 
     QJSEngine _js_engine;
-    QJSValue _console;
+    QJSValue _api;
     QJSValue _event_list;
     QJSValue _game_vars;
     QJSValue _help_pages;
@@ -27,9 +27,9 @@ public:
     explicit ScriptingEngine(QObject* parent);
 
     void loadModules();
-    void registerConsole(Console* console);
     void registerGameVariables(GameVariables* game_vars);
     void registerPlayer(Player* player);
+    void registerScriptApi(ScriptApi* api);
 
     QJSValue getObjectProperty(const QJSValue& object, const QString& property);
     Event parseEvent(int id);

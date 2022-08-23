@@ -23,6 +23,10 @@ class GameWindow: public QObject
     InputMode _input_mode;
     InputMode _prev_mode;
 
+    bool _interrupted;
+    int _interrupt_id;
+    bool _interrupt_new_room;
+
     void updateInputState();
 
 private slots:
@@ -34,6 +38,7 @@ private slots:
     void onLeaveHelp();
 
     void onGameOver();
+    void onRedirect(int id, bool new_room);
 
 public:
     GameWindow(QCoreApplication* parent, Console& console, QQmlApplicationEngine& qml_engine);

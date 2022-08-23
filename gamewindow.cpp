@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
+#include "Models/scriptapi.h"
 #include "System/console.h"
 
 GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicationEngine& qml_engine):
@@ -9,7 +10,10 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
     _game(new Game(this, console)),
     _console(console),
     _input_mode(InputMode::TITLE_SCREEN),
-    _prev_mode(InputMode::TITLE_SCREEN)
+    _prev_mode(InputMode::TITLE_SCREEN),
+    _interrupted(false),
+    _interrupt_id(0),
+    _interrupt_new_room(false)
 {
     connect(qml_engine.rootObjects().at(0), SIGNAL(leftArrowReceived()),
             this, SLOT(onPreviousHelpPage()));
@@ -25,10 +29,24 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
 
     connect(_game, &Game::gameOver,
             this, &GameWindow::onGameOver);
+    connect(_game->getScriptApi(), &ScriptApi::redirect,
+            this, &GameWindow::onRedirect);
+    connect(_game->getScriptApi(), &ScriptApi::message,
+            &_console, &Console::onMessage);
+    connect(_game->getScriptApi(), &ScriptApi::stopCombat,
+            _game, &Game::onStopCombat);
 }
 
 void GameWindow::updateInputState()
 {
+    if(_interrupted)
+    {
+        _interrupted = false;
+        _prev_mode = _input_mode;
+        _input_mode = InputMode::KEY_REDIRECT;
+        _game->updateEventRedirect(_interrupt_id, _interrupt_new_room);
+    }
+
     switch(_input_mode)
     {
     case InputMode::HELP:
@@ -149,6 +167,13 @@ void GameWindow::onGameOver()
 {
     // TODO: Improve this message
     _console.writeError("Game Over");
+}
+
+void GameWindow::onRedirect(int id, bool new_room)
+{
+    _interrupted = true;
+    _interrupt_id = id;
+    _interrupt_new_room = new_room;
 }
 
 void GameWindow::startGame()

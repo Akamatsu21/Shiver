@@ -110,9 +110,9 @@ std::string Console::parseMarkup(const std::string& text) const
     std::string buffer = text;
     buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
     buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
-    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"blue\">"); // item
+    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"dodgerblue\">"); // item
     buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
-    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"purple\">"); // option
+    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"darkviolet\">"); // option
     buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name
     return buffer;
 }
@@ -165,11 +165,6 @@ void Console::writeText(const std::string &text)
     restoreLog();
 }
 
-void Console::message(const QVariant& text)
-{
-    writeText(text.toString().toStdString());
-}
-
 void Console::moveHistoryUp()
 {
     if(_history_it != std::begin(_input_history))
@@ -209,4 +204,9 @@ void Console::obtainReturn()
     setWaitingForReturn(false);
     writeLine();
     emit returnReady();
+}
+
+void Console::onMessage(const QVariant& text)
+{
+    writeText(text.toString().toStdString());
 }

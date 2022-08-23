@@ -3,14 +3,14 @@
 Enemy::Enemy(const std::string& name,
              int agility,
              int constitution,
-             const std::string& death_text,
-             QJSValue on_death):
+             QJSValue on_death,
+             const std::map<int, QJSValue>& on_round_end):
     _name(name),
     _agility(agility),
     _constitution(constitution),
     _starting_constitution(constitution),
-    _death_text(death_text),
-    _on_death_callback(on_death)
+    _on_death_callback(on_death),
+    _on_round_end_callbacks(on_round_end)
 {
 
 }
@@ -28,11 +28,6 @@ int Enemy::getAgility() const
 int Enemy::getConstitution() const
 {
     return _constitution;
-}
-
-std::string Enemy::getDeathText() const
-{
-    return _death_text;
 }
 
 void Enemy::setConstitution(int value)
@@ -63,5 +58,13 @@ void Enemy::triggerOnDeathCallback()
     if(_on_death_callback.isCallable())
     {
         _on_death_callback.call();
+    }
+}
+
+void Enemy::triggerOnRoundEndCallback(int round)
+{
+    if(_on_round_end_callbacks.count(round) > 0 && _on_round_end_callbacks.at(round).isCallable())
+    {
+        _on_round_end_callbacks.at(round).call();
     }
 }

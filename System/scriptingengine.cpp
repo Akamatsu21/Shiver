@@ -1,14 +1,14 @@
 #include "scriptingengine.h"
 #include "Models/gamevariables.h"
 #include "Models/player.h"
-#include "System/console.h"
+#include "Models/scriptapi.h"
 #include "Utils/utils.h"
 
 ScriptingEngine::ScriptingEngine(QObject* parent):
     QObject(parent),
     _game_variables_obj(nullptr),
     _js_engine(),
-    _console(),
+    _api(),
     _event_list(),
     _game_vars(),
     _help_pages(),
@@ -28,12 +28,6 @@ void ScriptingEngine::loadModules()
     }
 }
 
-void ScriptingEngine::registerConsole(Console* console)
-{
-    _console = _js_engine.newQObject(console);
-    _js_engine.globalObject().setProperty("terminal", _console);
-}
-
 void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
 {
     _game_variables_obj = game_vars;
@@ -45,6 +39,12 @@ void ScriptingEngine::registerPlayer(Player* player)
 {
     _player = _js_engine.newQObject(player);
     _js_engine.globalObject().setProperty("player", _player);
+}
+
+void ScriptingEngine::registerScriptApi(ScriptApi* api)
+{
+    _api = _js_engine.newQObject(api);
+    _js_engine.globalObject().setProperty("system", _api);
 }
 
 QJSValue ScriptingEngine::getObjectProperty(const QJSValue& object, const QString& property)
@@ -95,18 +95,30 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             QJSValue enemy = enemies.property(i);
-            QJSValue death_text = enemy.hasProperty("death_text")
-                                  ? getObjectProperty(enemy, "death_text")
-                                  : QJSValue("");
             QJSValue on_death_callback = enemy.hasProperty("on_death")
                                          ? enemy.property("on_death")
                                          : QJSValue(false);
 
+            std::map<int, QJSValue> on_round_end_callbacks;
+            if(enemy.hasProperty("on_round_end"))
+            {
+                QJSValue callbacks = getObjectProperty(enemy, "on_round_end");
+                assert(callbacks.isArray());
+                int callbacks_length = callbacks.property("length").toInt();
+                for(int k = 0; k < callbacks_length; ++k)
+                {
+                    QJSValue callback = callbacks.property(k);
+                    int round = getObjectProperty(callback, "round").toInt();
+                    QJSValue func = callback.property("callback");
+                    on_round_end_callbacks[round] = func;
+                }
+            }
+
             event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
                            getObjectProperty(enemy, "agility").toInt(),
                            getObjectProperty(enemy, "constitution").toInt(),
-                           death_text.toString().toStdString(),
-                           on_death_callback);
+                           on_death_callback,
+                           on_round_end_callbacks);
         }
     }
 

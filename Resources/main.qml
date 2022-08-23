@@ -23,6 +23,14 @@ Window
         }
     }
 
+    function scrollDown()
+    {
+        if(terminal.contentHeight >= main_window.height)
+        {
+            terminal.contentItem.contentY = terminal.contentHeight - main_window.height;
+        }
+    }
+
     ScrollView
     {
         id: terminal
@@ -44,6 +52,7 @@ Window
             if(terminalController.waitingForReturn)
             {
                 terminalController.obtainReturn();
+                scrollDown();
             }
         }
         Keys.onUpPressed:
@@ -141,10 +150,7 @@ Window
             {
                 terminalController.obtainUserInput(text);
                 text = "";
-                if(terminal.contentHeight >= main_window.height)
-                {
-                    terminal.contentItem.contentY = terminal.contentHeight - main_window.height;
-                }
+                scrollDown();
             }
         }
     }

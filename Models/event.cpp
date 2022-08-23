@@ -208,11 +208,13 @@ Enemy& Event::getCurrentEnemy()
     return _enemies.front();
 }
 
-void Event::addEnemy(const std::string& name, int agility,
-                     int constitution, const std::string& death_text,
-                     QJSValue on_death)
+void Event::addEnemy(const std::string& name,
+                     int agility,
+                     int constitution,
+                     QJSValue on_death,
+                     const std::map<int, QJSValue>& on_round_end)
 {
-    _enemies.emplace(name, agility, constitution, death_text, on_death);
+    _enemies.emplace(name, agility, constitution, on_death, on_round_end);
 }
 
 void Event::defeatCurrentEnemy()

@@ -77,6 +77,29 @@ export const events =
         east: 44,
         west: 200
     },
+    event26:
+    {
+        description: function()
+        {
+            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            let gold = 5 * (5 - pranksters_left);
+            player.modifyGold(+gold);
+            if(pranksters_left === 5)
+            {
+                return "You didn't manage to kill any pranksters. You leave the room in shame."
+            }
+            else if(pranksters_left === 4)
+            {
+                return "You only managed to kill 1 prankster. You loot his corpse and find 5 gold. Then, you leave the room."
+            }
+            else
+            {
+                return `You managed to kill ${5 - pranksters_left} pranksters. You loot their corpses and find ${gold} gold in total. Then, you leave the room.`;
+            }
+        },
+        redirect: 171,
+        new_room: true
+    },
     event29:
     {
         description: "You trip over a pebble. Your sword hits a rock and makes a sound. [e]Orc[/e] lifts its head. It's noticed you. It throws itself into battle.",
@@ -263,7 +286,48 @@ export const events =
     {
         description: function()
         {
-            let desc = "The host offers to share the drink on the table with you. "
+            let desc = "The host offers to share the drink on the table with you. ";
+            if(player.hasItem("Decrepit Flask"))
+            {
+                desc += "You may [l]refuse[/l], [l]down[/l] the drink or [l]fill[/l] your flask with it.";
+            }
+            else
+            {
+                desc += "You may of course [l]refuse[/l], but if you do want the drink you don't have anything to pour it into. Your only option would be to [l]down[/l] it.";
+            }
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                {
+                    command: "refuse",
+                    redirect: 124,
+                    new_room: false
+                },
+                {
+                    command: "down",
+                    redirect: 217,
+                    new_room: false
+                }
+            ];
+
+            if(player.hasItem("Decrepit Flask"))
+            {
+                loc.push({
+                    command: "fill",
+                    redirect: 171,
+                    new_room: true,
+                    on_command: function()
+                    {
+                        player.removeItem("Decrepit Flask");
+                        player.addItem("Filled Flask");
+                        system.message("You fill up your flask and leave the chamber.");
+                    }
+                });
+            }
+
+            return loc;
         }
     },
     event89:
@@ -402,6 +466,23 @@ export const events =
         description: "The corridor continues west, and then turns [c]south[/c]. There is an intersection ahead.",
         south: 39
     },
+    event124:
+    {
+        description: "That was extraordinarily rude, especially in such distinguished company! The pranksters disappear. You may [l]search[/l] the room or [l]leave[/l].",
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 294,
+                new_room: false
+            },
+            {
+                command: "leave",
+                redirect: 171,
+                new_room: true
+            }
+        ]
+    },
     event130:
     {
         description: "The corridor is almost 5 feet wide, so you can walk comfortably. You stretch your bones. After walking only a hundred feet towards the [c]east[/c], you see another intersection.",
@@ -443,6 +524,12 @@ export const events =
                 }
             }
         ]
+    },
+    event171:
+    {
+        description: "You hurry out of the chamber. There are two exits. One to the [c]south[/c], which you originally came from, and one to the [c]east[/c].",
+        south: 50,
+        east: 99
     },
     event178:
     {
@@ -616,6 +703,36 @@ export const events =
         east: 82,
         west: 287
     },
+    event217:
+    {
+        description: function()
+        {
+            let desc = "You glance at the pranksters sitting at the table. Once again, some of them disappear, some of them appear again. The host disappeared completely. You've figured it out. This is an elixir of invisibility. You now have the advantage: the pranksters can't see you.<br /><br />";
+
+            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            for(let i = 0; i < 2; ++i)
+            {
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                let result1 = system.rollD6(1);
+                let result2 = system.rollD6(1);
+                if(result1 === 5 || result2 === 5)
+                {
+                    --pranksters_left;
+                    desc += "You hit him! He's dead meat.<br /><br/>";
+                }
+                else
+                {
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                }
+            }
+            game_vars.setCounter("265_pranksters_left", pranksters_left);
+
+            desc += "You decide to back off.";
+            return desc;
+        },
+        redirect: 26,
+        new_room: false
+    },
     event220:
     {
         description: function()
@@ -710,7 +827,7 @@ export const events =
         description: function()
         {
             game_vars.setFlag("310_door_open", true);
-            let desc = "The door opens by itself. Byt itself? Oh no! \"Come in, come in, mate! We've been waiting for you\" an incredibly obese, hairy individual shows you the way. He leads you to the other end of the cavern. At a round table, there are another five men of similar stature. \"Dear traveller\" the host begins. \"Here you have five wonderful men. The best pranksters in the entire maze.\" You look at them, but somehow cannot count to five. You count \"One, two, three...\" but then the first one's gone. Start again: \"One, two, three, fo...\" and something's wrong again - where did the third one go? Did he just disappear? The pranksters have noticed your confusion and they are laughing so hard the roof starts to shake. The chalices standing in front of every one of them, as well as a decorative vase (that looks more like a watering can) with some drink inside, are clattering. You begin once again: \"One, two, three, four...\" and the same thing happens. You counted up to four, but now you see only two. Enough is enough! You're angry. You draw your sword and stare down the pranksters. They are constantly appearing and disappearing. How to hit them? You choose prankster no. 5 as your target...<br /><br />";
+            let desc = "The door opens by itself. By itself? Oh no! \"Come in, come in, mate! We've been waiting for you\" an incredibly obese, hairy individual shows you the way. He leads you to the other end of the cavern. At a round table, there are another five men of similar stature. \"Dear traveller\" the host begins. \"Here you have five wonderful men. The best pranksters in the entire maze.\" You look at them, but somehow cannot count to five. You count \"One, two, three...\" but then the first one's gone. Start again: \"One, two, three, fo...\" and something's wrong again - where did the third one go? Did he just disappear? The pranksters have noticed your confusion and they are laughing so hard the roof starts to shake. The chalices standing in front of every one of them, as well as a decorative vase (that looks more like a watering can) with some drink inside, are clattering. You begin once again: \"One, two, three, four...\" and the same thing happens. You counted up to four, but now you see only two. Enough is enough! You're angry. You draw your sword and stare down the pranksters. They are constantly appearing and disappearing. How to hit them? You choose prankster no. 5 as your target...<br /><br />";
 
             let pranksters_left = 5;
             for(let i = 0; i < 3; ++i)
@@ -809,6 +926,27 @@ export const events =
     {
         description: "After some time, you see an intersection in the distance. The corridor continues [c]west[/c].",
         west: 50
+    },
+    event294:
+    {
+        description: function()
+        {
+            player.modifyLuck(+2);
+            return "In a crevice in the wall you find [i]Elixir of Invisibility[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
+        },
+        items:
+        [
+            "Elixir of Invisibility"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 171,
+                new_room: true
+            }
+        ]
     },
     event296:
     {
@@ -979,6 +1117,34 @@ export const events =
     {
         description: "You squeeze through the corridor, largely inhibited by the stone rubble lying around. You move further [c]south[/c].",
         south: 64
+    },
+    event359:
+    {
+        description: function()
+        {
+            let desc = "";
+            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            for(let i = 0; i < 2; ++i)
+            {
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                let result = system.rollD6(1);
+                if(result === 5)
+                {
+                    --pranksters_left;
+                    desc += "You hit him! He's dead meat.<br /><br/>";
+                }
+                else
+                {
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                }
+            }
+            game_vars.setCounter("265_pranksters_left", pranksters_left);
+
+            desc += "You decide to back off.";
+            return desc;
+        },
+        redirect: 26,
+        new_room: false
     },
     event364:
     {

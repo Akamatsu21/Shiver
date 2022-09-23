@@ -107,7 +107,7 @@ std::string Player::getInventory() const
         [](std::string acc, std::string element)
         {
             return acc + "\n" + element;
-    });
+        });
 }
 
 std::string Player::getInventoryHtml() const

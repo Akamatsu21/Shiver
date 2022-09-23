@@ -347,6 +347,11 @@ export const events =
             },
         ]
     },
+    event90:
+    {
+        description: "You climb up a set of stairs. The corridor leads west first, and then turns [c]south[/c].",
+        south: 212
+    },
     event102:
     {
         description: "You reach an intersection. The corridors spread in all directions.",
@@ -402,6 +407,18 @@ export const events =
                 ]
             }
         ]
+    },
+    event113:
+    {
+        description: "One step at a time, you enter the water. Your legs sink into the stinky mud. Finally, you can swim. At some point you hear a strange sound. As if someone was throwing planks into the water: splash, splash, splash! You swim faster. Behind a nearby thicket you notice a suspicious movement in the water. \"Nothing good will come out of this\" you think.",
+        yes_no_choice:
+        {
+            question: "Do you want keep swimming further?",
+            no: 15,
+            no_new_room: true,
+            yes: 307,
+            yes_new_room: false
+        }
     },
     event116:
     {
@@ -498,10 +515,38 @@ export const events =
         redirect: 251,
         new_room: false
     },
+    event132:
+    {
+        description: "You return through the muddy sewer, all the way back to the intersection.",
+        redirect: 102,
+        new_room: true
+    },
     event146:
     {
         description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
         east: 64
+    },
+    event151:
+    {
+        description: function()
+        {
+            game_vars.setFlag("38_door_open");
+            return "Thus far, none of the doors you've come across have opened as quietly and gently as this one. You come in. The room has a regular shapre and straight, smooth walls. In each of them, there is a torch holder. They all have torches. In the torchlight you notice a group of small creatures moving about. These are [e]Dwarves[/e]. They are running around flower beds. They're weeding and harvesting their greatest treasure - the dungeon lettuce. This is what all the inhabitants of this maze call their favourite snack. You can try to [l]befriend[/l] the [e]Dwarves[/e]. Or you can just walk to the door on the [c]east[/c]ern  side of the room. You may also [l]attack[/l] the innocent creatures.";
+        },
+        east: 272,
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 318,
+                new_room: false
+            },
+            {
+                command: "befriend",
+                redirect: 371,
+                new_room: false
+            }
+        ]
     },
     event163:
     {
@@ -664,6 +709,11 @@ export const events =
             }
         }
     },
+    event197:
+    {
+        description: "A long pavement leads stright [c]north[/c].",
+        north: 276
+    },
     event200:
     {
         description: function()
@@ -810,6 +860,23 @@ export const events =
     {
         description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
         east: 102
+    },
+    event241:
+    {
+        description: "You may take some [i]Lake Water[/i] with you, if you wish. It's now time to [l]leave[/l].",
+        items:
+        [
+            "Lake Water"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 132,
+                new_room: true
+            }
+        ]
     },
     event251:
     {
@@ -977,6 +1044,29 @@ export const events =
         redirect: 109,
         new_room: false
     },
+    event307:
+    {
+        description: function()
+        {
+            player.modifyAgility(-2);
+            return "The strange waves on the water surface refuse to stop, and actually... They are getting closer. You struggle to undo the belt holding your sword. In the water you notice 3 pairs of yellow eyes. They are too close to run away now. You attack. But the water is limiting your movements. You struggle to hit: lose 2 Agility. In front of you there are three [e]Green Lizards[/e].";
+        },
+        redirect: 214,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Green Lizards",
+                agility: 7,
+                constitution: 6,
+                on_death: function()
+                {
+                    player.modifyLuck(+2);
+                    system.message("You succeeded. You make it to the other side of the lake. You gain 2 luck.");
+                },
+            }
+        ]
+    },
     event310:
     {
         description: function()
@@ -1037,6 +1127,18 @@ export const events =
                 new_room: false
             }
         ]
+    },
+    event328:
+    {
+        description: "You stick your ear to the door. You can hear someone talking, and also a sound that resembles knocking.",
+        yes_no_choice:
+        {
+            question: "Do you want to enter the chamber?",
+            no: 90,
+            no_new_room: true,
+            yes: 151,
+            yes_new_room: true
+        }
     },
     event331:
     {

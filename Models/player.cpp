@@ -235,6 +235,18 @@ void Player::modifyGold(int value)
     }
 }
 
+void Player::modifyRations(int value)
+{
+    if(_rations < -value)
+    {
+        _rations = 0;
+    }
+    else
+    {
+        _rations += value;
+    }
+}
+
 bool Player::eatRation()
 {
     if(_rations == 0)

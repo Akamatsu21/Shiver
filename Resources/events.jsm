@@ -6,12 +6,39 @@ export const events =
         redirect: 25,
         new_room: false
     },
+    event4:
+    {
+        description: "[e]Dwarves[/e] lead you towards a table. They bring bowls of clean, green lettuce. They set up cups. You pour the drink. With the corner of your eye, you notice two [e]Dwarves[/e] leaving the room through the eastern door. You undo your strap, secretly pull out your sword, and then place it on the table in front of you. The room goes silent. [e]Dwarves[/e] are observing you. You look them dead in the eyes. The silence continues.",
+        yes_no_choice:
+        {
+            question: "Will you attack the [e]Dwarves[/e]?",
+            no: 295,
+            no_new_room: false,
+            yes: 318,
+            yes_new_room: false
+        },
+    },
+    event10:
+    {
+        description: "[e]Dwarves[/e] invite you to seat at the table. They are smiling. \"Finally a well-behaved monster\" they say. \"Whenever someone comes here, they just steal our lettuce and run. But we honestly can't blame them. At least our produce is useful to someone, hehe.\" You start thinking about the \"hehe\", and before you realise, the [e]Dwarves[/e] are already reeling off their tales. Few of them have ever explored further depths of the dungeon. The ones who came back say that the scariest thing you can come across is fire. The maze is also home to a fat Dragon. It is said to be extremely sinister, but some claim it can be bribed.<br /><br />You listen to these tales, but something is still bothering you.",
+        redirect: function()
+        {
+            if(game_vars.getFlag("85_door_discovered"))
+            {
+                return 34;
+            }
+            else
+            {
+                return 257;
+            }
+        }
+    },
     event11:
     {
         description: function()
         {
             game_vars.setFlag("331_visited", true);
-            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word resounds and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll fell yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are many strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
+            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word resounds and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll feel yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are many strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
         },
         choice:
         {
@@ -71,6 +98,23 @@ export const events =
             }
         ]
     },
+    event19:
+    {
+        description: function()
+        {
+            player.modifyRations(+1);
+            player.modifyLuck(+2);
+            return "[e]Dwarves[/e] bid you farewell and kindly offer two lettuces to you. That can serve you as one ration. They lead you to the eastern door. It's time to [l]leave[/l]. You gain 2 Luck.";
+        },
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 141,
+                new_room: true
+            }
+        ]
+    },
     event25:
     {
         description: "There is an elderly man sitting on a stone. He recommends you go to the [c]west[/c], and then turn right on the next few intersections.",
@@ -124,6 +168,18 @@ export const events =
             }
         ]
     },
+    event34:
+    {
+        description: "You reveal your discovery: a door in the northern wall. They don't seem impressed. You say you want to see what's behind the door. They're fine with that. One of the [e]Dwarves[/e] flips a switch hidden in the ground. The door opens and you can now [l]enter[/l].",
+        locals:
+        [
+            {
+                command: "enter",
+                redirect: 128,
+                new_room: true
+            }
+        ]
+    },
     event38:
     {
         description: function()
@@ -159,6 +215,22 @@ export const events =
         south: 146,
         west: 331
     },
+    event40:
+    {
+        description: "You will have to rely on the cards to win.",
+        yes_no_choice:
+        {
+            question: "Would you like to perform a luck check?",
+            no: 334,
+            no_new_room: false,
+            yes: 62,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setFlag("62_luck_check", player.performLuckCheck());
+            }
+        }
+    },
     event44:
     {
         description: "You go east. You can see a bulky door in front of you. You try to open it, but it won't even budge. You may give up and go back [c]west[/c], or try to [l]break[/l] down the door.",
@@ -177,7 +249,7 @@ export const events =
         description: function()
         {
             player.modifyLuck(+2);
-            return "You approach the fountain. You take some [i]magical water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
+            return "You approach the fountain. You take some [i]Magical Water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
         },
         items:
         [
@@ -226,6 +298,32 @@ export const events =
         },
         new_room: false
     },
+    event62:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("62_luck_check"))
+            {
+                return "Luck check successful!";
+            }
+            else
+            {
+                return "Luck check failed!";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("62_luck_check"))
+            {
+                return 201;
+            }
+            else
+            {
+                return 145;
+            }
+        },
+        new_room: false
+    },
     event64:
     {
         description: "You approach an intersection. You can choose any of the four directions.",
@@ -233,6 +331,27 @@ export const events =
         south: 224,
         east: 284,
         west: 296
+    },
+    event66:
+    {
+        description: function()
+        {
+            const result = system.rollD6(2);
+            player.modifyGold(+result);
+            return `You won ${result} gold playing the game. You currently have ${player.getGold()} gold.`;
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to play again?",
+            no: 19,
+            no_new_room: false,
+            yes: 229,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setFlag("229_luck_check", player.performLuckCheck());
+            }
+        }
     },
     event67:
     {
@@ -329,6 +448,16 @@ export const events =
 
             return loc;
         }
+    },
+    event85:
+    {
+        description: function()
+        {
+            game_vars.setFlag("85_door_discovered", true);
+            return "You turn left. You decided to walk along the northern wall. Your back is rubbing against the rocks. Once you get to the middle of the wall, you can feel a secret door behind you. You don't say anything, and keep on moving. You reach the table.";
+        },
+        redirect: 10,
+        new_room: false
     },
     event89:
     {
@@ -500,6 +629,23 @@ export const events =
             }
         ]
     },
+    event128:
+    {
+        description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]Bunch of Keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there. You insert your sword and clench your muscles. The rock slides to the side. You must [l]leave[/l] the stinky room promptly, while the pathway remains open.",
+        items:
+        [
+            "Bunch of Keys"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 108,
+                new_room: true
+            }
+        ]
+    },
     event130:
     {
         description: "The corridor is almost 5 feet wide, so you can walk comfortably. You stretch your bones. After walking only a hundred feet towards the [c]east[/c], you see another intersection.",
@@ -521,6 +667,33 @@ export const events =
         redirect: 102,
         new_room: true
     },
+    event145:
+    {
+        description: function()
+        {
+            const result = system.rollD6(2);
+            let desc = `You lost ${result} gold playing the game.`
+            if(result > player.getGold())
+            {
+                desc += " Looks like you don't even have that much, so you just pay up all your gold."
+            }
+            else
+            {
+                desc += ` You currently have ${player.getGold()} gold.`;
+            }
+
+            player.modifyGold(-result);
+            return desc;
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to play again?",
+            no: 19,
+            no_new_room: false,
+            yes: 40,
+            yes_new_room: false
+        }
+    },
     event146:
     {
         description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
@@ -530,10 +703,9 @@ export const events =
     {
         description: function()
         {
-            game_vars.setFlag("38_door_open");
-            return "Thus far, none of the doors you've come across have opened as quietly and gently as this one. You come in. The room has a regular shapre and straight, smooth walls. In each of them, there is a torch holder. They all have torches. In the torchlight you notice a group of small creatures moving about. These are [e]Dwarves[/e]. They are running around flower beds. They're weeding and harvesting their greatest treasure - the dungeon lettuce. This is what all the inhabitants of this maze call their favourite snack. You can try to [l]befriend[/l] the [e]Dwarves[/e]. Or you can just walk to the door on the [c]east[/c]ern  side of the room. You may also [l]attack[/l] the innocent creatures.";
+            game_vars.setFlag("38_door_open", true);
+            return "Thus far, none of the doors you've come across have opened as quietly and gently as this one. You come in. The room has a regular shape and straight, smooth walls. In each of them, there is a torch holder. They all have torches. In the torchlight you notice a group of small creatures moving about. These are [e]Dwarves[/e]. They are running around flower beds. They're weeding and harvesting their greatest treasure - the dungeon lettuce. This is what all the inhabitants of this maze call their favourite snack. You can try to [l]befriend[/l] the [e]Dwarves[/e]. Or you can just [l]walk[/l] to the door on the eastern  side of the room. You may also [l]attack[/l] the innocent creatures.";
         },
-        east: 272,
         locals:
         [
             {
@@ -545,8 +717,19 @@ export const events =
                 command: "befriend",
                 redirect: 371,
                 new_room: false
+            },
+            {
+                command: "walk",
+                redirect: 272,
+                new_room: false
             }
         ]
+    },
+    event160:
+    {
+        description: "You thread carefully. Your legs are caressed by the lush lettuce leaves. When you get to the middle of the room, you notice a beam of light piercing through the ceiling. You stay quiet about this discovery. You reach the table.",
+        redirect: 10,
+        new_room: false
     },
     event163:
     {
@@ -569,6 +752,32 @@ export const events =
                 }
             }
         ]
+    },
+    event167:
+    {
+        description: function()
+        {
+            if(player.hasItem("Filled Flask"))
+            {
+                return "Looks like you've found some non-magical water. You can now enter the chamber.";
+            }
+            else
+            {
+                return "There is no point entering this chamber right now. Come back when you've found something to drink (other than magical water!).";
+            }
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Filled Flask"))
+            {
+                return 236;
+            }
+            else
+            {
+                return 90;
+            }
+        },
+        new_room: true
     },
     event171:
     {
@@ -598,6 +807,31 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event183:
+    {
+        description: "The encounter in this room was so drastically different from the cruel reality of the dungeon, that out of sympathy for the cheerful creatures, you really should try to play [o]fair[/o]. \"Although, it would probably be quite easy to [o]cheat[/o] against these gullible bums\" you think.",
+        choice:
+        {
+            question: "The choice is yours.",
+            options:
+            [
+                {
+                    answer: "cheat",
+                    redirect: 229,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        game_vars.setFlag("229_luck_check", player.performLuckCheck());
+                    }
+                },
+                {
+                    answer: "fair",
+                    redirect: 40,
+                    new_room: false
+                }
+            ]
+        }
     },
     event192:
     {
@@ -745,6 +979,23 @@ export const events =
             return game_vars.getFlag("200_door_open");
         }
     },
+    event201:
+    {
+        description: function()
+        {
+            const result = system.rollD6(2);
+            player.modifyGold(+result);
+            return `You won ${result} gold playing the game. You currently have ${player.getGold()} gold.`;
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to play again?",
+            no: 19,
+            no_new_room: false,
+            yes: 40,
+            yes_new_room: false
+        }
+    },
     event212:
     {
         description: "You reach a large square, where the paths lead in four directions. Which one do you choose?",
@@ -861,12 +1112,44 @@ export const events =
         description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
         east: 102
     },
+    event229:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("229_luck_check"))
+            {
+                return "Luck check successful!";
+            }
+            else
+            {
+                return "Luck check failed!";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("229_luck_check"))
+            {
+                return 66;
+            }
+            else
+            {
+                return 383;
+            }
+        },
+        new_room: false 
+    },
+    event236:
+    {
+        description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
+        redirect: 4,
+        new_room: false
+    },
     event241:
     {
         description: "You may take some [i]Lake Water[/i] with you, if you wish. It's now time to [l]leave[/l].",
         items:
         [
-            "Lake Water"
+            "Filled Flask"
         ],
         item_limit: 1,
         locals:
@@ -883,6 +1166,12 @@ export const events =
         description: "You leave the way you came in.",
         redirect: 39,
         new_room: true
+    },
+    event257:
+    {
+        description: "You ask your hosts about the beam of light in the middle of the chamber. They go quiet, and then suddenly explode in anger. Anticipating what will follow, you launch an attack.",
+        redirect: 318,
+        new_room: false
     },
     event264:
     {
@@ -959,6 +1248,32 @@ export const events =
             }
         }
     },
+    event272:
+    {
+        description: "Three [e]Dwarves[/e] run up to you. They invite you to sit at a table on the other side of the room. But there are flower beds everywhere around... \"I wouldn't want to step on your lettuce\" you say. \"Just walk next to the wall\" responds the [o]first[/o] [e]Dwarf[/e]. \"Take the path through the middle of the room\" says the [o]second[/o] one. \"Why are you worrying? Just go, doesn't matter which way!\" shouts the [o]third[/o] one.",
+        choice:
+        {
+            question: "Whose advice will you listen to?",
+            options:
+            [
+                {
+                    answer: "first",
+                    redirect: 85,
+                    new_room: false
+                },
+                {
+                    answer: "second",
+                    redirect: 160,
+                    new_room: false
+                },
+                {
+                    answer: "third",
+                    redirect: 356,
+                    new_room: false
+                }
+            ]
+        },
+    },
     event278:
     {
         description: function()
@@ -1014,6 +1329,35 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event295:
+    {
+        description: function()
+        {
+            let desc = "Two [e]Dwarves[/e] return cheerfully, holding a deck of cards in their hands. Everybody laughs out loud.";
+            if(player.getGold() > 0)
+            {
+                desc += " You're going to play a game.";
+            }
+            else
+            {
+                desc += " Unfortunately, you don't have any money on you, so you're not able to join their game.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getGold() > 0)
+            {
+                return 183;
+            }
+            else
+            {
+                return 19;
+            }
+        },
+        new_room: false
     },
     event296:
     {
@@ -1128,6 +1472,17 @@ export const events =
             }
         ]
     },
+    event318:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-3);
+            player.modifyAgility(-2);
+            return "You pull out your sword and swing. Suddenly, with a horrific rumble, the ceiling of this cavern parts into two. The room is covered with unusual brightness. It's just daylight. Which is probably needed by the lettuces, but it blinds you so much that you need to retreat the way you came. You lose 3 Constitution and 2 Agility.";
+        },
+        redirect: 90,
+        new_room: true
+    },
     event328:
     {
         description: "You stick your ear to the door. You can hear someone talking, and also a sound that resembles knocking.",
@@ -1167,6 +1522,45 @@ export const events =
             }
         },
         new_room: true
+    },
+    event334:
+    {
+        description: function()
+        {
+            const result = system.rollD6(2);
+            let desc = "";
+
+            if(result % 2 === 0)
+            {
+                desc += `You lost ${result} gold playing the game.`
+                if(result > player.getGold())
+                {
+                    desc += " Looks like you don't even have that much, so you just pay up all your gold."
+                }
+                else
+                {
+                    desc += ` You currently have ${player.getGold()} gold.`;
+                }
+
+                player.modifyGold(-result);
+            }
+            else
+            {
+                const result = system.rollD6(2);
+                player.modifyGold(+result);
+                desc += `You won ${result} gold playing the game. You currently have ${player.getGold()} gold.`;
+            }
+            
+            return desc;
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to play again?",
+            no: 19,
+            no_new_room: false,
+            yes: 334,
+            yes_new_room: false
+        }
     },
     event336:
     {
@@ -1219,6 +1613,12 @@ export const events =
     {
         description: "You squeeze through the corridor, largely inhibited by the stone rubble lying around. You move further [c]south[/c].",
         south: 64
+    },
+    event356:
+    {
+        description: "You go without much care for what you step on. And, of course, you end up stepping on the lettuce. Twice. This time you definitely did not manage to win them over. They say good-bye in a cold tone and lead you to the eastern door. Oh, and on top of that they give you two lettuces. The ones you stepped on. With a bang, they close the door behind you.",
+        redirect: 141,
+        new_room: true
     },
     event359:
     {
@@ -1281,10 +1681,65 @@ export const events =
             no_new_room: false
         }
     },
+    event371:
+    {
+        description: function()
+        {
+            let desc = "[e]Dwarves[/e] have a friendly nature. They love company and guests. Although admittedly, usually it's some hairy creatures that come here, eat lots of lettuce, take a bit more with them and disappear.<br /><br />Two [e]Dwarves[/e] run over to you. You are still standing at the door, they invite you inside. But... Well, one of them starts scratching his shaggy head. \"We'd like to give you some of our lettuce, but we have nothing to drink. Maybe you have something? Just no magical water, it's poisonous to us.\"<br /><br />";
+
+            if(player.hasItem("Filled Flask"))
+            {
+                desc += "You happen to have a flask filled with water. It's time to [l]feast[/l]!";
+            }
+            else
+            {
+                desc += "You don't have anything, but you can look around. You will have to [l]leave[/l] the chamber. Remember, you will need some sort of a container for the liquid: it could be an empty flask or even a helmet. If you do not want to look for a drink, all that is left is to [l]attack[/l] the creatures.";
+            }
+            return desc;
+        },
+        locals: function()
+        {
+            if(player.hasItem("Filled Flask"))
+            {
+                return [
+                    {
+                        command: "feast",
+                        redirect: 4,
+                        new_room: false,
+                        on_command: function()
+                        {
+                            player.removeItem("Filled Flask");
+                        }
+                    }
+                ];
+            }
+            else
+            {
+                return [
+                    {
+                        command: "attack",
+                        redirect: 318,
+                        new_room: false
+                    },
+                    {
+                        command: "leave",
+                        redirect: 90,
+                        new_room: true
+                    }
+                ];
+            }
+        }
+    },
     event374:
     {
         description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
         north: 178,
         rations: true
+    },
+    event383:
+    {
+        description: "You become agitated. You grab your sword and attack.",
+        redirect: 318,
+        new_room: false
     }
 };

@@ -55,6 +55,7 @@ public:
     Q_INVOKABLE void modifyConstitution(int value);
     Q_INVOKABLE void modifyLuck(int value);
     Q_INVOKABLE void modifyGold(int value);
+    Q_INVOKABLE void modifyRations(int value);
 
     bool eatRation();
     bool drinkElixir();

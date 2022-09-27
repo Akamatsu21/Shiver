@@ -970,7 +970,6 @@ InputMode Game::resolveGameInput(const std::string& user_input)
 
             if(local_command._redirect != 0)
             {
-                _console.writeLine();
                 mode = updateCurrentEvent(local_command._redirect, local_command._new_room);
             }
         }
@@ -1032,7 +1031,6 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
 
         if(option._redirect != 0)
         {
-            _console.writeLine();
             mode = updateCurrentEvent(option._redirect, option._new_room);
         }
         performGameChecks();
@@ -1136,7 +1134,6 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
 
         if(option._redirect != 0)
         {
-            _console.writeLine();
             mode = updateCurrentEvent(option._redirect, option._new_room);
         }
         performGameChecks();

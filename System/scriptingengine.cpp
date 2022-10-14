@@ -9,23 +9,47 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     _game_variables_obj(nullptr),
     _js_engine(),
     _api(),
-    _event_list(),
     _game_vars(),
-    _help_pages(),
-    _player()
+    _player(),
+    _condition_clear_timings(),
+    _player_stats(),
+    _condition_list(),
+    _event_list(),
+    _help_pages()
 {
 }
 
 void ScriptingEngine::loadModules()
 {
     _js_engine.installExtensions(QJSEngine::AllExtensions);
+    _condition_list = _js_engine.importModule(":js/conditions.jsm").property("conditions");
     _event_list = _js_engine.importModule(":js/events.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
 
-    if(_event_list.isError() || _help_pages.isError())
+    if(_condition_list.isError() || _event_list.isError() || _help_pages.isError()
+    || _condition_list.isUndefined() || _event_list.isUndefined() || _help_pages.isUndefined())
     {
         throw std::runtime_error("Failure loading JS modules.");
     }
+}
+
+void ScriptingEngine::registerEnums()
+{
+    _player_stats = _js_engine.newObject();
+    for(const auto &[key, val]: utils::getAllPlayerStatsWithLabels())
+    {
+        _player_stats.setProperty(QString::fromStdString(key),
+                                  QJSValue(static_cast<int>(val)));
+    }
+    _js_engine.globalObject().setProperty("PlayerStats", _player_stats);
+
+    _condition_clear_timings = _js_engine.newObject();
+    for(const auto &[key, val]: utils::getAllConditionClearTimingsWithLabels())
+    {
+        _condition_clear_timings.setProperty(QString::fromStdString(key),
+                                             QJSValue(static_cast<int>(val)));
+    }
+    _js_engine.globalObject().setProperty("ConditionClearTimings", _condition_clear_timings);
 }
 
 void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
@@ -59,6 +83,30 @@ QJSValue ScriptingEngine::getObjectProperty(const QJSValue& object, const QStrin
     }
 }
 
+Condition ScriptingEngine::parseCondition(const QString& name)
+{
+    assert(_condition_list.hasProperty(name));
+    QJSValue condition_object = _condition_list.property(name);
+    Condition cond;
+    cond._name = name.toStdString();
+
+    assert(condition_object.hasProperty("stat"));
+    cond._modified_stat = static_cast<PlayerStat>(getObjectProperty(condition_object, "stat").toInt());
+
+    assert(condition_object.hasProperty("modifier"));
+    cond._modifier = getObjectProperty(condition_object, "modifier").toInt();
+
+    assert(condition_object.hasProperty("clear_timing"));
+    cond._clear_timing = static_cast<ConditionClearTiming>(
+                getObjectProperty(condition_object, "clear_timing").toInt());
+
+    cond._callback = condition_object.hasProperty("on_clear")
+                     ? condition_object.property("on_clear")
+                     : QJSValue(false);
+
+    return cond;
+}
+
 Event ScriptingEngine::parseEvent(int id)
 {
     assert(_game_variables_obj != nullptr);
@@ -74,8 +122,12 @@ Event ScriptingEngine::parseEvent(int id)
 
     if(event_object.hasProperty("redirect"))
     {
-        event.setRedirect(getObjectProperty(event_object, "redirect").toInt());
-        event.setNewRoom(getObjectProperty(event_object, "new_room").toBool());
+        QJSValue redirect_value = getObjectProperty(event_object, "redirect");
+        if(!redirect_value.isUndefined())
+        {
+            event.setRedirect(redirect_value.toInt());
+            event.setNewRoom(getObjectProperty(event_object, "new_room").toBool());
+        }
     }
 
     for(Direction direction: utils::getAllDirections())
@@ -83,7 +135,11 @@ Event ScriptingEngine::parseEvent(int id)
         QString direction_string = QString::fromStdString(utils::directionToString(direction));
         if(event_object.hasProperty(direction_string))
         {
-            event.setDestination(direction, getObjectProperty(event_object, direction_string).toInt());
+            QJSValue direction_value = getObjectProperty(event_object, direction_string);
+            if(!direction_value.isUndefined())
+            {
+                event.setDestination(direction, direction_value.toInt());
+            }
         }
     }
 
@@ -162,43 +218,49 @@ Event ScriptingEngine::parseEvent(int id)
     if(event_object.hasProperty("yes_no_choice"))
     {
         QJSValue choice = getObjectProperty(event_object, "yes_no_choice");
-        event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
+        if(!choice.isUndefined())
+        {
+            event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
 
-        QJSValue on_no_callback = choice.hasProperty("on_no")
-                                  ? choice.property("on_no")
-                                  : QJSValue(false);
-        QJSValue on_yes_callback = choice.hasProperty("on_yes")
-                                   ? choice.property("on_yes")
-                                   : QJSValue(false);
+            QJSValue on_no_callback = choice.hasProperty("on_no")
+                                      ? choice.property("on_no")
+                                      : QJSValue(false);
+            QJSValue on_yes_callback = choice.hasProperty("on_yes")
+                                       ? choice.property("on_yes")
+                                       : QJSValue(false);
 
-        event.addChoiceOption("yes",
-                              getObjectProperty(choice, "yes").toInt(),
-                              getObjectProperty(choice, "yes_new_room").toBool(),
-                              on_no_callback);
-        event.addChoiceOption("no",
-                              getObjectProperty(choice, "no").toInt(),
-                              getObjectProperty(choice, "no_new_room").toBool(),
-                              on_yes_callback);
+            event.addChoiceOption("yes",
+                                  getObjectProperty(choice, "yes").toInt(),
+                                  getObjectProperty(choice, "yes_new_room").toBool(),
+                                  on_no_callback);
+            event.addChoiceOption("no",
+                                  getObjectProperty(choice, "no").toInt(),
+                                  getObjectProperty(choice, "no_new_room").toBool(),
+                                  on_yes_callback);
+        }
     }
     else if(event_object.hasProperty("choice"))
     {
         QJSValue choice = getObjectProperty(event_object, "choice");
-        event.setChoice(ChoiceType::MULTI, getObjectProperty(choice, "question").toString().toStdString());
-
-        QJSValue options = getObjectProperty(choice, "options");
-        assert(options.isArray());
-        int length = options.property("length").toInt();
-        for(int i = 0; i < length; ++i)
+        if(!choice.isUndefined())
         {
-            QJSValue option = options.property(i);
-            QJSValue on_option_callback = option.hasProperty("on_option")
-                                          ? option.property("on_option")
-                                          : QJSValue(false);
+            event.setChoice(ChoiceType::MULTI, getObjectProperty(choice, "question").toString().toStdString());
 
-            event.addChoiceOption(getObjectProperty(option, "answer").toString().toStdString(),
-                                  getObjectProperty(option, "redirect").toInt(),
-                                  getObjectProperty(option, "new_room").toBool(),
-                                  on_option_callback);
+            QJSValue options = getObjectProperty(choice, "options");
+            assert(options.isArray());
+            int length = options.property("length").toInt();
+            for(int i = 0; i < length; ++i)
+            {
+                QJSValue option = options.property(i);
+                QJSValue on_option_callback = option.hasProperty("on_option")
+                                              ? option.property("on_option")
+                                              : QJSValue(false);
+
+                event.addChoiceOption(getObjectProperty(option, "answer").toString().toStdString(),
+                                      getObjectProperty(option, "redirect").toInt(),
+                                      getObjectProperty(option, "new_room").toBool(),
+                                      on_option_callback);
+            }
         }
     }
 
@@ -219,6 +281,11 @@ Event ScriptingEngine::parseEvent(int id)
                                   getObjectProperty(command, "new_room").toBool(),
                                   on_command_callback);
         }
+    }
+
+    if(event_object.hasProperty("on_exit"))
+    {
+        event.setExitCallback(event_object.property("on_exit"));
     }
 
     return event;

@@ -96,25 +96,25 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     return {command, params};
 }
 
-ElixirType CommandParser::parseElixirType(const std::string& input)
+PlayerStat CommandParser::parseElixirType(const std::string& input)
 {
     if(input.empty())
     {
-        return ElixirType::INVALID;
+        return PlayerStat::INVALID;
     }
     std::string input_command = utils::toLower(input);
-    ElixirType elixir = ElixirType::INVALID;
+    PlayerStat elixir = PlayerStat::INVALID;
     if(input_command == "agility")
     {
-        elixir = ElixirType::AGILITY;
+        elixir = PlayerStat::AGILITY;
     }
     else if(input_command == "constitution")
     {
-        elixir = ElixirType::CONSTITUTION;
+        elixir = PlayerStat::CONSTITUTION;
     }
     else if(input_command == "luck")
     {
-        elixir = ElixirType::LUCK;
+        elixir = PlayerStat::LUCK;
     }
 
     return elixir;

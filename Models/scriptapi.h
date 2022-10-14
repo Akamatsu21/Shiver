@@ -23,6 +23,7 @@ public:
     Q_INVOKABLE int rollD6(int count) const;
 
 signals:
+    void addCondition(const QVariant& name);
     void message(const QVariant& text);
     void redirect(int id, bool new_room);
     void stopCombat();

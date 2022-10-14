@@ -2,7 +2,7 @@ export const events =
 {
     event1:
     {
-        description: "The entrance to the dungeon is wide, covered in moss and lush bushes. You check your clothing and equipment. Remember to light the lantern!<br /><br />You enter the corridor. It's so tall you don't even need to bend. It leads straight towards the north. Soon you reach an intersection. It's shaped like the letter T. The roads lead towards [c]west[/c], [c]east[/c] and south (where you came from).",
+        description: "The entrance to the dungeon is wide, covered in moss and lush bushes. You check your clothing and equipment. Remember to light the lantern!<br /><br />You enter the corridor. It's so tall you don't even need to bend over. It leads straight towards the north. Soon you reach an intersection. It's shaped like the letter T. The roads lead towards [c]west[/c], [c]east[/c] and south (where you came from).",
         redirect: 25,
         new_room: false
     },
@@ -18,6 +18,16 @@ export const events =
             yes_new_room: false
         },
     },
+    event6:
+    {
+        description: function()
+        {
+            game_vars.setFlag("115_taken_first", false);
+            return "You look through the room. Ah, it's a real armoury. [o]Shield[/o]s are hanging off the walls, some of them heavy, with spiky finishes on top and bottom, other decorative, abundant with red and gold plates; also, light leather shields. At a rack, multiple [o]sword[/o]s are shining at you. The long, thin ones are the only effective weapon against witches. Stone swords with smooth blades and sharp tips are meant for fighting amphibiosaurs. You don't swing them around, but rather throw them from above to pierce the monsters. On the floor you see a row of neatly organised tiny swords used by gremlins, the underground dwarves. If only you knew what they can do with them!<br /><br />On a bench by the wall, you see [o]gloves[/o]: plated ones for fighting with heavy swords, leather ones for throwing spears. And even some furry gloves (it gets cold in the dungeon too!).<br /><br />On the eastern wall there are wooden shelves with a full collection of [o]helmet[/o]s. Helmets for tournament fights with yellow grass ornaments, heavy helmets with a visor. On the top floor there are three... Pots? No, they are helmets for fights that take place in rooms or corridors full of deadly gas. With the tip of your sword, you move some leather patches. You see a cap that the cruel monsters put on the heads of the people they torture.<br /><br />You continue looking around. There are tons of weapons around here. You don't even know why they're here and for what. You see a heavy [o]hammer[/o] with a wooden handle, probably taken from the goblins, and a hunting [o]dagger[/o] made out of bones, in a leather sheath.";
+        },
+        redirect: 115,
+        new_room: false
+    },
     event10:
     {
         description: "[e]Dwarves[/e] invite you to seat at the table. They are smiling. \"Finally a well-behaved monster\" they say. \"Whenever someone comes here, they just steal our lettuce and run. But we honestly can't blame them. At least our produce is useful to someone, hehe.\" You start thinking about the \"hehe\", and before you realise, the [e]Dwarves[/e] are already reeling off their tales. Few of them have ever explored further depths of the dungeon. The ones who came back say that the scariest thing you can come across is fire. The maze is also home to a fat Dragon. It is said to be extremely sinister, but some claim it can be bribed.<br /><br />You listen to these tales, but something is still bothering you.",
@@ -31,7 +41,8 @@ export const events =
             {
                 return 257;
             }
-        }
+        },
+        new_room: false
     },
     event11:
     {
@@ -115,6 +126,19 @@ export const events =
             }
         ]
     },
+    event21:
+    {
+        description: "If you want to see what's behind the door, you may [l]open[/l] it. If not, you may turn back [c]north[/c].",
+        north: 212,
+        locals:
+        [
+            {
+                command: "open",
+                redirect: 332,
+                new_room: true
+            }
+        ]
+    },
     event25:
     {
         description: "There is an elderly man sitting on a stone. He recommends you go to the [c]west[/c], and then turn right on the next few intersections.",
@@ -179,6 +203,68 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event37:
+    {
+        description: "You may choose a [o]metal[/o], [o]decorative[/o] or [o]leather[/o] shield.",
+        choice:
+        {
+            question: "Which shield do you take?",
+            options:
+            [
+                {
+                    answer: "metal",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Metal Shield"))
+                        {
+                            system.message("[i]Metal Shield[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Metal Shield");
+                            system.message("[i]Metal Shield[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "decorative",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Decorative Shield"))
+                        {
+                            system.message("[i]Decorative Shield[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Decorative Shield");
+                            system.message("[i]Decorative Shield[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "leather",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Leather Shield"))
+                        {
+                            system.message("[i]Leather Shield[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Leather Shield");
+                            system.message("[i]Leather Shield[/i] added to your inventory.")
+                        }
+                    }
+                }
+            ]
+        },
     },
     event38:
     {
@@ -365,6 +451,12 @@ export const events =
             }
         ]
     },
+    event68:
+    {
+        description: "You leave the armoury. The only exit leads to the [c]north[/c]. You follow the corridor to the nearest crossing. On the way, you may [c]eat[/c] a ration.",
+        north: 212,
+        rations: true
+    },
     event70:
     {
         description: "You may leave through the [c]east[/c] exit.",
@@ -481,6 +573,36 @@ export const events =
         description: "You climb up a set of stairs. The corridor leads west first, and then turns [c]south[/c].",
         south: 212
     },
+    event95:
+    {
+        description: function()
+        {
+            let desc = "";
+
+            if(player.hasItem("Cursed Gloves (-1 Agility)"))
+            {
+                desc += "You're already wearing a very tight pair of gloves... You'd better get rid of them before you look for a new one.";
+            }
+            else
+            {
+                desc += "You choose a pair of gloves. No, those aren't good. But now you can't take them off! You can feel them squeezing your hands, crushing your fingers.";
+                if(player.performLuckCheck())
+                {
+                    desc += "Luck check successful!<br />You managed to free yourself from the gloves.";
+                }
+                else
+                {
+                    desc += "Luck check failed!<br />You can't take the gloves off. You have to keep wearing them, which reduces your Agility by 1.<br />[i]Cursed Gloves[/i] added to your inventory.";
+                    player.addItem("Cursed Gloves (-1 Agility)");
+                    system.addCondition("cursed_gloves");
+                }
+            }
+
+            return desc;
+        },
+        redirect: 324,
+        new_room: false
+    },
     event102:
     {
         description: "You reach an intersection. The corridors spread in all directions.",
@@ -547,6 +669,91 @@ export const events =
             no_new_room: true,
             yes: 307,
             yes_new_room: false
+        }
+    },
+    event115:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("115_taken_first"))
+            {
+                return "You can still take one more item.";
+            }
+            else
+            {
+                return "You can take up to two things from here. Remember you can never hold two identical items, but two different items of the same type are fine (for example, two different shields).";
+            }
+        },
+        choice:
+        {
+            question: function()
+            {
+                if(game_vars.getFlag("115_taken_first"))
+                {
+                    return "What will be your second choice?";
+                }
+                else
+                {
+                    return "What will be your first choice?";
+                }
+            },
+            options:
+            [
+                {
+                    answer: "dagger",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Bone Hunting Dagger"))
+                        {
+                            system.message("[i]Bone Hunting Dagger[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Bone Hunting Dagger");
+                            system.message("[i]Bone Hunting Dagger[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "gloves",
+                    redirect: 95,
+                    new_room: false
+                },
+                {
+                    answer: "hammer",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Heavy Hammer"))
+                        {
+                            system.message("[i]Heavy Hammer[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Heavy Hammer");
+                            system.message("[i]Heavy Hammer[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "helmet",
+                    redirect: 298,
+                    new_room: false
+                },
+                {
+                    answer: "shield",
+                    redirect: 37,
+                    new_room: false
+                },
+                {
+                    answer: "sword",
+                    redirect: 232,
+                    new_room: false
+                }
+            ]
         }
     },
     event116:
@@ -725,6 +932,22 @@ export const events =
             }
         ]
     },
+    event153:
+    {
+        description: function()
+        {
+            player.modifyLuck(+1);
+            player.addItem("Enchanted Sword (+1 Combat Score)");
+            system.addCondition("enchanted_sword");
+            return "The rat is a good sign. This sword is enchanted. It will add 1 to your combat score in all future fights. You also gain 1 Luck.<br />[i]Enchanted Sword[/i] added to your inventory.";
+        },
+        redirect: 324,
+    },
+    event155:
+    {
+        description: "You observe the walls, move the lighter stones - nothing! All you can do now is go back [c]west[/c].",
+        west: 212
+    },
     event160:
     {
         description: "You thread carefully. Your legs are caressed by the lush lettuce leaves. When you get to the middle of the room, you notice a beam of light piercing through the ceiling. You stay quiet about this discovery. You reach the table.",
@@ -832,6 +1055,68 @@ export const events =
                 }
             ]
         }
+    },
+    event190:
+    {
+        description: "You may choose a [o]thin[/o], [o]stone[/o] or [o]short[/o] sword.",
+        choice:
+        {
+            question: "Which sword do you take?",
+            options:
+            [
+                {
+                    answer: "thin",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Thin Sword"))
+                        {
+                            system.message("[i]Thin Sword[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Thin Sword");
+                            system.message("[i]Thin Sword[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "stone",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Stone Sword"))
+                        {
+                            system.message("[i]Stone Sword[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Stone Sword");
+                            system.message("[i]Stone Sword[/i] added to your inventory.")
+                        }
+                    }
+                },
+                {
+                    answer: "short",
+                    redirect: 324,
+                    new_room: false,
+                    on_option: function()
+                    {
+                        if(player.hasItem("Short Sword"))
+                        {
+                            system.message("[i]Short Sword[/i] is already in your inventory!");
+                        }
+                        else
+                        {
+                            player.addItem("Short Sword");
+                            system.message("[i]Short Sword[/i] added to your inventory.")
+                        }
+                    }
+                }
+            ]
+        },
     },
     event192:
     {
@@ -1060,7 +1345,7 @@ export const events =
                 desc += "Small Shiny Key";
             }
 
-            desc += "[/i] added to your inventory";
+            desc += "[/i] added to your inventory.";
             return desc;
         },
         redirect: function()
@@ -1137,6 +1422,36 @@ export const events =
             }
         },
         new_room: false 
+    },
+    event232:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("232_chosen_sword"))
+            {
+                return "You've already upgraded your sword!";
+            }
+            else
+            {
+                return "You reach for the sword rack."
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("232_chosen_sword"))
+            {
+                return 68;
+            }
+            else
+            {
+                return 271;
+            }
+        }
+        ,
+        new_room: function()
+        {
+            return game_vars.getFlag("232_chosen_sword");
+        }
     },
     event236:
     {
@@ -1246,6 +1561,24 @@ export const events =
                     }
                 ];
             }
+        }
+    },
+    event271:
+    {
+        description: function()
+        {
+            game_vars.setFlag("232_chosen_sword", true);
+            player.modifyConstitution(-1);
+            player.removeItem("Sword");
+            return "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. Is that a good or bad sign?";
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to exchange this new sword for a different one?",
+            no: 153,
+            no_new_room: false,
+            yes: 190,
+            yes_new_room: false,
         }
     },
     event272:
@@ -1365,6 +1698,23 @@ export const events =
         north: 39,
         rations: true
     },
+    event298:
+    {
+        description: function()
+        {
+            if(player.hasItem("Helmet"))
+            {
+                return "You already have a helmet! Since you only have one head, you shouldn't need another one.";
+            }
+            else
+            {
+                player.addItem("Helmet");
+                return "This helmet might really come in handy.<br />[i]Helmet[/i] added to your inventory.";
+            }
+        },
+        redirect: 324,
+        new_room: false
+    },
     event301:
     {
         description: "You may try to [l]open[/l] the door, or just keep going [c]west[/c].",
@@ -1483,6 +1833,39 @@ export const events =
         redirect: 90,
         new_room: true
     },
+    event324:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("115_taken_first"))
+            {
+                return "That's all the choices you get. It's time to leave.";
+            }
+            else
+            {
+                return "That was your first choice.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("115_taken_first"))
+            {
+                return 68;
+            }
+            else
+            {
+                return 115;
+            }
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("115_taken_first");
+        },
+        on_exit: function()
+        {
+            game_vars.setFlag("115_taken_first", true);
+        }
+    },
     event328:
     {
         description: "You stick your ear to the door. You can hear someone talking, and also a sound that resembles knocking.",
@@ -1522,6 +1905,30 @@ export const events =
             }
         },
         new_room: true
+    },
+    event332:
+    {
+        description: function()
+        {
+            game_vars.setFlag("336_door_open", true);
+            player.modifyConstitution(-2);
+            return "The door is covered with a thick metal sheet. Thin, metallic stripes run diagonally across the surface, with a steel convex sticking out at their crossing point. You push your back against it. Your feet are slipping across the slushy ground. The door gives in with a horrific creak. You can hear a hurried murmur from inside the chamber. You squeeze into the opening, and with your back now against a rock you push the door, using all of your strength. With plenty of resistance, they finally open wide. This required mad effort - you take 2 damage. You raise your lantern to be at your head's height and... Your heart momentarily leaps into your throat. Hidden behind the wall, there is a [e]Troll[/e] here. It's bending its body like an arch. It's holding a sword with both of its hands, high above its head. It pushes out its hairy stomach. Its mad eyes are bloodshot. Its grinning, showing its clenched teeth. In just a moment, its gigantic sword will come down and cut the air. You reach for your sword. [e]Troll[/e] immediately attacks, but you manage to dodge. This will be a fight to the death.";
+        },
+        redirect: 6,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Troll",
+                agility: 8,
+                constitution: 8,
+                on_death: function()
+                {
+                    player.modifyLuck(+1);
+                    system.message("You gain 1 Luck.");
+                }
+            }
+        ]
     },
     event334:
     {
@@ -1569,16 +1976,37 @@ export const events =
             let desc = "You notice a door ahead. You come closer.";
             if(game_vars.getFlag("336_door_open"))
             {
-                desc += " It's open. You've already visited this place, but you can [l]enter[/l] again.";
+                desc += " It's open. You've already visited this place, but you can [l]enter[/l] again. If you don't want to, go back [c]north[/c].";
             }
             else
             {
-                desc += " It's closed. You could [l]open[/l] it.";
+                desc += " It's closed.";
             }
-            desc += " If you don't want to, go back [c]north[/c].";
             return desc;
         },
-        north: 212,
+        redirect: function()
+        {
+            if(game_vars.getFlag("336_door_open"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 21;
+            }
+        },
+        new_room: false,
+        north: function()
+        {
+            if(game_vars.getFlag("336_door_open"))
+            {
+                return 212;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         locals: function()
         {
             if(game_vars.getFlag("336_door_open"))
@@ -1593,13 +2021,7 @@ export const events =
             }
             else
             {
-                return [
-                    {
-                        command: "open",
-                        redirect: 21,
-                        new_room: true
-                    }
-                ];
+                return [];
             }
         }
     },

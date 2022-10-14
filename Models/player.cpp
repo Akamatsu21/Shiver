@@ -3,7 +3,7 @@
 
 #include "Utils/utils.h"
 
-Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirType elixir_type):
+Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerStat elixir_type):
     QObject(parent),
     _agility(agility),
     _constitution(constitution),
@@ -11,28 +11,68 @@ Player::Player(QObject* parent, int agility, int constitution, int luck, ElixirT
     _starting_agility(agility),
     _starting_constitution(constitution),
     _starting_luck(luck),
+    _agility_mod(0),
+    _constitution_mod(0),
+    _luck_mod(0),
+    _combat_mod(0),
     _gold(0),
     _rations(8),
     _elixir_count(2),
     _elixir_type(elixir_type),
-    _inventory{"Sword", "Shield", "Backpack", "Lantern"}
+    _inventory{"Sword", "Shield", "Backpack", "Lantern"},
+    _conditions{}
 {
 
 }
 
 int Player::getAgility() const
 {
-    return _agility;
+    return (_agility + _agility_mod >= 0 ? _agility + _agility_mod : 0);
 }
 
 int Player::getConstitution() const
 {
-    return _constitution;
+    return (_constitution + _constitution_mod >= 0 ? _constitution + _constitution_mod : 0);
 }
 
 int Player::getLuck() const
 {
+    return (_luck + _luck_mod >= 0 ? _luck + _luck_mod : 0);
+}
+
+int Player::getAgilityWithoutModifiers() const
+{
+    return _agility;
+}
+
+int Player::getConstitutionWithoutModifiers() const
+{
+    return _constitution;
+}
+
+int Player::getLuckWithoutModifiers() const
+{
     return _luck;
+}
+
+int Player::getAgilityModifier() const
+{
+    return _agility_mod;
+}
+
+int Player::getConstitutionModifier() const
+{
+    return _constitution_mod;
+}
+
+int Player::getLuckModifier() const
+{
+    return _luck_mod;
+}
+
+int Player::getCombatModifier() const
+{
+    return _combat_mod;
 }
 
 int Player::getStartingAgility() const
@@ -65,7 +105,7 @@ int Player::getElixirCount() const
     return _elixir_count;
 }
 
-ElixirType Player::getElixirType() const
+PlayerStat Player::getElixirType() const
 {
     return _elixir_type;
 }
@@ -74,13 +114,14 @@ std::string Player::getElixirTypeAsString() const
 {
     switch(_elixir_type)
     {
-    case ElixirType::AGILITY:
+    case PlayerStat::AGILITY:
         return "Elixir of Agility";
-    case ElixirType::CONSTITUTION:
+    case PlayerStat::CONSTITUTION:
         return "Elixir of Constitution";
-    case ElixirType::LUCK:
+    case PlayerStat::LUCK:
         return "Elixir of Luck";
-    case ElixirType::INVALID:
+    case PlayerStat::COMBAT_STRENGTH:
+    case PlayerStat::INVALID:
     default:
         return "";
     }
@@ -121,6 +162,25 @@ std::string Player::getInventoryHtml() const
         [](std::string acc, std::string element)
         {
             return acc + "<br />" + element;
+    });
+}
+
+std::vector<Condition> Player::getConditions() const
+{
+    return _conditions;
+}
+
+std::string Player::getConditionsString() const
+{
+    if(_conditions.empty())
+    {
+        return "";
+    }
+
+    return std::accumulate(std::next(std::begin(_conditions)), std::end(_conditions), _conditions.at(0)._name,
+        [](std::string acc, Condition element)
+        {
+            return acc + "<br />" + element._name;
     });
 }
 
@@ -268,16 +328,18 @@ bool Player::drinkElixir()
 
     switch(_elixir_type)
     {
-    case ElixirType::AGILITY:
+    case PlayerStat::AGILITY:
         _agility = _starting_agility;
         break;
-    case ElixirType::CONSTITUTION:
+    case PlayerStat::CONSTITUTION:
         _constitution = _starting_constitution;
         break;
-    case ElixirType::LUCK:
+    case PlayerStat::LUCK:
         ++_starting_luck;
         _luck = _starting_luck;
         break;
+    case PlayerStat::COMBAT_STRENGTH:
+    case PlayerStat::INVALID:
     default:
         break;
     }
@@ -301,12 +363,76 @@ void Player::addItem(const QVariant& item)
 
 void Player::removeItem(const std::string& item)
 {
-    _inventory.erase(std::find(std::begin(_inventory), std::end(_inventory), item));
+    std::vector<std::string>::iterator found_item =
+            std::find(std::begin(_inventory), std::end(_inventory), item);
+    if(found_item != std::end(_inventory))
+    {
+        _inventory.erase(found_item);
+    }
 }
 
 void Player::removeItem(const QVariant& item)
 {
     removeItem(item.toString().toStdString());
+}
+
+void Player::addCondition(const Condition& cond)
+{
+    switch(cond._modified_stat)
+    {
+    case PlayerStat::AGILITY:
+        _agility_mod += cond._modifier;
+        break;
+    case PlayerStat::CONSTITUTION:
+        _constitution_mod += cond._modifier;
+        break;
+    case PlayerStat::LUCK:
+        _luck_mod += cond._modifier;
+        break;
+    case PlayerStat::COMBAT_STRENGTH:
+        _combat_mod += cond._modifier;
+    case PlayerStat::INVALID:
+    default:
+        break;
+    }
+
+    _conditions.push_back(cond);
+}
+
+void Player::removeCondition(const std::string& name)
+{
+    std::vector<Condition>::iterator found_cond =
+            std::find_if(std::begin(_conditions), std::end(_conditions),
+            [&name](const Condition& cond){return cond._name == name;});
+
+    if(found_cond != std::end(_conditions))
+    {
+        switch(found_cond->_modified_stat)
+        {
+        case PlayerStat::AGILITY:
+            _agility_mod -= found_cond->_modifier;
+            break;
+        case PlayerStat::CONSTITUTION:
+            _constitution_mod -= found_cond->_modifier;
+            break;
+        case PlayerStat::LUCK:
+            _luck_mod -= found_cond->_modifier;
+            break;
+        case PlayerStat::COMBAT_STRENGTH:
+            _combat_mod -= found_cond->_modifier;
+            break;
+        case PlayerStat::INVALID:
+        default:
+            break;
+        }
+
+        if(found_cond->_callback.isCallable())
+        {
+            found_cond->_callback.call();
+        }
+
+        _conditions.erase(found_cond);
+    }
 }
 
 bool Player::performLuckCheck()

@@ -2,7 +2,10 @@ export const events =
 {
     event1:
     {
-        description: "Starting room",
+        description: function()
+        {
+            return `Starting room.<br />Agility: ${PlayerStats.Agility}<br />Constitution: ${PlayerStats.Constitution}<br />Luck: ${PlayerStats.Luck}<br />CombatEnd: ${ConditionClearTimings.CombatEnd}`;
+        },
         north: 2,
         west: function()
         {
@@ -14,7 +17,8 @@ export const events =
             {
                 return 10;
             }
-        }
+        },
+        south: 20
     },
     event2:
     {
@@ -257,5 +261,15 @@ export const events =
     {
         description: "You see a big pile of treasure. Feel free to take the [i]gold[/i].",
         gold: 100
+    },
+    event20:
+    {
+        description: function()
+        {
+            player.addItem("Cursed Gloves (-1 Agility)");
+            system.addCondition("cursed_gloves");
+            return "The evil gloves imprison you! You will lose agility in your next battle."
+        },
+        north: 1
     }
 };

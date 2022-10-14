@@ -8,7 +8,9 @@
 #include <vector>
 
 #include "Enums/command.h"
+#include "Enums/conditioncleartiming.h"
 #include "Enums/direction.h"
+#include "Enums/playerstat.h"
 
 namespace utils
 {
@@ -25,7 +27,11 @@ std::string createString(Args... args)
 
 std::string directionToString(Direction direction);
 
+std::map<std::string, ConditionClearTiming> getAllConditionClearTimingsWithLabels();
+
 std::vector<Direction> getAllDirections();
+
+std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels();
 
 template<typename K, typename V>
 std::vector<K> getKeys(const std::map<K, V>& map)

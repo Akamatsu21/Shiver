@@ -35,6 +35,8 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
             &_console, &Console::onMessage);
     connect(_game->getScriptApi(), &ScriptApi::stopCombat,
             _game, &Game::onStopCombat);
+    connect(_game->getScriptApi(), &ScriptApi::addCondition,
+            _game, &Game::onAddCondition);
 }
 
 void GameWindow::updateInputState()

@@ -85,5 +85,9 @@ eventX:
                 // Trigger to execute on command typed.
             }
         }
-    ]
+    ],
+    on_exit: function()
+    {
+        // Trigger to execute on room exit.
+    }
 }

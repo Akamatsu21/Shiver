@@ -79,6 +79,9 @@ class Game: public QObject
     void handleCombatRound();
     void performGameChecks();
 
+    // Condition clear triggers
+    void resolveCombatEndTriggers();
+
     // Game state saving
     GameState createGameState();
     void restoreGameState(const GameState& game_state);
@@ -109,6 +112,7 @@ public:
     void updateEventRedirect(int id, bool new_room);
 
 public slots:
+    void onAddCondition(const QVariant& name);
     void onStopCombat();
 
 signals:

@@ -3,7 +3,9 @@
 #include <random>
 #include <QFile>
 
-std::string utils::directionToString(Direction direction)
+namespace utils {
+
+std::string directionToString(Direction direction)
 {
     std::string result;
     switch(direction)
@@ -29,12 +31,26 @@ std::string utils::directionToString(Direction direction)
     return result;
 }
 
-std::vector<Direction> utils::getAllDirections()
+std::map<std::string, ConditionClearTiming> getAllConditionClearTimingsWithLabels()
+{
+    return std::map<std::string, ConditionClearTiming> {{"None", ConditionClearTiming::NONE},
+                                                        {"CombatEnd", ConditionClearTiming::COMBAT_END}};
+}
+
+std::vector<Direction> getAllDirections()
 {
     return std::vector {Direction::NORTH, Direction::SOUTH, Direction::EAST, Direction::WEST};
 }
 
-Direction utils::commandToDirection(Command command)
+std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels()
+{
+    return std::map<std::string, PlayerStat> {{"Agility", PlayerStat::AGILITY},
+                                              {"Constitution", PlayerStat::CONSTITUTION},
+                                              {"Luck", PlayerStat::LUCK},
+                                              {"CombatStrength", PlayerStat::COMBAT_STRENGTH}};
+}
+
+Direction commandToDirection(Command command)
 {
     Direction result = Direction::INVALID;
     switch(command)
@@ -59,7 +75,7 @@ Direction utils::commandToDirection(Command command)
     return result;
 }
 
-std::string utils::parseParams(std::queue<std::string>& params)
+std::string parseParams(std::queue<std::string>& params)
 {
     std::ostringstream ss;
     while(!params.empty())
@@ -74,7 +90,7 @@ std::string utils::parseParams(std::queue<std::string>& params)
     return ss.str();
 }
 
-int utils::rollD6(int count)
+int rollD6(int count)
 {
 #ifdef _WIN32
     static std::mt19937 rng(time(0));
@@ -93,7 +109,7 @@ int utils::rollD6(int count)
     return result;
 }
 
-std::string utils::toLower(const std::string& s)
+std::string toLower(const std::string& s)
 {
     std::string result;
     std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
@@ -101,7 +117,7 @@ std::string utils::toLower(const std::string& s)
     return result;
 }
 
-std::string utils::getTitleScreenText()
+std::string getTitleScreenText()
 {
     QFile file(":static/title.txt");
     if(file.open(QIODevice::ReadOnly))
@@ -110,4 +126,6 @@ std::string utils::getTitleScreenText()
     }
 
     throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
+}
+
 }

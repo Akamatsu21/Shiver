@@ -52,8 +52,13 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        << game_state._player_elixir_count << "\n"
        << game_state._player_elixir_type << "\n"
        << "INVENTORY_START\n"
-       << game_state._player_inventory << "\n"
-       << "INVENTORY_END\n";
+       << game_state._player_inventory
+       << (game_state._player_inventory.empty() ? "" : "\n")
+       << "INVENTORY_END\n"
+       << "CONDITIONS_START\n"
+       << game_state._player_conditions
+       << (game_state._player_conditions.empty() ? "" : "\n")
+       << "CONDITIONS_END\n";
 
     // Current event description.
     ss << game_state._event_id << "\n"
@@ -136,6 +141,34 @@ GameState SaveStateManager::parseSaveFileContents()
                 first = false;
             }
             game_state._player_inventory += line;
+        }
+    }
+
+    std::getline(ss, line);
+    if(line != "CONDITIONS_START")
+    {
+        throw std::runtime_error("Corrupted savefile. Error code: 3654");
+    }
+    game_state._player_conditions = "";
+    first = true;
+    for(;;)
+    {
+        std::getline(ss, line);
+        if(line == "CONDITIONS_END")
+        {
+            break;
+        }
+        else
+        {
+            if(!first)
+            {
+                game_state._player_conditions += "\n";
+            }
+            else
+            {
+                first = false;
+            }
+            game_state._player_conditions += line;
         }
     }
 

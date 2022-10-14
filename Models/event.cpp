@@ -17,7 +17,8 @@ Event::Event(int id):
     _item_limit(0),
     _rations_enabled(false),
     _choice(),
-    _local_commands{}
+    _local_commands{},
+    _exit_callback(false)
 {
 
 }
@@ -198,6 +199,11 @@ void Event::setRationsEnabled(bool value)
     _rations_enabled = value;
 }
 
+void Event::setExitCallback(QJSValue callback)
+{
+    _exit_callback = callback;
+}
+
 Enemy Event::getCurrentEnemy() const
 {
     return _enemies.front();
@@ -272,5 +278,13 @@ void Event::triggerLocalCommandCallback(const std::string& command)
     if(getLocalCommand(command)._callback.isCallable())
     {
         getLocalCommand(command)._callback.call();
+    }
+}
+
+void Event::triggerExitCallback()
+{
+    if(_exit_callback.isCallable())
+    {
+        _exit_callback.call();
     }
 }

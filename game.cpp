@@ -28,7 +28,7 @@ Game::Game(QObject* parent, Console& console):
     _generated_stats{0, 0, 0},
     _current_help_page(0),
     _save_file(""),
-   _script_api(new ScriptApi(this, _current_event, _combat_state))
+    _script_api(new ScriptApi(this, _current_event, _combat_state))
 {
 
 }
@@ -39,6 +39,7 @@ void Game::setup()
     {
         _save_state_manager.initDirectories();
         _scripting_engine->loadModules();
+        _scripting_engine->registerEnums();
         _scripting_engine->registerScriptApi(_script_api);
         _scripting_engine->registerGameVariables(_game_vars);
         _help_pages = _scripting_engine->parseHelpPages();
@@ -83,23 +84,25 @@ void Game::handleDrinkCommand()
         std::string stat;
         switch(_player->getElixirType())
         {
-        case ElixirType::AGILITY:
+        case PlayerStat::AGILITY:
             stat =  "Agility";
             break;
-        case ElixirType::CONSTITUTION:
+        case PlayerStat::CONSTITUTION:
             stat = "Constitution";
             break;
-        case ElixirType::LUCK:
+        case PlayerStat::LUCK:
             stat = "Luck";
             break;
-        case ElixirType::INVALID:
+        case PlayerStat::COMBAT_STRENGTH:
+        case PlayerStat::INVALID:
         default:
             _console.writeError("Error: Impossible game state.");
             break;
         }
 
-        std::string msg = utils::createString("You drank your elixir. ", stat, " restored to the starting value.");
-        if(_player->getElixirType() == ElixirType::LUCK)
+        std::string msg = utils::createString("You drank your elixir. ",
+                                              stat, " restored to the starting value.");
+        if(_player->getElixirType() == PlayerStat::LUCK)
         {
             msg += "<br />Your starting luck has increased by 1!";
         }
@@ -310,13 +313,40 @@ void Game::handleSaveListCommand()
 
 void Game::handleStatsCommand()
 {
+    std::string agility_mod =
+            (_player->getAgilityModifier() != 0
+             ? utils::createString(" (",
+                                   (_player->getAgilityModifier() > 0 ? "+" : ""),
+                                   _player->getAgilityModifier(),
+                                   ")")
+             : "");
+    std::string constitution_mod =
+            (_player->getConstitutionModifier() != 0
+             ? utils::createString(" (",
+                                   (_player->getConstitutionModifier() > 0 ? "+" : ""),
+                                   _player->getConstitutionModifier(),
+                                   ")")
+             : "");
+    std::string luck_mod =
+            (_player->getLuckModifier() != 0
+             ? utils::createString(" (",
+                                   (_player->getLuckModifier() > 0 ? "+" : ""),
+                                   _player->getLuckModifier(),
+                                   ")")
+             : "");
     std::string msg = utils::createString("[p]Adventurer[/p]",
                                           "<br />Agility: ",
-                                          _player->getAgility(), "/", _player->getStartingAgility(),
+                                          _player->getAgilityWithoutModifiers(),
+                                          "/", _player->getStartingAgility(),
+                                          agility_mod,
                                           "<br />Constitution: ",
-                                          _player->getConstitution(), "/", _player->getStartingConstitution(),
+                                          _player->getConstitutionWithoutModifiers(),
+                                          "/", _player->getStartingConstitution(),
+                                          constitution_mod,
                                           "<br />Luck: ",
-                                          _player->getLuck(), "/", _player->getStartingLuck(),
+                                          _player->getLuckWithoutModifiers(),
+                                          "/", _player->getStartingLuck(),
+                                          luck_mod,
                                           "<br />Gold: ",
                                           _player->getGold(),
                                           "<br />Rations: ",
@@ -526,6 +556,8 @@ std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<
 
 InputMode Game::updateCurrentEvent(int id, bool new_room)
 {
+    _current_event.triggerExitCallback();
+
     InputMode mode = InputMode::GAME;
     _current_event = _scripting_engine->parseEvent(id);
     if(_current_event.hasEnemies())
@@ -609,6 +641,7 @@ void Game::checkForDeath()
             std::string msg = utils::createString("You have defeated [e]",
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
+            resolveCombatEndTriggers();
             _current_event.getCurrentEnemy().triggerOnDeathCallback();
             _current_event.defeatCurrentEnemy();
 
@@ -639,7 +672,7 @@ void Game::handleCombatRound()
     do
     {
         _combat_state._enemy_score = utils::rollD6(2) + _current_event.getCurrentEnemy().getAgility();
-        _combat_state._player_score = utils::rollD6(2) + _player->getAgility();
+        _combat_state._player_score = utils::rollD6(2) + _player->getAgility() + _player->getCombatModifier();
 
         std::string msg = utils::createString("Combat round ",
                                               _combat_state._combat_round,
@@ -672,12 +705,23 @@ void Game::performGameChecks()
     }
 }
 
+void Game::resolveCombatEndTriggers()
+{
+    for(const auto &condition: _player->getConditions())
+    {
+        if(condition._clear_timing == ConditionClearTiming::COMBAT_END)
+        {
+            _player->removeCondition(condition._name);
+        }
+    }
+}
+
 GameState Game::createGameState()
 {
     GameState game_state = {};
-    game_state._player_agility = _player->getAgility();
-    game_state._player_constitution = _player->getConstitution();
-    game_state._player_luck = _player->getLuck();
+    game_state._player_agility = _player->getAgilityWithoutModifiers();
+    game_state._player_constitution = _player->getConstitutionWithoutModifiers();
+    game_state._player_luck = _player->getLuckWithoutModifiers();
     game_state._player_start_agility = _player->getStartingAgility();
     game_state._player_start_constitution = _player->getStartingConstitution();
     game_state._player_start_luck = _player->getStartingLuck();
@@ -686,6 +730,7 @@ GameState Game::createGameState()
     game_state._player_elixir_count = _player->getElixirCount();
     game_state._player_elixir_type = static_cast<int>(_player->getElixirType());
     game_state._player_inventory = _player->getInventory();
+    game_state._player_conditions = _player->getConditionsString();
 
     game_state._event_id = _current_event.getId();
     game_state._event_enemy_present = _current_event.hasEnemies();
@@ -731,7 +776,7 @@ void Game::restoreGameState(const GameState& game_state)
                          game_state._player_start_agility,
                          game_state._player_start_constitution,
                          game_state._player_start_luck,
-                         static_cast<ElixirType>(game_state._player_elixir_type));
+                         static_cast<PlayerStat>(game_state._player_elixir_type));
 
     try
     {
@@ -748,12 +793,29 @@ void Game::restoreGameState(const GameState& game_state)
     }
     _scripting_engine->registerPlayer(_player);
 
-    std::istringstream ss(game_state._player_inventory);
-    while(!ss.eof())
+    std::istringstream ss;
+    if(!game_state._player_inventory.empty())
     {
-        std::string item;
-        std::getline(ss, item);
-        _player->addItem(item);
+        ss.str(game_state._player_inventory);
+        ss.clear();
+        while(!ss.eof())
+        {
+            std::string item;
+            std::getline(ss, item);
+            _player->addItem(item);
+        }
+    }
+
+    if(!game_state._player_conditions.empty())
+    {
+        ss.str(game_state._player_conditions);
+        ss.clear();
+        while(!ss.eof())
+        {
+            std::string cond;
+            std::getline(ss, cond);
+            onAddCondition(QString::fromStdString(cond));
+        }
     }
 
     _game_vars->clear();
@@ -848,9 +910,9 @@ void Game::restoreGameState(const GameState& game_state)
 InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
 {
     InputMode mode = InputMode::CHARACTER_CREATION;
-    ElixirType elixir = ElixirType::INVALID;
+    PlayerStat elixir = PlayerStat::INVALID;
     elixir = CommandParser::parseElixirType(user_input);
-    if(elixir == ElixirType::INVALID)
+    if(elixir == PlayerStat::INVALID)
     {
         _console.writeText("Invalid choice.");
     }
@@ -885,6 +947,7 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
 
         mode = InputMode::GAME;
         resolveDamage(false, damage);
+        resolveCombatEndTriggers();
         _current_event.defeatAllEnemies();
         _combat_state._combat_in_progress = false;
         _console.writeText("You have escaped!");
@@ -1187,8 +1250,14 @@ void Game::updateEventRedirect(int id, bool new_room)
     _current_event.setNewRoom(new_room);
 }
 
+void Game::onAddCondition(const QVariant& name)
+{
+    _player->addCondition(_scripting_engine->parseCondition(name.toString()));
+}
+
 void Game::onStopCombat()
 {
     _combat_state._combat_in_progress = false;
+    resolveCombatEndTriggers();
     _current_event.defeatAllEnemies();
 }

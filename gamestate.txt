@@ -12,6 +12,9 @@ Elixir Type
 INVENTORY_START
 ...
 INVENTORY_END
+CONDITIONS_START
+...
+CONDITIONS_END
 
 // Current event description
 ID

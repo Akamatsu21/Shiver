@@ -28,11 +28,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     Enums/command.h \
+    Enums/conditioncleartiming.h \
     Enums/direction.h \
-    Enums/elixirtype.h \
     Enums/inputmode.h \
+    Enums/playerstat.h \
     Models/choice.h \
     Models/combatstate.h \
+    Models/condition.h \
     Models/enemy.h \
     Models/event.h \
     Models/gamestate.h \

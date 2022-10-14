@@ -5,7 +5,7 @@
 #include <queue>
 
 #include "Enums/command.h"
-#include "Enums/elixirtype.h"
+#include "Enums/playerstat.h"
 
 class CommandParser
 {
@@ -14,7 +14,7 @@ public:
 
     static std::pair<Command, std::queue<std::string>> parseCommand(const std::string& input);
 
-    static ElixirType parseElixirType(const std::string& input);
+    static PlayerStat parseElixirType(const std::string& input);
 
     static std::pair<bool, bool> parseYesNo(const std::string& input);
 };

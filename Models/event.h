@@ -24,6 +24,7 @@ class Event
     bool _rations_enabled;
     Choice _choice;
     std::map<std::string, UserOption> _local_commands;
+    QJSValue _exit_callback;
 
 public:
     Event(int id);
@@ -60,6 +61,7 @@ public:
     void setGold(int value);
     void setItemLimit(int value);
     void setRationsEnabled(bool value);
+    void setExitCallback(QJSValue callback);
 
     Enemy getCurrentEnemy() const;
     Enemy& getCurrentEnemy();
@@ -80,6 +82,8 @@ public:
 
     void addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback);
     void triggerLocalCommandCallback(const std::string& command);
+
+    void triggerExitCallback();
 };
 
 #endif // EVENT_H

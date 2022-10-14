@@ -16,6 +16,7 @@ struct GameState
     int _player_elixir_count;
     int _player_elixir_type;
     std::string _player_inventory;
+    std::string _player_conditions;
 
     int _event_id;
     bool _event_enemy_present;

@@ -174,6 +174,32 @@ export const events =
         redirect: 116,
         new_room: false
     },
+    event30:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("30_luck_check"))
+            {
+                return "Luck check successful!";
+            }
+            else
+            {
+                return "Luck check failed!";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("30_luck_check"))
+            {
+                return 159;
+            }
+            else
+            {
+                return 342;
+            }
+        },
+        new_room: false
+    },
     event31:
     {
         description: "Lower your lantern. Move the corpse with your sword. See - you found 5 [i]gold[/i]! If that's not enough, you can still [l]inspect[/l] the chamber. Otherwise, just [l]leave[/l].",
@@ -603,6 +629,42 @@ export const events =
         redirect: 324,
         new_room: false
     },
+    event99:
+    {
+        description: function()
+        {
+            let desc = "The corridor runs west, but then turns north. It goes on straight for a while, only to turn back west. From the turn, you take 23 steps and the corridor ends.";
+            if(game_vars.getFlag("99_visited"))
+            {
+                desc += " There is nothing to find here. Your only option is to go back [c]east[/c].";
+            }
+
+            return desc;
+        },
+        east: function()
+        {
+            if(game_vars.getFlag("99_visited"))
+            {
+                return 259;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("99_visited"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 182;
+            }
+        },
+        new_room: false
+    },
     event102:
     {
         description: "You reach an intersection. The corridors spread in all directions.",
@@ -838,7 +900,7 @@ export const events =
     },
     event128:
     {
-        description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]Bunch of Keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there. You insert your sword and clench your muscles. The rock slides to the side. You must [l]leave[/l] the stinky room promptly, while the pathway remains open.",
+        description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]Bunch of Keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
         items:
         [
             "Bunch of Keys"
@@ -849,7 +911,11 @@ export const events =
             {
                 command: "leave",
                 redirect: 108,
-                new_room: true
+                new_room: true,
+                on_command: function()
+                {
+                    system.message("You insert your sword and clench your muscles. The rock slides to the side. You escape the stinky room promptly. Right behind you, the exit closes with a bang. You're now in a corridor.");
+                }
             }
         ]
     },
@@ -948,6 +1014,12 @@ export const events =
         description: "You observe the walls, move the lighter stones - nothing! All you can do now is go back [c]west[/c].",
         west: 212
     },
+    event159:
+    {
+        description: "The wall opens up. It was hiding a corridor. You quickly enter the opening, as the wall closes back behind you.",
+        redirect: 78,
+        new_room: true
+    },
     event160:
     {
         description: "You thread carefully. Your legs are caressed by the lush lettuce leaves. When you get to the middle of the room, you notice a beam of light piercing through the ceiling. You stay quiet about this discovery. You reach the table.",
@@ -1004,9 +1076,9 @@ export const events =
     },
     event171:
     {
-        description: "You hurry out of the chamber. There are two exits. One to the [c]south[/c], which you originally came from, and one to the [c]east[/c].",
+        description: "You hurry out of the chamber. There are two exits. One to the [c]south[/c], which you originally came from, and one to the [c]west[/c].",
         south: 50,
-        east: 99
+        west: 99
     },
     event178:
     {
@@ -1028,6 +1100,27 @@ export const events =
                 command: "leave",
                 redirect: 120,
                 new_room: true
+            }
+        ]
+    },
+    event182:
+    {
+        description: function()
+        {
+            game_vars.setFlag("99_visited", true);
+            return "You've reached a dead end. You could [l]search[/l] for secret passages or turn back [c]east[/c].";
+        },
+        east: 259,
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 30,
+                new_room: false,
+                on_command: function()
+                {
+                    game_vars.setFlag("30_luck_check", player.performLuckCheck());
+                }
             }
         ]
     },
@@ -1488,6 +1581,11 @@ export const events =
         redirect: 318,
         new_room: false
     },
+    event259:
+    {
+        description: "You go back down the corridor, until you reach the pranksters' chamber. You open the door confidently. No one is there. You promptly reach the other door and come out to another corridor, continuing [c]south[/c].",
+        south: 50
+    },
     event264:
     {
         description: "The stone rubble is quite difficult to get through. Fortunately, the corridor does not have many turns, and instead leads straight to the [c]north[/c].",
@@ -1606,6 +1704,13 @@ export const events =
                 }
             ]
         },
+    },
+    event276:
+    {
+        description: "You reach a crossing. You may go [c]north[/c], [c]east[/c] or [c]south[/c].",
+        north: 308,
+        south: 215,
+        east: 382
     },
     event278:
     {
@@ -2030,6 +2135,12 @@ export const events =
         description: "[e]Kormaa[/e] listens to your order and... runs away.",
         redirect: 251,
         new_room: false
+    },
+    event342:
+    {
+        description: "You didn't manage to find anything. You turn back.",
+        redirect: 259,
+        new_room: true
     },
     event351:
     {

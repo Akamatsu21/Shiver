@@ -76,7 +76,7 @@ export const events =
         east: 39
     },
     event15:
-    {   // TODO swimming counter
+    {
         description: "If you're not excited about the idea of entering the water, you may just simply [l]search[/l] around. Alternatively, you may take on the challenge of [l]swim[/l]ming through the lake.",
         locals:
         [
@@ -89,6 +89,10 @@ export const events =
                 command: "swim",
                 redirect: 113,
                 new_room: true
+            },
+            on_command: function()
+            {
+                game_vars.setCounter("lake_return_point", 15);
             }
         ]
     },
@@ -149,7 +153,7 @@ export const events =
     {
         description: function()
         {
-            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            let pranksters_left = game_vars.getCounter("pranksters_left");
             let gold = 5 * (5 - pranksters_left);
             player.modifyGold(+gold);
             if(pranksters_left === 5)
@@ -377,6 +381,18 @@ export const events =
             }
         ]
     },
+    event46:
+    {
+        description: "You look around and try to get out of the northern shore of this cave. You see a small gap. You move towards it. It looks like it's just barely big enough for you to [l]squeeze[/l] through it.",
+        locals:
+        [
+            {
+                command: "squeeze",
+                redirect: 53,
+                new_room: true
+            }
+        ]
+    },
     event50:
     {
         description: "You approach an intersection. You may go [c]north[/c], [c]west[/c] or [c]east[/c].",
@@ -443,6 +459,18 @@ export const events =
         south: 224,
         east: 284,
         west: 296
+    },
+    event65:
+    {
+        description: "You need to think about something important.",
+        yes_no_choice:
+        {
+            question: "Are you sick of this place yet?",
+            no: 283,
+            no_new_room: false,
+            yes: 195,
+            yes_new_room: false
+        },
     },
     event66:
     {
@@ -576,6 +604,27 @@ export const events =
         },
         redirect: 10,
         new_room: false
+    },
+    event88:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-2);
+            return "You swim like a madman. You manage to safely reach the shore. You're in the same place you ended up in after crossing the lake. You take the [i]net[/i] and unfold it on the ground. You throw away entangles leaves and roots. Suddenly, the white marine rat, [e]Uruburu[/e], jumps out from underneath the floating trash. It bites your foot and runs: You take 2 damage. You may clean the [i]net[/i] and put it in your backpack. Then, it's time to [l]leave[/l]."
+        },
+        items:
+        [
+            "Net"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 195,
+                new_room: true
+            }
+        ]
     },
     event89:
     {
@@ -726,8 +775,11 @@ export const events =
         description: "One step at a time, you enter the water. Your legs sink into the stinky mud. Finally, you can swim. At some point you hear a strange sound. As if someone was throwing planks into the water: splash, splash, splash! You swim faster. Behind a nearby thicket you notice a suspicious movement in the water. \"Nothing good will come out of this\" you think.",
         yes_no_choice:
         {
-            question: "Do you want keep swimming further?",
-            no: 15,
+            question: "Do you want to keep swimming further?",
+            no: function()
+            {
+                return game_vars.getCounter("lake_return_point");
+            },
             no_new_room: true,
             yes: 307,
             yes_new_room: false
@@ -940,6 +992,12 @@ export const events =
         redirect: 102,
         new_room: true
     },
+    event139:
+    {
+        description: "You safely return to the northern shore of the lake.",
+        redirect: 195,
+        new_room: false
+    },
     event145:
     {
         description: function()
@@ -1008,6 +1066,18 @@ export const events =
             return "The rat is a good sign. This sword is enchanted. It will add 1 to your combat score in all future fights. You also gain 1 Luck.<br />[i]Enchanted Sword[/i] added to your inventory.";
         },
         redirect: 324,
+    },
+    event154:
+    {
+        description: "You attach one of the buoys to your leather strap. You swim towards the shore. Yes, you could have seen this coming: In front of a green thicket you see three pairs of shiny eyes. The net seems too valueable of a find tolose it like this. You won't abandon it, although you don't necessarily need to fight the monsters.",
+        yes_no_choice:
+        {
+            question: "Would you like to attempt to escape?",
+            no: 341,
+            no_new_room: false,
+            yes: 88,
+            yes_new_room: false,
+        },
     },
     event155:
     {
@@ -1079,6 +1149,32 @@ export const events =
         description: "You hurry out of the chamber. There are two exits. One to the [c]south[/c], which you originally came from, and one to the [c]west[/c].",
         south: 50,
         west: 99
+    },
+    event172:
+    {
+        description: function()
+        {
+            if(game_vars.getCounter("lake_crossed") === 2)
+            {
+                return "You managed to make it back to the side you originally came from.";
+            }
+            else
+            {
+                return "You are now on the other side.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("lake_crossed") === 2)
+            {
+                return 15;
+            }
+            else
+            {
+                return 365;
+            }
+        },
+        new_room: false
     },
     event178:
     {
@@ -1321,6 +1417,27 @@ export const events =
             }
         }
     },
+    event195:
+    {
+        description: "You may try to [l]swim[/l] back to the other side of the lake, or [l]search[/l] around this side. Decide!",
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 46,
+                new_room: false
+            },
+            {
+                command: "swim",
+                redirect: 113,
+                new_room: true
+            },
+            on_command: function()
+            {
+                game_vars.setCounter("lake_return_point", 195);
+            }
+        ]
+    },
     event197:
     {
         description: "A long pavement leads stright [c]north[/c].",
@@ -1382,13 +1499,33 @@ export const events =
         east: 82,
         west: 287
     },
+    event214:
+    {
+        description: function()
+        {
+            game_vars.incrementCounter("lake_crossed", 1);
+            return "You reach the shore.";
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("lake_crossed") === 1)
+            {
+                return 65;
+            }
+            else
+            {
+                return 172;
+            }
+        },
+        new_room: false
+    },
     event217:
     {
         description: function()
         {
             let desc = "You glance at the pranksters sitting at the table. Once again, some of them disappear, some of them appear again. The host disappeared completely. You've figured it out. This is an elixir of invisibility. You now have the advantage: the pranksters can't see you.<br /><br />";
 
-            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            let pranksters_left = game_vars.getCounter("pranksters_left");
             for(let i = 0; i < 2; ++i)
             {
                 desc += "You aim at prankster no. " + pranksters_left + ".<br />"
@@ -1404,7 +1541,7 @@ export const events =
                     desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
                 }
             }
-            game_vars.setCounter("265_pranksters_left", pranksters_left);
+            game_vars.setCounter("pranksters_left", pranksters_left);
 
             desc += "You decide to back off.";
             return desc;
@@ -1520,7 +1657,7 @@ export const events =
     {
         description: function()
         {
-            if(game_vars.getFlag("232_chosen_sword"))
+            if(game_vars.getFlag("sword_upgraded"))
             {
                 return "You've already upgraded your sword!";
             }
@@ -1531,7 +1668,7 @@ export const events =
         },
         redirect: function()
         {
-            if(game_vars.getFlag("232_chosen_sword"))
+            if(game_vars.getFlag("sword_upgraded"))
             {
                 return 68;
             }
@@ -1543,7 +1680,7 @@ export const events =
         ,
         new_room: function()
         {
-            return game_vars.getFlag("232_chosen_sword");
+            return game_vars.getFlag("sword_upgraded");
         }
     },
     event236:
@@ -1557,7 +1694,7 @@ export const events =
         description: "You may take some [i]Lake Water[/i] with you, if you wish. It's now time to [l]leave[/l].",
         items:
         [
-            "Filled Flask"
+            "Lake Water"
         ],
         item_limit: 1,
         locals:
@@ -1613,7 +1750,7 @@ export const events =
                     desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
                 }
             }
-            game_vars.setCounter("265_pranksters_left", pranksters_left);
+            game_vars.setCounter("pranksters_left", pranksters_left);
 
             desc += "\"My friend, please leave them alone!\" screams the host.";
             return desc;
@@ -1665,7 +1802,7 @@ export const events =
     {
         description: function()
         {
-            game_vars.setFlag("232_chosen_sword", true);
+            game_vars.setFlag("sword_upgraded", true);
             player.modifyConstitution(-1);
             player.removeItem("Sword");
             return "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. Is that a good or bad sign?";
@@ -1722,6 +1859,18 @@ export const events =
         },
         redirect: 109,
         new_room: false
+    },
+    event283:
+    {
+        description: "\"Such a dangerous lake, and yet it was so easy to cross? I shall look for adventures\" you decide. You venture into the rushes. In a close vicinity of the shore you see red balls floating on the surface. Intriguing, isn't it? You enter the water slowly. You swim closer. You reach under the water. It turns out to be a net hanging on some cork buoys.",
+        yes_no_choice:
+        {
+            question: "Would you like to pull the net to the shore?",
+            no: 139,
+            no_new_room: false,
+            yes: 154,
+            yes_new_room: true
+        },
     },
     event284:
     {
@@ -2136,6 +2285,25 @@ export const events =
         redirect: 251,
         new_room: false
     },
+    event341:
+    {
+        description: "The monsters swim towards you. You attack.",
+        enemies:
+        [
+            {
+                name: "Green Lizards",
+                agility: 7,
+                constitution: 6,
+                on_death: function()
+                {
+                    player.modifyAgility(+1);
+                    system.message("In a crazy fight you slice the lizards with your sword, but the net also gets cut. When you reach the shore after slaying the bests, it turns out the net is in pieces. You throw it away. You gain 1 Agility.");
+                }
+            }
+        ],
+        redirect: 195,
+        new_room: true
+    },
     event342:
     {
         description: "You didn't manage to find anything. You turn back.",
@@ -2158,7 +2326,7 @@ export const events =
         description: function()
         {
             let desc = "";
-            let pranksters_left = game_vars.getCounter("265_pranksters_left");
+            let pranksters_left = game_vars.getCounter("pranksters_left");
             for(let i = 0; i < 2; ++i)
             {
                 desc += "You aim at prankster no. " + pranksters_left + ".<br />"
@@ -2173,7 +2341,7 @@ export const events =
                     desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
                 }
             }
-            game_vars.setCounter("265_pranksters_left", pranksters_left);
+            game_vars.setCounter("pranksters_left", pranksters_left);
 
             desc += "You decide to back off.";
             return desc;
@@ -2201,6 +2369,32 @@ export const events =
                 new_room: false
             }
         ]
+    },
+    event365:
+    {
+        description: function()
+        {
+            if(game_vars.getCounter("lake_crossed") % 2 === 0)
+            {
+                return "You are now on the side you originally came from.";
+            }
+            else
+            {
+                return "You are now on the side you didn't originally come from.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("lake_crossed") % 2 === 0)
+            {
+                return 15;
+            }
+            else
+            {
+                return 195;
+            }
+        },
+        new_room: false
     },
     event366:
     {

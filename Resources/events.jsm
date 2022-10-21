@@ -88,11 +88,11 @@ export const events =
             {
                 command: "swim",
                 redirect: 113,
-                new_room: true
-            },
-            on_command: function()
-            {
-                game_vars.setCounter("lake_return_point", 15);
+                new_room: true,
+                on_command: function()
+                {
+                    game_vars.setCounter("lake_return_point", 15);
+                }
             }
         ]
     },
@@ -393,12 +393,45 @@ export const events =
             }
         ]
     },
+    event48:
+    {
+        description: "You open up your backpack and reach for one of the urns to pour the gold over. In that instant, the gold spills everywhere, and the urns transform into two powerful, winged demons, which fly upwards and sit down on the rock protrusion. You may [l]attack[/l] them, or attempt to [l]collect[/l] the spilled gold.",
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 169,
+                new_room: false
+            },
+            {
+                command: "collect",
+                redirect: 133,
+                new_room: false
+            }
+        ]
+    },
     event50:
     {
         description: "You approach an intersection. You may go [c]north[/c], [c]west[/c] or [c]east[/c].",
         north: 310,
         east: 130,
         west: 64
+    },
+    event53:
+    {
+        description: "You end up at a spacious footpath. It leads to the north, and then swerves heavily to the west. You take several dozen steps and stop in front of a heavy door.",
+        redirect: function()
+        {
+            if(game_vars.getFlag("53_door_open"))
+            {
+                return 322;
+            }
+            else
+            {
+                return 299;
+            }
+        },
+        new_room: false
     },
     event56:
     {
@@ -516,6 +549,33 @@ export const events =
         description: "You may leave through the [c]east[/c] exit.",
         east: 39
     },
+    event72:
+    {
+        description: "You decide to finish off the [e]Demon[/e].",
+        redirect: 199,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Demon",
+                agility: 7,
+                constitution: function()
+                {
+                    return game_vars.getCounter("demon_constitution");
+                },
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            system.message("Time to get the gold! You approach the place where the urns were.");
+                        }
+                    }
+                ]
+            }
+        ],
+    },
     event75:
     {
         description: "You back off and go back towards the intersection. You pass the elderly man.",
@@ -533,6 +593,12 @@ export const events =
             yes: 340,
             yes_new_room: false
         }
+    },
+    event78:
+    {
+        description: "You may go [c]north[/c] or [c]south[/c].",
+        north: 170,
+        south: 357
     },
     event82:
     {
@@ -714,6 +780,18 @@ export const events =
         },
         new_room: false
     },
+    event101:
+    {
+        description: "[e]Demon[/e] begs for your mercy.",
+        yes_no_choice:
+        {
+            question: "Will you spare its life?",
+            no: 234,
+            no_new_room: false,
+            yes: 362,
+            yes_new_room: false
+        }
+    },
     event102:
     {
         description: "You reach an intersection. The corridors spread in all directions.",
@@ -738,6 +816,12 @@ export const events =
             no_new_room: true
         }
     },
+    event108:
+    {
+        description: "You may go [c]north[/c] or [c]south[/c].",
+        north: 363,
+        south: 141
+    },
     event109:
     {
         description: "Suddenly, a disgusting monster appears out of nowhere. It's [e]Kormaa[/e]. You have no other choice but to fight.",
@@ -747,9 +831,10 @@ export const events =
                 name: "Kormaa",
                 agility: 7,
                 constitution: 8,
-                on_round_end:
+                callbacks:
                 [
                     {
+                        timing: function() { return CallbackTiming.RoundEnd; },
                         round: 1,
                         callback: function()
                         {
@@ -784,6 +869,19 @@ export const events =
             yes: 307,
             yes_new_room: false
         }
+    },
+    event114:
+    {
+        description: "You don't find anything here, but you can [c]eat[/c] a ration and then [l]leave[/l].",
+        rations: true,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 276,
+                new_room: true
+            }
+        ]
     },
     event115:
     {
@@ -879,10 +977,16 @@ export const events =
                 name: "Orc",
                 agility: 6,
                 constitution: 4,
-                on_death: function()
-                {
-                    system.message("You may [l]look[/l] around the room if you wish. Otherwise, [l]leave[/l] the cavern.");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            system.message("You may [l]look[/l] around the room if you wish. Otherwise, [l]leave[/l] the cavern.");
+                        }
+                    }
+                ]
             }
         ],
         locals:
@@ -952,7 +1056,7 @@ export const events =
     },
     event128:
     {
-        description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]Bunch of Keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
+        description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]bunch of keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
         items:
         [
             "Bunch of Keys"
@@ -992,11 +1096,23 @@ export const events =
         redirect: 102,
         new_room: true
     },
+    event133:
+    {
+        description: "You drop down on your knees and begin to gather this enormous treasure into one pile. But the monsters where waiting for this. They charge at you. Your only choice is to escape.",
+        redirect: 385,
+        new_room: true
+    },
     event139:
     {
         description: "You safely return to the northern shore of the lake.",
         redirect: 195,
         new_room: false
+    },
+    event141:
+    {
+        description: "You are at a dead end of a corridor that stops here. It leads directly [c]north[/c]. You may [c]eat[/c] a ration. You have no other choice but to go down the corridor.",
+        north: 357,
+        rations: true
     },
     event145:
     {
@@ -1069,7 +1185,7 @@ export const events =
     },
     event154:
     {
-        description: "You attach one of the buoys to your leather strap. You swim towards the shore. Yes, you could have seen this coming: In front of a green thicket you see three pairs of shiny eyes. The net seems too valueable of a find tolose it like this. You won't abandon it, although you don't necessarily need to fight the monsters.",
+        description: "You attach one of the buoys to your leather strap. You swim towards the shore. Yes, you could have seen this coming: In front of a green thicket you see three pairs of shiny eyes. The net seems too valuable of a find to lose it like this. You won't abandon it, although you don't necessarily need to fight the monsters.",
         yes_no_choice:
         {
             question: "Would you like to attempt to escape?",
@@ -1109,12 +1225,18 @@ export const events =
                 {
                     return game_vars.getCounter("kormaa_constitution");
                 },
-                on_death: function()
-                {
-                    player.modifyLuck(+1);
-                    game_vars.setFlag("163_passage_discovered", true);
-                    system.message("After defeating the monster, you learn that the fountain is now empty. You observe the walls of the cavern carefully. On the [c]north[/c]ern side you discover a hole that was covered up with a boulder. There's your exit. You gain 1 Luck.");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            player.modifyLuck(+1);
+                            game_vars.setFlag("163_passage_discovered", true);
+                            system.message("After defeating the monster, you learn that the fountain is now empty. You observe the walls of the cavern carefully. On the [c]north[/c]ern side you discover a hole that was covered up with a boulder. There's your exit. You gain 1 Luck.");
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -1143,6 +1265,42 @@ export const events =
             }
         },
         new_room: true
+    },
+    event169:
+    {
+        description: "The first [e]Demon[/e] flies towards you. You must fight.",
+        redirect: 297,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Demon",
+                agility: 8,
+                constitution: 5,
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.RoundEnd; },
+                        round: 1,
+                        callback: function()
+                        {
+                            if(system.getCurrentPlayerScore() < system.getCurrentEnemyScore())
+                            {
+                                system.enableEscape(385);
+                            }
+                        }
+                    },
+                    {
+                        timing: function() { return CallbackTiming.RoundEnd; },
+                        round: 2,
+                        callback: function()
+                        {
+                            system.disableEscape();
+                        }
+                    }
+                ]
+            }
+        ]
     },
     event171:
     {
@@ -1244,6 +1402,31 @@ export const events =
                 }
             ]
         }
+    },
+    event184:
+    {
+        description: "You wipe the blood from your sword using the hides at your feet. You advance.",
+        enemies:
+        [
+            {
+                name: "Demon",
+                agility: 7,
+                constitution: 6,
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.RoundEnd; },
+                        round: 1,
+                        callback: function()
+                        {
+                            game_vars.setCounter("demon_constitution", system.getCurrentEnemyConstitution());
+                            system.stopCombat();
+                            system.redirect(226, false);
+                        }
+                    }
+                ]
+            }
+        ]
     },
     event190:
     {
@@ -1417,6 +1600,12 @@ export const events =
             }
         }
     },
+    event194:
+    {
+        description: "You walk back down the spacious footpath all the way to its end. You climb up to the opening. You squeeze through and end up at the shore.",
+        redirect: 195,
+        new_room: true
+    },
     event195:
     {
         description: "You may try to [l]swim[/l] back to the other side of the lake, or [l]search[/l] around this side. Decide!",
@@ -1430,18 +1619,31 @@ export const events =
             {
                 command: "swim",
                 redirect: 113,
-                new_room: true
+                new_room: true,
+                on_command: function()
+                {
+                    game_vars.setCounter("lake_return_point", 195);
+                }
             },
-            on_command: function()
-            {
-                game_vars.setCounter("lake_return_point", 195);
-            }
         ]
     },
     event197:
     {
         description: "A long pavement leads stright [c]north[/c].",
         north: 276
+    },
+    event199:
+    {
+        description: "You look for the scattered [i]gold[/i]. There's not as much left as what you saw in the urn! You manage to find 20 pieces. That's alright... You can pick it up. You may now finally [l]leave[/l].",
+        gold: 20,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 385,
+                new_room: true
+            }
+        ]
     },
     event200:
     {
@@ -1491,6 +1693,12 @@ export const events =
             yes_new_room: false
         }
     },
+    event205:
+    {
+        description: "You approach the altar. You take the stone container and open the lid with the tip of your sword. Inside lies a green gem. It's an emerald! You pick it up and inspect, with the help of the oil lamp's light. It's wonderful. But... You drop it and it shatters on the stone floor.",
+        redirect: 254,
+        new_room: false
+    },
     event212:
     {
         description: "You reach a large square, where the paths lead in four directions. Which one do you choose?",
@@ -1519,6 +1727,11 @@ export const events =
         },
         new_room: false
     },
+    event215:
+    {
+        description: "You go south, until you reach the chamber with the fountain. The exit is on the [c]east[/c].",
+        east: 39
+    },
     event217:
     {
         description: function()
@@ -1534,11 +1747,11 @@ export const events =
                 if(result1 === 5 || result2 === 5)
                 {
                     --pranksters_left;
-                    desc += "You hit him! He's dead meat.<br /><br/>";
+                    desc += "You hit him! He's dead meat.<br /><br />";
                 }
                 else
                 {
-                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br />";
                 }
             }
             game_vars.setCounter("pranksters_left", pranksters_left);
@@ -1622,6 +1835,35 @@ export const events =
             return game_vars.getFlag("200_door_open");
         }
     },
+    event226:
+    {
+        description: "The battle continues. The [e]Demon[/e] seems intimidated. If you ran away, it most likely wouldn't chase you.",
+        enemies:
+        [
+            {
+                name: "Demon",
+                agility: 7,
+                constitution: function()
+                {
+                    return game_vars.getCounter("demon_constitution");
+                },
+                escape_redirect: 385,
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.RoundAction; },
+                        round: 2,
+                        callback: function()
+                        {
+                            game_vars.setCounter("demon_constitution", system.getCurrentEnemyConstitution());
+                            system.stopCombat();
+                            system.redirect(101, false);
+                        }
+                    }
+                ]
+            }
+        ]
+    },
     event228:
     {
         description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
@@ -1683,6 +1925,44 @@ export const events =
             return game_vars.getFlag("sword_upgraded");
         }
     },
+    event234:
+    {
+        description: "You decide to finish off the [e]Demon[/e].",
+        enemies:
+        [
+            {
+                name: "Demon",
+                agility: 7,
+                constitution: function()
+                {
+                    return game_vars.getCounter("demon_constitution");
+                },
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            system.message("You may now [l]inspect[/l] the stone box on the altar or [l]collect[/l] the gold from the floor.");
+                        }
+                    }
+                ]
+            }
+        ],
+        locals:
+        [
+            {
+                command: "collect",
+                redirect: 199,
+                new_room: false
+            },
+            {
+                command: "inspect",
+                redirect: 205,
+                new_room: false
+            }
+        ]
+    },
     event236:
     {
         description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
@@ -1712,6 +1992,16 @@ export const events =
         redirect: 39,
         new_room: true
     },
+    event254:
+    {
+        description: function()
+        {
+            player.modifyGold(+10);
+            return "Suddenly, from the other side of the chamber you hear a powerful roar. You manage to grab some gold (you later count 10 pieces) and escape.";
+        },
+        redirect: 385,
+        new_room: true
+    },
     event257:
     {
         description: "You ask your hosts about the beam of light in the middle of the chamber. They go quiet, and then suddenly explode in anger. Anticipating what will follow, you launch an attack.",
@@ -1722,6 +2012,27 @@ export const events =
     {
         description: "You go back down the corridor, until you reach the pranksters' chamber. You open the door confidently. No one is there. You promptly reach the other door and come out to another corridor, continuing [c]south[/c].",
         south: 50
+    },
+    event263:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-2);
+            return "You leave the barely breathing monster and approach the altar. Doing as the [e]Demon[/e] said, you may take the [i]emerald[/i]. As you grab your backpack, you hear a terrifying scream behind you. The wounded [e]Demon[/e] charges at you with all its remaining strength. It pierces your back with its talons: you take 2 damage. You jump away and deal what turns out to be the final blow. You may now [l]collect[/l] the gold.";
+        },
+        items:
+        [
+            "Emerald"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "collect",
+                redirect: 326,
+                new_room: false
+            }
+        ]
     },
     event264:
     {
@@ -1743,11 +2054,11 @@ export const events =
                 if(result === 5)
                 {
                     --pranksters_left;
-                    desc += "You hit him! He's dead meat.<br /><br/>";
+                    desc += "You hit him! He's dead meat.<br /><br />";
                 }
                 else
                 {
-                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br />";
                 }
             }
             game_vars.setCounter("pranksters_left", pranksters_left);
@@ -1952,6 +2263,28 @@ export const events =
         north: 39,
         rations: true
     },
+    event297:
+    {
+        description: "You can now [l]collect[/l] the gold from the floor. Or maybe you'd like to [l]inspect[/l] the stone container on the altar? Or, if you have enough strength and courage, you can [l]attack[/l] the other [e]Demon[/e].",
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 184,
+                new_room: false
+            },
+            {
+                command: "collect",
+                redirect: 254,
+                new_room: false
+            },
+            {
+                command: "inspect",
+                redirect: 205,
+                new_room: false
+            }
+        ]
+    },
     event298:
     {
         description: function()
@@ -1968,6 +2301,18 @@ export const events =
         },
         redirect: 324,
         new_room: false
+    },
+    event299:
+    {
+        description: "The door is closed.",
+        yes_no_choice:
+        {
+            question: "Would you like to open it?",
+            no: 194,
+            no_new_room: true,
+            yes: 349,
+            yes_new_room: false,
+        }
     },
     event301:
     {
@@ -2007,11 +2352,30 @@ export const events =
                 name: "Green Lizards",
                 agility: 7,
                 constitution: 6,
-                on_death: function()
-                {
-                    player.modifyLuck(+2);
-                    system.message("You succeeded. You make it to the other side of the lake. You gain 2 luck.");
-                },
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            player.modifyLuck(+2);
+                            system.message("You succeeded. You make it to the other side of the lake. You gain 2 luck.");
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    event308:
+    {
+        description: "A short tunnel ends in a dead end. You could [l]search[/l] for secret passages or turn back [c]south[/c].",
+        south: 276,
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 114,
+                new_room: false
             }
         ]
     },
@@ -2056,10 +2420,16 @@ export const events =
                 name: "Ogre",
                 agility: 8,
                 constitution: 10,
-                on_death: function()
-                {
-                    system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse.");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse.");
+                        }
+                    }
+                ]
             }
         ],
         locals:
@@ -2086,6 +2456,12 @@ export const events =
         },
         redirect: 90,
         new_room: true
+    },
+    event322:
+    {
+        description: "The chamber is completely empty. You may exit through the [c]east[/c] or [c]west[/c] door (where you came from).",
+        east: 242,
+        west: 194
     },
     event324:
     {
@@ -2119,6 +2495,23 @@ export const events =
         {
             game_vars.setFlag("115_taken_first", true);
         }
+    },
+    event326:
+    {
+        description: function()
+        {
+            player.modifyLuck(+3);
+            return "You get down to collect the [i]gold[/i]. And there's a lot! You gain 3 Luck. You can now [l]leave[/l].";
+        },
+        gold: 30,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 385,
+                new_room: true
+            }
+        ]
     },
     event328:
     {
@@ -2176,11 +2569,17 @@ export const events =
                 name: "Troll",
                 agility: 8,
                 constitution: 8,
-                on_death: function()
-                {
-                    player.modifyLuck(+1);
-                    system.message("You gain 1 Luck.");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            player.modifyLuck(+1);
+                            system.message("You gain 1 Luck.");
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -2294,11 +2693,17 @@ export const events =
                 name: "Green Lizards",
                 agility: 7,
                 constitution: 6,
-                on_death: function()
-                {
-                    player.modifyAgility(+1);
-                    system.message("In a crazy fight you slice the lizards with your sword, but the net also gets cut. When you reach the shore after slaying the bests, it turns out the net is in pieces. You throw it away. You gain 1 Agility.");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            player.modifyAgility(+1);
+                            system.message("In a crazy fight you slice the lizards with your sword, but the net also gets cut. When you reach the shore after slaying the beasts, it turns out the net is in pieces. You throw it away. You gain 1 Agility.");
+                        }
+                    }
+                ]
             }
         ],
         redirect: 195,
@@ -2309,6 +2714,22 @@ export const events =
         description: "You didn't manage to find anything. You turn back.",
         redirect: 259,
         new_room: true
+    },
+    event349:
+    {
+        description: function()
+        {
+            game_vars.setFlag("53_door_open", true);
+            return "You carefully slide your foot into a narrow crevice. With your hips you push the door and they open. What a tactic! You can smell a faint odour of dried herbs. There are two smooth pillars by the left wall. In between those, at eye level stretches a granite shelf. On top of it, two small lamps and a stone box between them.<br /><br />The floor is lined up with furry hides of animals and monsters. This could be an underground chapel! By the wall opposite to the altar site, you see a low table carved in stone. Something's on the table. You raise your lantern. Dear king Almanhagor, those are two urns filled with gold. They are identical, with an elaborate design. On one side they are decorated with monster heads, on the other - they have pairs of shiny wings attached.";
+        },
+        yes_no_choice:
+        {
+            question: "Do you want to take the gold?",
+            no: 385,
+            no_new_room: true,
+            yes: 48,
+            yes_new_room: false
+        }
     },
     event351:
     {
@@ -2334,11 +2755,11 @@ export const events =
                 if(result === 5)
                 {
                     --pranksters_left;
-                    desc += "You hit him! He's dead meat.<br /><br/>";
+                    desc += "You hit him! He's dead meat.<br /><br />";
                 }
                 else
                 {
-                    desc += "As your sword was approaching his head, he disappeared.<br /><br/>";
+                    desc += "As your sword was approaching his head, he disappeared.<br /><br />";
                 }
             }
             game_vars.setCounter("pranksters_left", pranksters_left);
@@ -2348,6 +2769,18 @@ export const events =
         },
         redirect: 26,
         new_room: false
+    },
+    event362:
+    {
+        description: "The grateful monster reveals a secret to you. In the stone box on the altar, there is an enchanted emerald. It's owner can gain the Gift of Flight, although it only works once. But you must be careful: you're not allowed to touch the emerald. You must tilt the box and drop the gem straight to your backpack.",
+        yes_no_choice:
+        {
+            question: "Do you trust the monster?",
+            no: 72,
+            no_new_room: false,
+            yes: 263,
+            yes_new_room: false
+        }
     },
     event364:
     {
@@ -2402,10 +2835,10 @@ export const events =
         yes_no_choice:
         {
             question: "Would you like to try using your newfound key?",
-            yes: 131,
-            yes_new_room: false,
             no: 278,
-            no_new_room: false
+            no_new_room: false,
+            yes: 131,
+            yes_new_room: false
         }
     },
     event371:
@@ -2463,10 +2896,22 @@ export const events =
         north: 178,
         rations: true
     },
+    event382:
+    {
+        description: "At some point the corridor turns to the [c]north[/c]. At the turn, you may eat a ration.",
+        north: 134,
+        rations: true
+    },
     event383:
     {
         description: "You become agitated. You grab your sword and attack.",
         redirect: 318,
         new_room: false
+    },
+    event385:
+    {
+        description: "You can exit the [e]Demon[/e]'s chamber through the [c]east[/c] or [c]west[/c] door.",
+        east: 242,
+        west: 194
     }
 };

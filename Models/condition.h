@@ -4,15 +4,25 @@
 #include <QJSValue>
 
 #include "Enums/playerstat.h"
-#include "Enums/conditioncleartiming.h"
+#include "Models/callback.h"
 
-struct Condition
+class Condition
 {
     std::string _name;
     PlayerStat _modified_stat = PlayerStat::INVALID;
     int _modifier;
-    ConditionClearTiming _clear_timing = ConditionClearTiming::NONE;
-    QJSValue _callback;
+    Callback _callback;
+
+public:
+    Condition(const std::string& name, PlayerStat modified_stat, int modifier,
+              CallbackTiming clear_timing, QJSValue on_clear_callback);
+
+    std::string getName() const;
+    PlayerStat getModifiedStat() const;
+    int getModifierValue() const;
+    CallbackTiming getClearTiming() const;
+
+    void triggerCallback();
 };
 
 #endif // CONDITION_H

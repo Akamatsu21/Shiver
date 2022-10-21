@@ -7,6 +7,8 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        Models/callback.cpp \
+        Models/condition.cpp \
         Models/enemy.cpp \
         Models/event.cpp \
         Models/gamevariables.cpp \
@@ -27,11 +29,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    Enums/callbacktiming.h \
     Enums/command.h \
-    Enums/conditioncleartiming.h \
     Enums/direction.h \
     Enums/inputmode.h \
     Enums/playerstat.h \
+    Models/callback.h \
     Models/choice.h \
     Models/combatstate.h \
     Models/condition.h \

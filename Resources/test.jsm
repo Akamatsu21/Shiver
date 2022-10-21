@@ -4,7 +4,7 @@ export const events =
     {
         description: function()
         {
-            return `Starting room.<br />Agility: ${PlayerStats.Agility}<br />Constitution: ${PlayerStats.Constitution}<br />Luck: ${PlayerStats.Luck}<br />CombatEnd: ${ConditionClearTimings.CombatEnd}`;
+            return `Starting room.<br />Agility: ${PlayerStat.Agility}<br />Constitution: ${PlayerStat.Constitution}<br />Luck: ${PlayerStat.Luck}<br />CombatEnd: ${CallbackTiming.CombatEnd}`;
         },
         north: 2,
         west: function()
@@ -38,11 +38,18 @@ export const events =
             {
                 name: "Orc",
                 agility: 5,
-                constitution: 1,
-                on_death: function()
-                {
-                    game_vars.incrementCounter("orc_kills", +1);
-                }
+                constitution: 6,
+                escape_redirect: 2,
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("orc_kills", +1);
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -60,15 +67,32 @@ export const events =
                 name: "Goblin",
                 agility: 1,
                 constitution: 1,
-                on_death: function()
-                {
-                    system.message("Suddenly, you hear another monster approaching...");
-                }
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            system.message("Suddenly, you hear another monster approaching...");
+                        }
+                    }
+                ]
             },
             {
                 name: "Griffon",
                 agility: 20,
-                constitution: 60
+                constitution: 60,
+                callbacks:
+                [
+                    {
+                        timing: function() { return CallbackTiming.RoundEnd; },
+                        round: 1,
+                        callback: function()
+                        {
+                            system.enableEscape(2);
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -233,19 +257,25 @@ export const events =
                 name: "Triceratops",
                 agility: 1,
                 constitution: 4,
-                on_death: function()
-                {
-                    if(system.getCurrentRound() % 2 == 0)
+                callbacks:
+                [
                     {
-                        system.message("Defeated in an even number of rounds - you may proceed to the treasure!");
-                        system.redirect(19, false);
+                        timing: function() { return CallbackTiming.CombatEnd; },
+                        callback: function()
+                        {
+                            if(system.getCurrentRound() % 2 == 0)
+                            {
+                                system.message("Defeated in an even number of rounds - you may proceed to the treasure!");
+                                system.redirect(19, false);
+                            }
+                            else
+                            {
+                                system.message("Defeated in an odd number of rounds - you're going to hell!");
+                                system.redirect(18, true);
+                            }
+                        }
                     }
-                    else
-                    {
-                        system.message("Defeated in an odd number of rounds - you're going to hell!");
-                        system.redirect(18, true);
-                    }
-                }
+                ]
             }
         ]
     },

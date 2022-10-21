@@ -65,14 +65,19 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        << game_state._event_enemy_present << "\n";
     if(game_state._event_enemy_present)
     {
-       ss << game_state._event_enemy_name << "\n"
-          << game_state._event_enemy_constitution << "\n";
+        ss << game_state._event_enemy_name << "\n"
+           << game_state._event_enemy_constitution << "\n"
+           << game_state._event_enemy_escape_enabled << "\n";
+        if(game_state._event_enemy_escape_enabled)
+        {
+            ss << game_state._event_enemy_escape_redirect << "\n";
+        }
     }
     ss << game_state._event_gold_present << "\n";
     ss << game_state._event_items_present << "\n";
     if(game_state._event_items_present)
     {
-       ss << game_state._event_item_limit << "\n";
+        ss << game_state._event_item_limit << "\n";
     }
     ss << game_state._event_rations_enabled << "\n";
 
@@ -178,7 +183,12 @@ GameState SaveStateManager::parseSaveFileContents()
     if(game_state._event_enemy_present)
     {
         std::getline(ss, game_state._event_enemy_name);
-        ss >> game_state._event_enemy_constitution;
+        ss >> game_state._event_enemy_constitution
+           >> game_state._event_enemy_escape_enabled;
+        if(game_state._event_enemy_escape_enabled)
+        {
+            ss >> game_state._event_enemy_escape_redirect;
+        }
     }
 
     ss >> game_state._event_gold_present

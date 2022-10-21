@@ -11,7 +11,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     _api(),
     _game_vars(),
     _player(),
-    _condition_clear_timings(),
+    _callback_timings(),
     _player_stats(),
     _condition_list(),
     _event_list(),
@@ -41,15 +41,15 @@ void ScriptingEngine::registerEnums()
         _player_stats.setProperty(QString::fromStdString(key),
                                   QJSValue(static_cast<int>(val)));
     }
-    _js_engine.globalObject().setProperty("PlayerStats", _player_stats);
+    _js_engine.globalObject().setProperty("PlayerStat", _player_stats);
 
-    _condition_clear_timings = _js_engine.newObject();
-    for(const auto &[key, val]: utils::getAllConditionClearTimingsWithLabels())
+    _callback_timings = _js_engine.newObject();
+    for(const auto &[key, val]: utils::getAllCallbackTimingsWithLabels())
     {
-        _condition_clear_timings.setProperty(QString::fromStdString(key),
+        _callback_timings.setProperty(QString::fromStdString(key),
                                              QJSValue(static_cast<int>(val)));
     }
-    _js_engine.globalObject().setProperty("ConditionClearTimings", _condition_clear_timings);
+    _js_engine.globalObject().setProperty("CallbackTiming", _callback_timings);
 }
 
 void ScriptingEngine::registerGameVariables(GameVariables* game_vars)
@@ -87,24 +87,22 @@ Condition ScriptingEngine::parseCondition(const QString& name)
 {
     assert(_condition_list.hasProperty(name));
     QJSValue condition_object = _condition_list.property(name);
-    Condition cond;
-    cond._name = name.toStdString();
 
     assert(condition_object.hasProperty("stat"));
-    cond._modified_stat = static_cast<PlayerStat>(getObjectProperty(condition_object, "stat").toInt());
+    PlayerStat stat = static_cast<PlayerStat>(getObjectProperty(condition_object, "stat").toInt());
 
     assert(condition_object.hasProperty("modifier"));
-    cond._modifier = getObjectProperty(condition_object, "modifier").toInt();
+    int mod = getObjectProperty(condition_object, "modifier").toInt();
 
     assert(condition_object.hasProperty("clear_timing"));
-    cond._clear_timing = static_cast<ConditionClearTiming>(
+    CallbackTiming timing = static_cast<CallbackTiming>(
                 getObjectProperty(condition_object, "clear_timing").toInt());
 
-    cond._callback = condition_object.hasProperty("on_clear")
-                     ? condition_object.property("on_clear")
-                     : QJSValue(false);
+    QJSValue callback = condition_object.hasProperty("on_clear")
+                      ? condition_object.property("on_clear")
+                      : QJSValue(false);
 
-    return cond;
+    return Condition(name.toStdString(), stat, mod, timing, callback);
 }
 
 Event ScriptingEngine::parseEvent(int id)
@@ -151,30 +149,50 @@ Event ScriptingEngine::parseEvent(int id)
         for(int i = 0; i < length; ++i)
         {
             QJSValue enemy = enemies.property(i);
-            QJSValue on_death_callback = enemy.hasProperty("on_death")
-                                         ? enemy.property("on_death")
-                                         : QJSValue(false);
 
-            std::map<int, QJSValue> on_round_end_callbacks;
-            if(enemy.hasProperty("on_round_end"))
+            bool escape_enabled = false;
+            int escape_redirect = -1;
+            if(enemy.hasProperty("escape_redirect"))
             {
-                QJSValue callbacks = getObjectProperty(enemy, "on_round_end");
+                escape_enabled = true;
+                escape_redirect = getObjectProperty(enemy, "escape_redirect").toInt();
+            }
+
+            std::vector<Callback> enemy_callbacks;
+            if(enemy.hasProperty("callbacks"))
+            {
+                QJSValue callbacks = getObjectProperty(enemy, "callbacks");
                 assert(callbacks.isArray());
                 int callbacks_length = callbacks.property("length").toInt();
                 for(int k = 0; k < callbacks_length; ++k)
                 {
                     QJSValue callback = callbacks.property(k);
-                    int round = getObjectProperty(callback, "round").toInt();
-                    QJSValue func = callback.property("callback");
-                    on_round_end_callbacks[round] = func;
+                    CallbackTiming timing = static_cast<CallbackTiming>(
+                                getObjectProperty(callback, "timing").toInt());
+                    QJSValue effect = callback.property("callback");
+
+                    switch(timing)
+                    {
+                    case CallbackTiming::ROUND_ACTION:
+                    case CallbackTiming::ROUND_END:
+                    {
+                        assert(callback.hasProperty("round"));
+                        int round = getObjectProperty(callback, "round").toInt();
+                        enemy_callbacks.emplace_back(timing, round, effect);
+                    } break;
+                    default:
+                        enemy_callbacks.emplace_back(timing, effect);
+                        break;
+                    }
                 }
             }
 
             event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
                            getObjectProperty(enemy, "agility").toInt(),
                            getObjectProperty(enemy, "constitution").toInt(),
-                           on_death_callback,
-                           on_round_end_callbacks);
+                           escape_enabled,
+                           escape_redirect,
+                           enemy_callbacks);
         }
     }
 
@@ -224,10 +242,10 @@ Event ScriptingEngine::parseEvent(int id)
 
             QJSValue on_no_callback = choice.hasProperty("on_no")
                                       ? choice.property("on_no")
-                                      : QJSValue(false);
+                                      : QJSValue::UndefinedValue;
             QJSValue on_yes_callback = choice.hasProperty("on_yes")
                                        ? choice.property("on_yes")
-                                       : QJSValue(false);
+                                       : QJSValue::UndefinedValue;
 
             event.addChoiceOption("yes",
                                   getObjectProperty(choice, "yes").toInt(),
@@ -254,7 +272,7 @@ Event ScriptingEngine::parseEvent(int id)
                 QJSValue option = options.property(i);
                 QJSValue on_option_callback = option.hasProperty("on_option")
                                               ? option.property("on_option")
-                                              : QJSValue(false);
+                                              : QJSValue::UndefinedValue;
 
                 event.addChoiceOption(getObjectProperty(option, "answer").toString().toStdString(),
                                       getObjectProperty(option, "redirect").toInt(),
@@ -274,7 +292,7 @@ Event ScriptingEngine::parseEvent(int id)
             QJSValue command = locals.property(i);
             QJSValue on_command_callback = command.hasProperty("on_command")
                                            ? command.property("on_command")
-                                           : QJSValue(false);
+                                           : QJSValue::UndefinedValue;
 
             event.addLocalCommand(getObjectProperty(command, "command").toString().toStdString(),
                                   getObjectProperty(command, "redirect").toInt(),

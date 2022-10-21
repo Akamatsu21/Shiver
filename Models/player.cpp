@@ -120,8 +120,6 @@ std::string Player::getElixirTypeAsString() const
         return "Elixir of Constitution";
     case PlayerStat::LUCK:
         return "Elixir of Luck";
-    case PlayerStat::COMBAT_STRENGTH:
-    case PlayerStat::INVALID:
     default:
         return "";
     }
@@ -177,10 +175,10 @@ std::string Player::getConditionsString() const
         return "";
     }
 
-    return std::accumulate(std::next(std::begin(_conditions)), std::end(_conditions), _conditions.at(0)._name,
+    return std::accumulate(std::next(std::begin(_conditions)), std::end(_conditions), _conditions.at(0).getName(),
         [](std::string acc, Condition element)
         {
-            return acc + "<br />" + element._name;
+            return acc + "<br />" + element.getName();
     });
 }
 
@@ -338,8 +336,6 @@ bool Player::drinkElixir()
         ++_starting_luck;
         _luck = _starting_luck;
         break;
-    case PlayerStat::COMBAT_STRENGTH:
-    case PlayerStat::INVALID:
     default:
         break;
     }
@@ -378,20 +374,19 @@ void Player::removeItem(const QVariant& item)
 
 void Player::addCondition(const Condition& cond)
 {
-    switch(cond._modified_stat)
+    switch(cond.getModifiedStat())
     {
     case PlayerStat::AGILITY:
-        _agility_mod += cond._modifier;
+        _agility_mod += cond.getModifierValue();
         break;
     case PlayerStat::CONSTITUTION:
-        _constitution_mod += cond._modifier;
+        _constitution_mod += cond.getModifierValue();
         break;
     case PlayerStat::LUCK:
-        _luck_mod += cond._modifier;
+        _luck_mod += cond.getModifierValue();
         break;
     case PlayerStat::COMBAT_STRENGTH:
-        _combat_mod += cond._modifier;
-    case PlayerStat::INVALID:
+        _combat_mod += cond.getModifierValue();
     default:
         break;
     }
@@ -403,34 +398,29 @@ void Player::removeCondition(const std::string& name)
 {
     std::vector<Condition>::iterator found_cond =
             std::find_if(std::begin(_conditions), std::end(_conditions),
-            [&name](const Condition& cond){return cond._name == name;});
+            [&name](const Condition& cond){return cond.getName() == name;});
 
     if(found_cond != std::end(_conditions))
     {
-        switch(found_cond->_modified_stat)
+        switch(found_cond->getModifiedStat())
         {
         case PlayerStat::AGILITY:
-            _agility_mod -= found_cond->_modifier;
+            _agility_mod -= found_cond->getModifierValue();
             break;
         case PlayerStat::CONSTITUTION:
-            _constitution_mod -= found_cond->_modifier;
+            _constitution_mod -= found_cond->getModifierValue();
             break;
         case PlayerStat::LUCK:
-            _luck_mod -= found_cond->_modifier;
+            _luck_mod -= found_cond->getModifierValue();
             break;
         case PlayerStat::COMBAT_STRENGTH:
-            _combat_mod -= found_cond->_modifier;
+            _combat_mod -= found_cond->getModifierValue();
             break;
-        case PlayerStat::INVALID:
         default:
             break;
         }
 
-        if(found_cond->_callback.isCallable())
-        {
-            found_cond->_callback.call();
-        }
-
+        found_cond->triggerCallback();
         _conditions.erase(found_cond);
     }
 }

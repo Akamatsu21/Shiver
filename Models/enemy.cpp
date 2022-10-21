@@ -3,14 +3,16 @@
 Enemy::Enemy(const std::string& name,
              int agility,
              int constitution,
-             QJSValue on_death,
-             const std::map<int, QJSValue>& on_round_end):
+             bool escape_enabled,
+             int escape_redirect,
+             const std::vector<Callback>& callbacks):
     _name(name),
     _agility(agility),
     _constitution(constitution),
     _starting_constitution(constitution),
-    _on_death_callback(on_death),
-    _on_round_end_callbacks(on_round_end)
+    _escape_enabled(escape_enabled),
+    _escape_redirect(escape_redirect),
+    _callbacks(callbacks)
 {
 
 }
@@ -30,6 +32,21 @@ int Enemy::getConstitution() const
     return _constitution;
 }
 
+bool Enemy::isEscapeEnabled() const
+{
+    return _escape_enabled;
+}
+
+int Enemy::getEscapeRedirect() const
+{
+    return _escape_redirect;
+}
+
+std::vector<Callback> Enemy::getCallbacks() const
+{
+    return _callbacks;
+}
+
 void Enemy::setConstitution(int value)
 {
     if(value < 0 || value > _starting_constitution)
@@ -38,6 +55,16 @@ void Enemy::setConstitution(int value)
     }
 
     _constitution = value;
+}
+
+void Enemy::setEscapeEnabled(bool value)
+{
+    _escape_enabled = value;
+}
+
+void Enemy::setEscapeRedirect(int value)
+{
+    _escape_redirect = value;
 }
 
 void Enemy::modifyConstitution(int value)
@@ -50,21 +77,5 @@ void Enemy::modifyConstitution(int value)
     else if(_constitution > _starting_constitution)
     {
         _constitution = _starting_constitution;
-    }
-}
-
-void Enemy::triggerOnDeathCallback()
-{
-    if(_on_death_callback.isCallable())
-    {
-        _on_death_callback.call();
-    }
-}
-
-void Enemy::triggerOnRoundEndCallback(int round)
-{
-    if(_on_round_end_callbacks.count(round) > 0 && _on_round_end_callbacks.at(round).isCallable())
-    {
-        _on_round_end_callbacks.at(round).call();
     }
 }

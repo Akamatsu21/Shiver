@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Enums/command.h"
-#include "Enums/conditioncleartiming.h"
+#include "Enums/callbacktiming.h"
 #include "Enums/direction.h"
 #include "Enums/playerstat.h"
 
@@ -27,7 +27,7 @@ std::string createString(Args... args)
 
 std::string directionToString(Direction direction);
 
-std::map<std::string, ConditionClearTiming> getAllConditionClearTimingsWithLabels();
+std::map<std::string, CallbackTiming> getAllCallbackTimingsWithLabels();
 
 std::vector<Direction> getAllDirections();
 

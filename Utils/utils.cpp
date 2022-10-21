@@ -22,7 +22,6 @@ std::string directionToString(Direction direction)
     case Direction::WEST:
         result = "west";
         break;
-    case Direction::INVALID:
     default:
         result = "error";
         break;
@@ -31,10 +30,12 @@ std::string directionToString(Direction direction)
     return result;
 }
 
-std::map<std::string, ConditionClearTiming> getAllConditionClearTimingsWithLabels()
+std::map<std::string, CallbackTiming> getAllCallbackTimingsWithLabels()
 {
-    return std::map<std::string, ConditionClearTiming> {{"None", ConditionClearTiming::NONE},
-                                                        {"CombatEnd", ConditionClearTiming::COMBAT_END}};
+    return std::map<std::string, CallbackTiming> {{"None", CallbackTiming::NONE},
+                                                  {"RoundAction", CallbackTiming::ROUND_ACTION},
+                                                  {"RoundEnd", CallbackTiming::ROUND_END},
+                                                  {"CombatEnd", CallbackTiming::COMBAT_END}};
 }
 
 std::vector<Direction> getAllDirections()

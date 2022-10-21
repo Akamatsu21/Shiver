@@ -68,8 +68,9 @@ public:
     void addEnemy(const std::string& name,
                   int agility,
                   int constitution,
-                  QJSValue on_death,
-                  const std::map<int, QJSValue>& on_round_end);
+                  bool escape_enabled,
+                  int escape_redirect,
+                  const std::vector<Callback>& callbacks);
     void defeatCurrentEnemy();
     void defeatAllEnemies();
 

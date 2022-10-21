@@ -13,17 +13,30 @@ eventX:
             name: "Enemy Name",
             agility: 10,
             constitution: 10,
-            on_death: function()
-            {
-                // Trigger to execute on death.
-            },
-            on_round_end:
+            escape_redirect: 50,
+            callbacks:
             [
                 {
+                    timing: CallbackTiming.RoundEnd,
                     round: 1,
                     callback: function()
                     {
                         // Trigger to execute on end of round 1.
+                    }
+                },
+                {
+                    timing: CallbackTiming.RoundStart,
+                    round: 3,
+                    callback: function()
+                    {
+                        // Trigger to execute on start of round 3.
+                    }
+                },
+                {
+                    timing: CallbackTiming.CombatEnd,
+                    callback: function()
+                    {
+                        // Trigger to execute on defeat.
                     }
                 }
             ]

@@ -37,6 +37,12 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
             _game, &Game::onStopCombat);
     connect(_game->getScriptApi(), &ScriptApi::addCondition,
             _game, &Game::onAddCondition);
+    connect(_game->getScriptApi(), &ScriptApi::removeCondition,
+            _game, &Game::onRemoveCondition);
+    connect(_game->getScriptApi(), &ScriptApi::disableEscape,
+            _game, &Game::onDisableEscape);
+    connect(_game->getScriptApi(), &ScriptApi::enableEscape,
+            _game, &Game::onEnableEscape);
 }
 
 void GameWindow::updateInputState()
@@ -110,9 +116,7 @@ void GameWindow::onUserInputReceived(const QString& user_input)
     case InputMode::SAVEDEL_CONFIRMATION:
         _input_mode = _game->resolveSaveDelInput(user_input.toStdString());
         break;
-    case InputMode::HELP:
-    case InputMode::KEY_GAME_START:
-    case InputMode::KEY_REDIRECT:
+    default:
         assert(false);
         break;
     }
@@ -131,16 +135,7 @@ void GameWindow::onUserKeyReceived()
     case InputMode::KEY_REDIRECT:
         _input_mode = _game->resolveRedirectInput();
         break;
-    case InputMode::HELP:
-    case InputMode::TITLE_SCREEN:
-    case InputMode::CHARACTER_CREATION:
-    case InputMode::GAME:
-    case InputMode::YES_NO_CHOICE:
-    case InputMode::MULTI_CHOICE:
-    case InputMode::ESCAPE_CHECK:
-    case InputMode::SAVE_CONFIRMATION:
-    case InputMode::LOAD_CONFIRMATION:
-    case InputMode::SAVEDEL_CONFIRMATION:
+    default:
         assert(false);
         break;
     }

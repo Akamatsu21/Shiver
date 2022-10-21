@@ -93,8 +93,6 @@ void Game::handleDrinkCommand()
         case PlayerStat::LUCK:
             stat = "Luck";
             break;
-        case PlayerStat::COMBAT_STRENGTH:
-        case PlayerStat::INVALID:
         default:
             _console.writeError("Error: Impossible game state.");
             break;
@@ -145,6 +143,11 @@ bool Game::handleEscapeCommand()
         _console.writeText("No enemies present!");
         return false;
     }
+    else if(!_current_event.getCurrentEnemy().isEscapeEnabled())
+    {
+        _console.writeText("Escape not enabled in this fight!");
+        return false;
+    }
 
     _console.writeText("Would you like to attempt a luck check to reduce the damage received while escaping?");
     return true;
@@ -158,9 +161,16 @@ bool Game::handleFightCommand()
         return false;
     }
 
+    resolveRoundActionTriggers(_combat_state._combat_round);
+    if(!_combat_state._combat_in_progress)
+    {
+        // Trigger ended the combat.
+        return false;
+    }
+
     resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
     displayCombatStatus();
-    _current_event.getCurrentEnemy().triggerOnRoundEndCallback(_combat_state._combat_round);
+    resolveRoundEndTriggers(_combat_state._combat_round);
     return true;
 }
 
@@ -232,6 +242,13 @@ bool Game::handleLuckyCommand()
         return false;
     }
 
+    resolveRoundActionTriggers(_combat_state._combat_round);
+    if(!_combat_state._combat_in_progress)
+    {
+        // Trigger ended the combat.
+        return false;
+    }
+
     bool player_win = _combat_state._player_score > _combat_state._enemy_score;
     bool player_lucky = _player->performLuckCheck();
     int damage = 0;
@@ -247,7 +264,7 @@ bool Game::handleLuckyCommand()
     _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
     resolveDamage(player_win, damage);
     displayCombatStatus();
-    _current_event.getCurrentEnemy().triggerOnRoundEndCallback(_combat_state._combat_round);
+    resolveRoundEndTriggers(_combat_state._combat_round);
     return true;
 }
 
@@ -425,6 +442,7 @@ void Game::displayCombatStatus()
                               _current_event.getCurrentEnemy().getConstitution(),
                               "<br />[p]Player[/p]: ",
                               _player->getConstitution());
+
     _console.writeText(msg);
     _console.writeLine();
 }
@@ -642,7 +660,6 @@ void Game::checkForDeath()
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
             resolveCombatEndTriggers();
-            _current_event.getCurrentEnemy().triggerOnDeathCallback();
             _current_event.defeatCurrentEnemy();
 
             if(!_current_event.hasEnemies())
@@ -668,6 +685,7 @@ void Game::checkForDeath()
 void Game::handleCombatRound()
 {
     ++_combat_state._combat_round;
+
     bool tie = false;
     do
     {
@@ -680,6 +698,7 @@ void Game::handleCombatRound()
                                               _combat_state._enemy_score,
                                               "<br />[p]Player[/p]'s score: ",
                                               _combat_state._player_score);
+
         _console.writeText(msg);
 
         if(_combat_state._player_score == _combat_state._enemy_score)
@@ -694,6 +713,11 @@ void Game::handleCombatRound()
             tie = false;
         }
     } while(tie);
+
+    if(_current_event.getCurrentEnemy().isEscapeEnabled())
+    {
+        _console.writeText("If you don't want to continue the fight, you can [c]escape[/c].");
+    }
 }
 
 void Game::performGameChecks()
@@ -707,11 +731,45 @@ void Game::performGameChecks()
 
 void Game::resolveCombatEndTriggers()
 {
-    for(const auto &condition: _player->getConditions())
+    for(const auto& condition: _player->getConditions())
     {
-        if(condition._clear_timing == ConditionClearTiming::COMBAT_END)
+        if(condition.getClearTiming() == CallbackTiming::COMBAT_END)
         {
-            _player->removeCondition(condition._name);
+            _player->removeCondition(condition.getName());
+        }
+    }
+
+    for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
+    {
+        if(callback.isValid() && callback.getTiming() == CallbackTiming::COMBAT_END)
+        {
+            callback();
+        }
+    }
+}
+
+void Game::resolveRoundActionTriggers(int round)
+{
+    for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
+    {
+        if(callback.isValid()
+        && callback.getTiming() == CallbackTiming::ROUND_ACTION
+        && callback.getRound() == round)
+        {
+            callback();
+        }
+    }
+}
+
+void Game::resolveRoundEndTriggers(int round)
+{
+    for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
+    {
+        if(callback.isValid()
+        && callback.getTiming() == CallbackTiming::ROUND_END
+        && callback.getRound() == round)
+        {
+            callback();
         }
     }
 }
@@ -738,6 +796,11 @@ GameState Game::createGameState()
     {
         game_state._event_enemy_name = _current_event.getCurrentEnemy().getName();
         game_state._event_enemy_constitution = _current_event.getCurrentEnemy().getConstitution();
+        game_state._event_enemy_escape_enabled = _current_event.getCurrentEnemy().isEscapeEnabled();
+        if(_current_event.getCurrentEnemy().isEscapeEnabled())
+        {
+            game_state._event_enemy_escape_redirect = _current_event.getCurrentEnemy().getEscapeRedirect();
+        }
     }
     game_state._event_gold_present = _current_event.hasGold();
     game_state._event_items_present = _current_event.hasItems();
@@ -870,6 +933,11 @@ void Game::restoreGameState(const GameState& game_state)
         {
             terminate(e.what());
         }
+        _current_event.getCurrentEnemy().setEscapeEnabled(game_state._event_enemy_escape_enabled);
+        if(game_state._event_enemy_escape_enabled)
+        {
+            _current_event.getCurrentEnemy().setEscapeRedirect(game_state._event_enemy_escape_redirect);
+        }
     }
     else
     {
@@ -945,13 +1013,15 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
             _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
         }
 
-        mode = InputMode::GAME;
+        mode = InputMode::KEY_REDIRECT;
+        _current_event.setRedirect(_current_event.getCurrentEnemy().getEscapeRedirect());
+        _current_event.setNewRoom(true);
+
         resolveDamage(false, damage);
         resolveCombatEndTriggers();
         _current_event.defeatAllEnemies();
         _combat_state._combat_in_progress = false;
         _console.writeText("You have escaped!");
-        mode = updateRoomExit(mode);
     }
 
     return mode;
@@ -1023,7 +1093,6 @@ InputMode Game::resolveGameInput(const std::string& user_input)
             mode = InputMode::SAVEDEL_CONFIRMATION;
         }
         break;
-    case Command::INVALID:
     default:
         if(handleLocalCommand(user_input))
         {
@@ -1176,7 +1245,6 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
             mode = InputMode::SAVEDEL_CONFIRMATION;
         }
         break;
-    case Command::INVALID:
     default:
         _console.writeText("Invalid command.");
         break;
@@ -1253,6 +1321,22 @@ void Game::updateEventRedirect(int id, bool new_room)
 void Game::onAddCondition(const QVariant& name)
 {
     _player->addCondition(_scripting_engine->parseCondition(name.toString()));
+}
+
+void Game::onDisableEscape()
+{
+    _current_event.getCurrentEnemy().setEscapeEnabled(false);
+}
+
+void Game::onEnableEscape(int redirect)
+{
+    _current_event.getCurrentEnemy().setEscapeEnabled(true);
+    _current_event.getCurrentEnemy().setEscapeRedirect(redirect);
+}
+
+void Game::onRemoveCondition(const QVariant& name)
+{
+    _player->removeCondition(name.toString().toStdString());
 }
 
 void Game::onStopCombat()

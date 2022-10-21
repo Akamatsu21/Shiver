@@ -24,8 +24,11 @@ public:
 
 signals:
     void addCondition(const QVariant& name);
+    void disableEscape();
+    void enableEscape(int redirect);
     void message(const QVariant& text);
     void redirect(int id, bool new_room);
+    void removeCondition(const QVariant& name);
     void stopCombat();
 };
 

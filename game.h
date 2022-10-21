@@ -79,8 +79,10 @@ class Game: public QObject
     void handleCombatRound();
     void performGameChecks();
 
-    // Condition clear triggers
+    // Resolve triggers
     void resolveCombatEndTriggers();
+    void resolveRoundActionTriggers(int round);
+    void resolveRoundEndTriggers(int round);
 
     // Game state saving
     GameState createGameState();
@@ -113,6 +115,9 @@ public:
 
 public slots:
     void onAddCondition(const QVariant& name);
+    void onDisableEscape();
+    void onEnableEscape(int redirect);
+    void onRemoveCondition(const QVariant& name);
     void onStopCombat();
 
 signals:

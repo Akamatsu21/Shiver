@@ -21,6 +21,8 @@ ID
 Enemy present
 Enemy name
 Enemy constitution
+Enemy escape enabled
+Enemy escape redirect
 Gold present
 Item present
 Item Limit

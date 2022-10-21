@@ -28,7 +28,8 @@ Game::Game(QObject* parent, Console& console):
     _generated_stats{0, 0, 0},
     _current_help_page(0),
     _save_file(""),
-    _script_api(new ScriptApi(this, _current_event, _combat_state))
+    _script_api(new ScriptApi(this, _current_event, _combat_state)),
+    _conan(false)
 {
 
 }
@@ -38,10 +39,10 @@ void Game::setup()
     try
     {
         _save_state_manager.initDirectories();
-        _scripting_engine->loadModules();
         _scripting_engine->registerEnums();
         _scripting_engine->registerScriptApi(_script_api);
         _scripting_engine->registerGameVariables(_game_vars);
+        _scripting_engine->loadModules();
         _help_pages = _scripting_engine->parseHelpPages();
     }
     catch(const std::runtime_error& e)
@@ -330,6 +331,8 @@ void Game::handleSaveListCommand()
 
 void Game::handleStatsCommand()
 {
+    std::string player_name = _conan ? "Conan The Barbarian King"
+                                     : "Adventurer";
     std::string agility_mod =
             (_player->getAgilityModifier() != 0
              ? utils::createString(" (",
@@ -351,7 +354,7 @@ void Game::handleStatsCommand()
                                    _player->getLuckModifier(),
                                    ")")
              : "");
-    std::string msg = utils::createString("[p]Adventurer[/p]",
+    std::string msg = utils::createString("[p]", player_name, "[/p]",
                                           "<br />Agility: ",
                                           _player->getAgilityWithoutModifiers(),
                                           "/", _player->getStartingAgility(),
@@ -479,10 +482,22 @@ void Game::displayHelpPage()
 void Game::characterCreation()
 {
     _console.clearScreen();
-    std::string msg = "Creating your character...<br />Randomly assigning player stats:<br />";
-    int agility = utils::rollD6(1) + 6;
-    int constitution = utils::rollD6(2) + 12;
-    int luck = utils::rollD6(1) + 6;
+    std::string msg;
+    int agility, constitution, luck;
+    if(_conan)
+    {
+        msg = "Creating your character...<br />Conan The Barbarian King begins with the highest possible stats:<br />";
+        agility = 12;
+        constitution = 24;
+        luck = 12;
+    }
+    else
+    {
+        msg = "Creating your character...<br />Randomly assigning player stats:<br />";
+        agility = utils::rollD6(1) + 6;
+        constitution = utils::rollD6(2) + 12;
+        luck = utils::rollD6(1) + 6;
+    }
     _generated_stats = std::make_tuple(agility, constitution, luck);
 
     msg += utils::createString("Agility: ", agility,
@@ -1219,6 +1234,9 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
     auto [command, params] = CommandParser::parseCommand(user_input);
     switch(command)
     {
+    case Command::CHEAT:
+        _conan = true;
+        // Intentional fallthrough.
     case Command::BEGIN:
         characterCreation();
         mode = InputMode::CHARACTER_CREATION;

@@ -43,7 +43,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             game_vars.incrementCounter("orc_kills", +1);
@@ -70,7 +70,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             system.message("Suddenly, you hear another monster approaching...");
@@ -85,7 +85,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.RoundEnd; },
+                        timing: CallbackTiming.RoundEnd,
                         round: 1,
                         callback: function()
                         {
@@ -260,7 +260,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             if(system.getCurrentRound() % 2 == 0)

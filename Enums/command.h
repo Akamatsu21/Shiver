@@ -20,7 +20,8 @@ enum class Command
     SAVE,
     LOAD,
     SAVELIST,
-    SAVEDEL
+    SAVEDEL,
+    CHEAT
 };
 
 #endif // COMMAND_H

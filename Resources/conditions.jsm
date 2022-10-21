@@ -2,9 +2,9 @@ export const conditions =
 {
     cursed_gloves:
     {
-        stat: function() { return PlayerStat.Agility; },
+        stat: PlayerStat.Agility,
         modifier: -1,
-        clear_timing: function() { return CallbackTiming.CombatEnd; },
+        clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
             player.removeItem("Cursed Gloves (-1 Agility)");
@@ -13,8 +13,8 @@ export const conditions =
     },
     enchanted_sword:
     {
-        stat: function() { return PlayerStat.CombatScore; },
+        stat: PlayerStat.CombatScore,
         modifier: +1,
-        clear_timing: function() { return CallbackTiming.None; }
+        clear_timing: CallbackTiming.None
     }
 };

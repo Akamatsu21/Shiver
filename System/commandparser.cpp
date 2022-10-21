@@ -12,6 +12,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     {
         return {Command::INVALID, std::queue<std::string>()};
     }
+    else if(input == "Summon Conan The Barbarian King")
+    {
+        return {Command::CHEAT, std::queue<std::string>()};
+    }
 
     std::istringstream iss(input);
     std::queue<std::string> params(

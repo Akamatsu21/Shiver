@@ -40,6 +40,9 @@ class Game: public QObject
     // Object for exporting game information to JavaScript.
     ScriptApi* _script_api;
 
+    // Secret switch.
+    bool _conan;
+
     // Command handlers.
     bool handleDirectionCommand(Direction direction);
     void handleDrinkCommand();

@@ -566,7 +566,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             system.message("Time to get the gold! You approach the place where the urns were.");
@@ -834,7 +834,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.RoundEnd; },
+                        timing: CallbackTiming.RoundEnd,
                         round: 1,
                         callback: function()
                         {
@@ -980,7 +980,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             system.message("You may [l]look[/l] around the room if you wish. Otherwise, [l]leave[/l] the cavern.");
@@ -1228,7 +1228,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             player.modifyLuck(+1);
@@ -1280,7 +1280,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.RoundEnd; },
+                        timing: CallbackTiming.RoundEnd,
                         round: 1,
                         callback: function()
                         {
@@ -1291,7 +1291,7 @@ export const events =
                         }
                     },
                     {
-                        timing: function() { return CallbackTiming.RoundEnd; },
+                        timing: CallbackTiming.RoundEnd,
                         round: 2,
                         callback: function()
                         {
@@ -1415,7 +1415,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.RoundEnd; },
+                        timing: CallbackTiming.RoundEnd,
                         round: 1,
                         callback: function()
                         {
@@ -1851,7 +1851,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.RoundAction; },
+                        timing: CallbackTiming.RoundAction,
                         round: 2,
                         callback: function()
                         {
@@ -1940,7 +1940,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             system.message("You may now [l]inspect[/l] the stone box on the altar or [l]collect[/l] the gold from the floor.");
@@ -2355,7 +2355,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             player.modifyLuck(+2);
@@ -2423,7 +2423,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse.");
@@ -2572,7 +2572,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             player.modifyLuck(+1);
@@ -2696,7 +2696,7 @@ export const events =
                 callbacks:
                 [
                     {
-                        timing: function() { return CallbackTiming.CombatEnd; },
+                        timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
                             player.modifyAgility(+1);

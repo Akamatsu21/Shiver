@@ -10,16 +10,16 @@
 |                                                      |
 |------------------------------------------------------|[/e]
 
-          Original game by Jacek Ciesielski.
+           Original game by Jacek Ciesielski.
 
-                Hey, brave [p]Adventurer[/p]!
-    Is it you that was said to have ice-cold water
-        flowing in his veins instead of blood,
-          and a body made out of pure steel?
+             Hey, brave [p]Adventurer[/p]!
+     Is it you that was said to have ice-cold water
+         flowing in his veins instead of blood,
+           and a body made out of pure steel?
 If so, have a look in the direction of the setting sun.
-  Over there, amongst the remnants of the Kingdom of
-      Almanhagor, hides an undiscovered Dungeon.
-Only you can excavate its Great Mystery. Get going!
+   Over there, amongst the remnants of the Kingdom of
+       Almanhagor, hides an undiscovered Dungeon.
+  Only you can excavate its Great Mystery. Get going!
 
 
 Type [c]begin[/c] to start your adventure.

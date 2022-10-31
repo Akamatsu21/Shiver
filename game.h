@@ -78,9 +78,9 @@ class Game: public QObject
     void saveGame();
 
     // Game checks
-    void checkForDeath();
+    void checkForEnemyDeath();
     void handleCombatRound();
-    void performGameChecks();
+    bool performGameChecks();   // true if player died
 
     // Resolve triggers
     void resolveCombatEndTriggers();
@@ -109,6 +109,7 @@ public:
     InputMode resolveTitleScreenInput(const std::string& user_input);
     InputMode resolveYesNoChoice(const std::string& user_input);
 
+    void gameOverScreen();
     void titleScreen();
     void nextHelpPage();
     void previousHelpPage();
@@ -124,7 +125,7 @@ public slots:
     void onStopCombat();
 
 signals:
-    void gameOver();
+    void gameCrash();
 };
 
 #endif // GAME_H

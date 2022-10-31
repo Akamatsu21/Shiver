@@ -27,6 +27,8 @@ class GameWindow: public QObject
     int _interrupt_id;
     bool _interrupt_new_room;
 
+    void resetGame();
+    void setupGameConnections();
     void updateInputState();
 
 private slots:
@@ -37,7 +39,7 @@ private slots:
     void onPreviousHelpPage();
     void onLeaveHelp();
 
-    void onGameOver();
+    void onGameCrash();
     void onRedirect(int id, bool new_room);
 
 public:

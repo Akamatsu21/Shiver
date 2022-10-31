@@ -27,8 +27,27 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
     connect(&_console, &Console::returnReady,
             this, &GameWindow::onUserKeyReceived);
 
-    connect(_game, &Game::gameOver,
-            this, &GameWindow::onGameOver);
+    setupGameConnections();
+}
+
+void GameWindow::resetGame()
+{
+    disconnect(_game);
+    delete _game;
+    _input_mode = InputMode::TITLE_SCREEN;
+    _prev_mode = InputMode::TITLE_SCREEN;
+    _interrupted = false;
+    _interrupt_id = 0;
+    _interrupt_new_room = false;
+    _game = new Game(this, _console);
+    setupGameConnections();
+    startGame();
+}
+
+void GameWindow::setupGameConnections()
+{
+    connect(_game, &Game::gameCrash,
+            this, &GameWindow::onGameCrash);
     connect(_game->getScriptApi(), &ScriptApi::redirect,
             this, &GameWindow::onRedirect);
     connect(_game->getScriptApi(), &ScriptApi::message,
@@ -75,6 +94,9 @@ void GameWindow::updateInputState()
         _console.setWaitingForReturn(false);
         _console.setHelpVisible(false);
         break;
+    case InputMode::KEY_GAME_OVER:
+        _game->gameOverScreen();
+        [[fallthrough]];
     case InputMode::KEY_GAME_START:
     case InputMode::KEY_REDIRECT:
         _console.setWaitingForInput(false);
@@ -132,6 +154,9 @@ void GameWindow::onUserKeyReceived()
     case InputMode::KEY_GAME_START:
         _input_mode = _game->resolveGameStartInput();
         break;
+    case InputMode::KEY_GAME_OVER:
+        resetGame();
+        return;
     case InputMode::KEY_REDIRECT:
         _input_mode = _game->resolveRedirectInput();
         break;
@@ -160,10 +185,11 @@ void GameWindow::onLeaveHelp()
     updateInputState();
 }
 
-void GameWindow::onGameOver()
+void GameWindow::onGameCrash()
 {
-    // TODO: Improve this message
-    _console.writeError("Game Over");
+    _console.setWaitingForInput(false);
+    _console.setWaitingForReturn(false);
+    _console.setHelpVisible(false);
 }
 
 void GameWindow::onRedirect(int id, bool new_room)

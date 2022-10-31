@@ -5,8 +5,8 @@ import QtQuick.Controls 2.15
 Window
 {
     id: main_window
-    width: 800
-    height: 1000
+    minimumWidth: 1100
+    minimumHeight: 1000
     visible: true
     title: "Shiver"
     signal leftArrowReceived()

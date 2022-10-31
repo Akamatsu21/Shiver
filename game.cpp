@@ -50,7 +50,7 @@ void Game::setup()
         _console.writeError("Fatal error while loading the game.");
         _console.writeError(e.what());
         _console.writeError("Game terminated.");
-        emit gameOver();
+        emit gameCrash();
     }
 }
 
@@ -665,7 +665,7 @@ void Game::saveGame()
     }
 }
 
-void Game::checkForDeath()
+void Game::checkForEnemyDeath()
 {
     if(_combat_state._combat_in_progress)
     {
@@ -687,13 +687,6 @@ void Game::checkForDeath()
                 displayCurrentEnemy();
             }
         }
-    }
-
-    if(_player->getConstitution() == 0)
-    {
-        _console.writeText("You are dead!");
-        _combat_state._combat_in_progress = false;
-        emit gameOver();
     }
 }
 
@@ -735,13 +728,19 @@ void Game::handleCombatRound()
     }
 }
 
-void Game::performGameChecks()
+bool Game::performGameChecks()
 {
-    checkForDeath();
+    checkForEnemyDeath();
+    if(_player->getConstitution() == 0)
+    {
+        _combat_state._combat_in_progress = false;
+        return true;
+    }
     if(_combat_state._combat_in_progress)
     {
         handleCombatRound();
     }
+    return false;
 }
 
 void Game::resolveCombatEndTriggers()
@@ -841,12 +840,12 @@ GameState Game::createGameState()
 
 void Game::restoreGameState(const GameState& game_state)
 {
-    auto terminate = [this](const char* msg)
+    auto reportError = [this](const char* msg)
     {
         _console.writeError("Fatal error while loading savefile.");
         _console.writeError(msg);
         _console.writeError("Game terminated.");
-        emit gameOver();
+        emit gameCrash();
     };
 
     delete _player;
@@ -867,7 +866,8 @@ void Game::restoreGameState(const GameState& game_state)
     }
     catch(const std::out_of_range& e)
     {
-        terminate(e.what());
+        reportError(e.what());
+        return;
     }
     _scripting_engine->registerPlayer(_player);
 
@@ -922,7 +922,8 @@ void Game::restoreGameState(const GameState& game_state)
             }
             else
             {
-                terminate("Incorrect game state loaded. Error code: 3189");
+                reportError("Incorrect game state loaded. Error code: 3189");
+                return;
             }
         }
     }
@@ -932,7 +933,8 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasEnemies())
         {
-            terminate("Incorrect game state loaded. Error code: 5554");
+            reportError("Incorrect game state loaded. Error code: 5554");
+            return;
         }
 
         while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
@@ -946,7 +948,8 @@ void Game::restoreGameState(const GameState& game_state)
         }
         catch(const std::out_of_range& e)
         {
-            terminate(e.what());
+            reportError(e.what());
+            return;
         }
         _current_event.getCurrentEnemy().setEscapeEnabled(game_state._event_enemy_escape_enabled);
         if(game_state._event_enemy_escape_enabled)
@@ -969,7 +972,8 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasItems())
         {
-            terminate("Incorrect game state loaded. Error code: 9254");
+            reportError("Incorrect game state loaded. Error code: 9254");
+            return;
         }
         _current_event.setItemLimit(game_state._event_item_limit);
     }
@@ -979,7 +983,8 @@ void Game::restoreGameState(const GameState& game_state)
     {
         if(!_current_event.hasEnemies())
         {
-            terminate("Incorrect game state loaded. Error code: 3642");
+            reportError("Incorrect game state loaded. Error code: 3642");
+            return;
         }
         _combat_state._combat_round = game_state._combat_round;
         _combat_state._enemy_score = game_state._combat_enemy_score;
@@ -1130,8 +1135,11 @@ InputMode Game::resolveGameInput(const std::string& user_input)
     if(perform_game_checks)
     {
         bool combat_happened = _combat_state._combat_in_progress;
-        performGameChecks();
-        if(combat_happened && !_combat_state._combat_in_progress)
+        if(performGameChecks())
+        {
+            mode = InputMode::KEY_GAME_OVER;
+        }
+        else if(combat_happened && !_combat_state._combat_in_progress)
         {
             mode = updateRoomExit(mode);
         }
@@ -1144,7 +1152,10 @@ InputMode Game::resolveGameStartInput()
 {
     _game_running = true;
     InputMode mode = updateCurrentEvent(1, true);
-    performGameChecks();
+    if(performGameChecks())
+    {
+        mode = InputMode::KEY_GAME_OVER;
+    }
     return mode;
 }
 
@@ -1180,7 +1191,10 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
         {
             mode = updateCurrentEvent(option._redirect, option._new_room);
         }
-        performGameChecks();
+        if(performGameChecks())
+        {
+            mode = InputMode::KEY_GAME_OVER;
+        }
     }
 
     return mode;
@@ -1190,7 +1204,10 @@ InputMode Game::resolveRedirectInput()
 {
     InputMode mode = updateCurrentEvent(_current_event.getRedirect(),
                                         _current_event.leadsToNewRoom());
-    performGameChecks();
+    if(performGameChecks())
+    {
+        mode = InputMode::KEY_GAME_OVER;
+    }
     return mode;
 }
 
@@ -1285,10 +1302,28 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
         {
             mode = updateCurrentEvent(option._redirect, option._new_room);
         }
-        performGameChecks();
+        if(performGameChecks())
+        {
+            mode = InputMode::KEY_GAME_OVER;
+        }
     }
 
     return mode;
+}
+
+void Game::gameOverScreen()
+{
+    try
+    {
+        _console.clearScreen();
+        _console.writeText(utils::getGameOverText());
+    }
+    catch(const std::system_error& e)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(e.what());
+        _console.writeError("Game over screen returned an error.");
+    }
 }
 
 void Game::titleScreen()

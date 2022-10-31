@@ -7,6 +7,7 @@
     </qresource>
     <qresource prefix="/static">
         <file>title.txt</file>
+        <file>gameover.txt</file>
     </qresource>
     <qresource prefix="/qml">
         <file>main.qml</file>

@@ -14,6 +14,7 @@ enum class InputMode
     LOAD_CONFIRMATION,
     SAVEDEL_CONFIRMATION,
     KEY_GAME_START,
+    KEY_GAME_OVER,
     KEY_REDIRECT
 };
 

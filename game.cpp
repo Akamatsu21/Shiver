@@ -1137,7 +1137,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         bool combat_happened = _combat_state._combat_in_progress;
         if(performGameChecks())
         {
-            mode = InputMode::KEY_GAME_OVER;
+            mode = InputMode::KEY_DEATH;
         }
         else if(combat_happened && !_combat_state._combat_in_progress)
         {
@@ -1154,7 +1154,7 @@ InputMode Game::resolveGameStartInput()
     InputMode mode = updateCurrentEvent(1, true);
     if(performGameChecks())
     {
-        mode = InputMode::KEY_GAME_OVER;
+        mode = InputMode::KEY_DEATH;
     }
     return mode;
 }
@@ -1193,7 +1193,7 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
         }
         if(performGameChecks())
         {
-            mode = InputMode::KEY_GAME_OVER;
+            mode = InputMode::KEY_DEATH;
         }
     }
 
@@ -1206,7 +1206,7 @@ InputMode Game::resolveRedirectInput()
                                         _current_event.leadsToNewRoom());
     if(performGameChecks())
     {
-        mode = InputMode::KEY_GAME_OVER;
+        mode = InputMode::KEY_DEATH;
     }
     return mode;
 }
@@ -1304,7 +1304,7 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
         }
         if(performGameChecks())
         {
-            mode = InputMode::KEY_GAME_OVER;
+            mode = InputMode::KEY_DEATH;
         }
     }
 

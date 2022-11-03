@@ -94,10 +94,9 @@ void GameWindow::updateInputState()
         _console.setWaitingForReturn(false);
         _console.setHelpVisible(false);
         break;
-    case InputMode::KEY_GAME_OVER:
-        _game->gameOverScreen();
-        [[fallthrough]];
+    case InputMode::KEY_DEATH:
     case InputMode::KEY_GAME_START:
+    case InputMode::KEY_GAME_OVER:
     case InputMode::KEY_REDIRECT:
         _console.setWaitingForInput(false);
         _console.setWaitingForReturn(true);
@@ -151,6 +150,10 @@ void GameWindow::onUserKeyReceived()
     _prev_mode = _input_mode;
     switch(_input_mode)
     {
+    case InputMode::KEY_DEATH:
+        _game->gameOverScreen();
+        _input_mode = InputMode::KEY_GAME_OVER;
+        break;
     case InputMode::KEY_GAME_START:
         _input_mode = _game->resolveGameStartInput();
         break;

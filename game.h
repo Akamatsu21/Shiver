@@ -44,17 +44,17 @@ class Game: public QObject
     bool _conan;
 
     // Command handlers.
-    bool handleDirectionCommand(Direction direction);
+    bool handleDirectionCommand(Direction direction);   // true if valid movement
     void handleDrinkCommand();
     void handleEatCommand();
-    bool handleEscapeCommand();
-    bool handleFightCommand();
+    bool handleEscapeCommand(); // true if valid
+    bool handleFightCommand();  // true if valid
     void handleHelpCommand();
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed); // true if successful
-    bool handleLocalCommand(const std::string& input);
-    bool handleLuckyCommand();
+    bool handleLocalCommand(const std::string& input);  // true if valid
+    bool handleLuckyCommand();  // true if valid
     bool handleSaveCommand(const std::string& save_file); // true if input mode change needed
-    bool handleSaveDelCommand(const std::string& save_file);
+    bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();
     void handleStatsCommand();
     void handleTakeCommand(const std::string& item);

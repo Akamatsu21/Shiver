@@ -7,7 +7,7 @@
 class Console: public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString visibleText READ getVisibleText NOTIFY visibleTextChanged)
+    Q_PROPERTY(QString visibleText READ getVisibleText WRITE setVisibleText NOTIFY visibleTextChanged)
     Q_PROPERTY(bool waitingForInput READ isWatingForInput NOTIFY waitingForInputChanged)
     Q_PROPERTY(bool waitingForReturn READ isWatingForReturn NOTIFY waitingForReturnChanged)
     Q_PROPERTY(bool helpVisible READ isHelpVisible NOTIFY helpVisibleChanged)
@@ -39,12 +39,14 @@ public:
     bool isHelpVisible() const;
 
     void setLog(const std::string& value);
+    void setVisibleText(const QString& value);
     void setWaitingForInput(bool value);
     void setWaitingForReturn(bool value);
     void setHelpVisible(bool value);
 
     void clearScreen();
-    void restoreLog();
+    void pasteLine();
+    void pasteText(const std::string& text);
     void showHelpPage(int page_number, int total_pages, const std::string& text);
     void writeError(const std::string& error);
     void writeLine();
@@ -56,9 +58,12 @@ public slots:
     void obtainUserInput(const QString& input);
     void obtainReturn();
     void onMessage(const QVariant& text);
+    void restoreLog();
 
 signals:
     void visibleTextChanged();
+    void printText(const QString& text);
+    void forceLogPrint();
     void waitingForInputChanged();
     void waitingForReturnChanged();
     void helpVisibleChanged();

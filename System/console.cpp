@@ -50,6 +50,15 @@ void Console::setLog(const std::string& value)
     _log = value;
 }
 
+void Console::setVisibleText(const QString& value)
+{
+    if(_visible_text != value)
+    {
+        _visible_text = value;
+        emit visibleTextChanged();
+    }
+}
+
 void Console::setWaitingForInput(bool value)
 {
     if(_waiting_for_input != value)
@@ -129,10 +138,17 @@ void Console::clearScreen()
     _log = "";
 }
 
-void Console::restoreLog()
+void Console::pasteLine()
 {
-    _visible_text = QString::fromStdString(_log);
-    emit visibleTextChanged();
+    _log += "<br />";
+    emit forceLogPrint();
+}
+
+void Console::pasteText(const std::string& text)
+{
+    std::string parsed_text = parseMarkup(text);
+    _log += parsed_text + "<br />";
+    emit forceLogPrint();
 }
 
 void Console::showHelpPage(int page_number, int total_pages, const std::string& text)
@@ -149,20 +165,20 @@ void Console::showHelpPage(int page_number, int total_pages, const std::string& 
 void Console::writeError(const std::string& error)
 {
     _log += "<font color=\"red\">" + error + "</font><br />";
-    restoreLog();
+    emit forceLogPrint();
 }
 
 void Console::writeLine()
 {
     _log += "<br />";
-    restoreLog();
+    emit printText("<br />");
 }
 
 void Console::writeText(const std::string &text)
 {
-    std::string parsed_text = parseMarkup(text);
-    _log += parsed_text + "<br />";
-    restoreLog();
+    std::string parsed_text = parseMarkup(text) + "<br />";
+    _log += parsed_text;
+    emit printText(QString::fromStdString(parsed_text));
 }
 
 void Console::moveHistoryUp()
@@ -193,7 +209,7 @@ void Console::moveHistoryDown()
 void Console::obtainUserInput(const QString& input)
 {
     setWaitingForInput(false);
-    writeText("<br /><font color=\"gold\">></font> " + input.toStdString());
+    pasteText("<br /><font color=\"gold\">></font> " + input.toStdString());
     _input_history.push_back(input.toStdString());
     _history_it = std::end(_input_history);
     emit inputReady(input);
@@ -202,11 +218,17 @@ void Console::obtainUserInput(const QString& input)
 void Console::obtainReturn()
 {
     setWaitingForReturn(false);
-    writeLine();
+    pasteLine();
     emit returnReady();
 }
 
 void Console::onMessage(const QVariant& text)
 {
     writeText(text.toString().toStdString());
+}
+
+void Console::restoreLog()
+{
+    _visible_text = QString::fromStdString(_log);
+    emit visibleTextChanged();
 }

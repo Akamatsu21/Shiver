@@ -992,7 +992,7 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _console.setLog(game_state._log);
-    _console.restoreLog();
+    emit _console.forceLogPrint();
 }
 
 InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
@@ -1316,7 +1316,7 @@ void Game::gameOverScreen()
     try
     {
         _console.clearScreen();
-        _console.writeText(utils::getGameOverText());
+        _console.pasteText(utils::getGameOverText());
     }
     catch(const std::system_error& e)
     {
@@ -1331,7 +1331,7 @@ void Game::titleScreen()
     try
     {
         _console.clearScreen();
-        _console.writeText(utils::getTitleScreenText());
+        _console.pasteText(utils::getTitleScreenText());
     }
     catch(const std::system_error& e)
     {
@@ -1362,7 +1362,7 @@ void Game::previousHelpPage()
 void Game::exitHelpPage()
 {
     _current_help_page = 0;
-    _console.restoreLog();
+    emit _console.forceLogPrint();
 }
 
 void Game::updateEventRedirect(int id, bool new_room)

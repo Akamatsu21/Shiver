@@ -61,7 +61,7 @@ ScriptApi* Game::getScriptApi()
 
 bool Game::handleDirectionCommand(Direction direction)
 {
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can travel.");
         return false;
@@ -115,7 +115,7 @@ void Game::handleDrinkCommand()
 
 void Game::handleEatCommand()
 {
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can eat.");
         return;
@@ -139,7 +139,7 @@ void Game::handleEatCommand()
 
 bool Game::handleEscapeCommand()
 {
-    if(!_combat_state._combat_in_progress)
+    if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
         return false;
@@ -156,22 +156,22 @@ bool Game::handleEscapeCommand()
 
 bool Game::handleFightCommand()
 {
-    if(!_combat_state._combat_in_progress)
+    if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
         return false;
     }
 
-    resolveRoundActionTriggers(_combat_state._combat_round);
-    if(!_combat_state._combat_in_progress)
+    resolveRoundActionTriggers(_combat_state.combat_round);
+    if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
         return false;
     }
 
-    resolveDamage(_combat_state._player_score > _combat_state._enemy_score, 2);
+    resolveDamage(_combat_state.player_score > _combat_state.enemy_score, 2);
     displayCombatStatus();
-    resolveRoundEndTriggers(_combat_state._combat_round);
+    resolveRoundEndTriggers(_combat_state.combat_round);
     return true;
 }
 
@@ -201,13 +201,12 @@ bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_nee
     if(confirmation_needed)
     {
         _console.writeText("Are you sure you want to load a saved game?");
-        return true;
     }
     else
     {
         loadGame();
-        return true;
     }
+    return true;
 }
 
 bool Game::handleLocalCommand(const std::string& input)
@@ -221,14 +220,7 @@ bool Game::handleLocalCommand(const std::string& input)
                                command) != std::end(local_commands);
         if(valid)
         {
-            if(_combat_state._combat_in_progress)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return !_combat_state.combat_in_progress;
         }
     }
 
@@ -237,20 +229,20 @@ bool Game::handleLocalCommand(const std::string& input)
 
 bool Game::handleLuckyCommand()
 {
-    if(!_combat_state._combat_in_progress)
+    if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
         return false;
     }
 
-    resolveRoundActionTriggers(_combat_state._combat_round);
-    if(!_combat_state._combat_in_progress)
+    resolveRoundActionTriggers(_combat_state.combat_round);
+    if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
         return false;
     }
 
-    bool player_win = _combat_state._player_score > _combat_state._enemy_score;
+    bool player_win = _combat_state.player_score > _combat_state.enemy_score;
     bool player_lucky = _player->performLuckCheck();
     int damage = 0;
     if(player_win)
@@ -265,7 +257,7 @@ bool Game::handleLuckyCommand()
     _console.writeText(player_lucky ? "Luck check successful!" : "Luck check failed!");
     resolveDamage(player_win, damage);
     displayCombatStatus();
-    resolveRoundEndTriggers(_combat_state._combat_round);
+    resolveRoundEndTriggers(_combat_state.combat_round);
     return true;
 }
 
@@ -278,8 +270,7 @@ bool Game::handleSaveCommand(const std::string& save_file)
     }
 
     _save_file = save_file;
-    bool new_file = !_save_state_manager.saveFileExists(_save_file);
-    if(new_file)
+    if(!_save_state_manager.saveFileExists(_save_file))
     {
         saveGame();
         return false;
@@ -325,7 +316,7 @@ void Game::handleSaveListCommand()
     }
     else
     {
-        _console.writeText(_save_state_manager.listSaveFiles());
+        _console.writeText(save_list);
     }
 }
 
@@ -333,54 +324,48 @@ void Game::handleStatsCommand()
 {
     std::string player_name = _conan ? "Conan The Barbarian King"
                                      : "Adventurer";
-    std::string agility_mod =
-            (_player->getAgilityModifier() != 0
-             ? utils::createString(" (",
-                                   (_player->getAgilityModifier() > 0 ? "+" : ""),
-                                   _player->getAgilityModifier(),
-                                   ")")
-             : "");
-    std::string constitution_mod =
-            (_player->getConstitutionModifier() != 0
-             ? utils::createString(" (",
-                                   (_player->getConstitutionModifier() > 0 ? "+" : ""),
-                                   _player->getConstitutionModifier(),
-                                   ")")
-             : "");
-    std::string luck_mod =
-            (_player->getLuckModifier() != 0
-             ? utils::createString(" (",
-                                   (_player->getLuckModifier() > 0 ? "+" : ""),
-                                   _player->getLuckModifier(),
-                                   ")")
-             : "");
+    auto createModString = [](int val)
+    {
+        if(val == 0)
+        {
+            return std::string();
+        }
+        else
+        {
+            return utils::createString(" (",
+                                       (val > 0 ? "+" : ""),
+                                       val,
+                                       ")");
+        }
+    };
+
     std::string msg = utils::createString("[p]", player_name, "[/p]",
                                           "<br />Agility: ",
-                                          _player->getAgilityWithoutModifiers(),
-                                          "/", _player->getStartingAgility(),
-                                          agility_mod,
+                                            _player->getAgilityWithoutModifiers(),
+                                            "/", _player->getStartingAgility(),
+                                            createModString(_player->getAgilityModifier()),
                                           "<br />Constitution: ",
-                                          _player->getConstitutionWithoutModifiers(),
-                                          "/", _player->getStartingConstitution(),
-                                          constitution_mod,
+                                            _player->getConstitutionWithoutModifiers(),
+                                            "/", _player->getStartingConstitution(),
+                                            createModString(_player->getConstitutionModifier()),
                                           "<br />Luck: ",
-                                          _player->getLuckWithoutModifiers(),
-                                          "/", _player->getStartingLuck(),
-                                          luck_mod,
+                                            _player->getLuckWithoutModifiers(),
+                                            "/", _player->getStartingLuck(),
+                                            createModString(_player->getLuckModifier()),
                                           "<br />Gold: ",
-                                          _player->getGold(),
+                                            _player->getGold(),
                                           "<br />Rations: ",
-                                          _player->getRations(),
+                                            _player->getRations(),
                                           "<br />", _player->getElixirTypeAsString(), ": ",
-                                          _player->getElixirCount(),
+                                            _player->getElixirCount(),
                                           "<br /><br />Inventory:<br />",
-                                          _player->getInventoryHtml());
+                                            _player->getInventoryHtml());
     _console.writeText(msg);
 }
 
 void Game::handleTakeCommand(const std::string& item)
 {
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can pick up items.");
         return;
@@ -453,7 +438,7 @@ void Game::displayCombatStatus()
 void Game::displayCurrentEvent()
 {
     _console.writeText(_current_event.getDescription());
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         displayCurrentEnemy();
     }
@@ -604,7 +589,7 @@ InputMode Game::updateCurrentEvent(int id, bool new_room)
     }
     displayCurrentEvent();
 
-    if(!_combat_state._combat_in_progress)
+    if(!_combat_state.combat_in_progress)
     {
         mode = updateRoomExit(mode);
     }
@@ -667,7 +652,7 @@ void Game::saveGame()
 
 void Game::checkForEnemyDeath()
 {
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         if(_current_event.getCurrentEnemy().getConstitution() == 0)
         {
@@ -679,11 +664,11 @@ void Game::checkForEnemyDeath()
 
             if(!_current_event.hasEnemies())
             {
-                _combat_state._combat_in_progress = false;
+                _combat_state.combat_in_progress = false;
             }
             else
             {
-                _combat_state._combat_round = 0;
+                _combat_state.combat_round = 0;
                 displayCurrentEnemy();
             }
         }
@@ -692,24 +677,24 @@ void Game::checkForEnemyDeath()
 
 void Game::handleCombatRound()
 {
-    ++_combat_state._combat_round;
+    ++_combat_state.combat_round;
 
     bool tie = false;
     do
     {
-        _combat_state._enemy_score = utils::rollD6(2) + _current_event.getCurrentEnemy().getAgility();
-        _combat_state._player_score = utils::rollD6(2) + _player->getAgility() + _player->getCombatModifier();
+        _combat_state.enemy_score = utils::rollD6(2) + _current_event.getCurrentEnemy().getAgility();
+        _combat_state.player_score = utils::rollD6(2) + _player->getAgility() + _player->getCombatModifier();
 
         std::string msg = utils::createString("Combat round ",
-                                              _combat_state._combat_round,
-                                              "<br />[e]",_current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
-                                              _combat_state._enemy_score,
+                                              _combat_state.combat_round,
+                                              "<br />[e]", _current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
+                                              _combat_state.enemy_score,
                                               "<br />[p]Player[/p]'s score: ",
-                                              _combat_state._player_score);
+                                              _combat_state.player_score);
 
         _console.writeText(msg);
 
-        if(_combat_state._player_score == _combat_state._enemy_score)
+        if(_combat_state.player_score == _combat_state.enemy_score)
         {
             tie = true;
             _console.writeLine();
@@ -733,10 +718,10 @@ bool Game::performGameChecks()
     checkForEnemyDeath();
     if(_player->getConstitution() == 0)
     {
-        _combat_state._combat_in_progress = false;
+        _combat_state.combat_in_progress = false;
         return true;
     }
-    if(_combat_state._combat_in_progress)
+    if(_combat_state.combat_in_progress)
     {
         handleCombatRound();
     }
@@ -791,49 +776,49 @@ void Game::resolveRoundEndTriggers(int round)
 GameState Game::createGameState()
 {
     GameState game_state = {};
-    game_state._player_agility = _player->getAgilityWithoutModifiers();
-    game_state._player_constitution = _player->getConstitutionWithoutModifiers();
-    game_state._player_luck = _player->getLuckWithoutModifiers();
-    game_state._player_start_agility = _player->getStartingAgility();
-    game_state._player_start_constitution = _player->getStartingConstitution();
-    game_state._player_start_luck = _player->getStartingLuck();
-    game_state._player_gold = _player->getGold();
-    game_state._player_rations = _player->getRations();
-    game_state._player_elixir_count = _player->getElixirCount();
-    game_state._player_elixir_type = static_cast<int>(_player->getElixirType());
-    game_state._player_inventory = _player->getInventory();
-    game_state._player_conditions = _player->getConditionsString();
+    game_state.player_agility = _player->getAgilityWithoutModifiers();
+    game_state.player_constitution = _player->getConstitutionWithoutModifiers();
+    game_state.player_luck = _player->getLuckWithoutModifiers();
+    game_state.player_start_agility = _player->getStartingAgility();
+    game_state.player_start_constitution = _player->getStartingConstitution();
+    game_state.player_start_luck = _player->getStartingLuck();
+    game_state.player_gold = _player->getGold();
+    game_state.player_rations = _player->getRations();
+    game_state.player_elixir_count = _player->getElixirCount();
+    game_state.player_elixir_type = static_cast<int>(_player->getElixirType());
+    game_state.player_inventory = _player->getInventory();
+    game_state.player_conditions = _player->getConditionsString();
 
-    game_state._event_id = _current_event.getId();
-    game_state._event_enemy_present = _current_event.hasEnemies();
+    game_state.event_id = _current_event.getId();
+    game_state.event_enemy_present = _current_event.hasEnemies();
     if(_current_event.hasEnemies())
     {
-        game_state._event_enemy_name = _current_event.getCurrentEnemy().getName();
-        game_state._event_enemy_constitution = _current_event.getCurrentEnemy().getConstitution();
-        game_state._event_enemy_escape_enabled = _current_event.getCurrentEnemy().isEscapeEnabled();
+        game_state.event_enemy_name = _current_event.getCurrentEnemy().getName();
+        game_state.event_enemy_constitution = _current_event.getCurrentEnemy().getConstitution();
+        game_state.event_enemy_escape_enabled = _current_event.getCurrentEnemy().isEscapeEnabled();
         if(_current_event.getCurrentEnemy().isEscapeEnabled())
         {
-            game_state._event_enemy_escape_redirect = _current_event.getCurrentEnemy().getEscapeRedirect();
+            game_state.event_enemy_escape_redirect = _current_event.getCurrentEnemy().getEscapeRedirect();
         }
     }
-    game_state._event_gold_present = _current_event.hasGold();
-    game_state._event_items_present = _current_event.hasItems();
+    game_state.event_gold_present = _current_event.hasGold();
+    game_state.event_items_present = _current_event.hasItems();
     if(_current_event.hasItems())
     {
-        game_state._event_item_limit = _current_event.getItemLimit();
+        game_state.event_item_limit = _current_event.getItemLimit();
     }
-    game_state._event_rations_enabled = _current_event.rationsEnabled();
+    game_state.event_rations_enabled = _current_event.rationsEnabled();
 
-    game_state._combat_in_progress = _combat_state._combat_in_progress;
-    if(_combat_state._combat_in_progress)
+    game_state.combat_in_progress = _combat_state.combat_in_progress;
+    if(_combat_state.combat_in_progress)
     {
-        game_state._combat_round = _combat_state._combat_round;
-        game_state._combat_enemy_score = _combat_state._enemy_score;
-        game_state._combat_player_score = _combat_state._player_score;
+        game_state.combat_round = _combat_state.combat_round;
+        game_state.combat_enemy_score = _combat_state.enemy_score;
+        game_state.combat_player_score = _combat_state.player_score;
     }
 
-    game_state._log = _console.getLogContents();
-    game_state._variables = _game_vars->toString();
+    game_state.log = _console.getLogContents();
+    game_state.variables = _game_vars->toString();
 
     return game_state;
 }
@@ -850,19 +835,19 @@ void Game::restoreGameState(const GameState& game_state)
 
     delete _player;
     _player = new Player(this,
-                         game_state._player_start_agility,
-                         game_state._player_start_constitution,
-                         game_state._player_start_luck,
-                         static_cast<PlayerStat>(game_state._player_elixir_type));
+                         game_state.player_start_agility,
+                         game_state.player_start_constitution,
+                         game_state.player_start_luck,
+                         static_cast<PlayerStat>(game_state.player_elixir_type));
 
     try
     {
-        _player->setAgility(game_state._player_agility);
-        _player->setConstitution(game_state._player_constitution);
-        _player->setLuck(game_state._player_luck);
-        _player->setGold(game_state._player_gold);
-        _player->setRations(game_state._player_rations);
-        _player->setElixirCount(game_state._player_elixir_count);
+        _player->setAgility(game_state.player_agility);
+        _player->setConstitution(game_state.player_constitution);
+        _player->setLuck(game_state.player_luck);
+        _player->setGold(game_state.player_gold);
+        _player->setRations(game_state.player_rations);
+        _player->setElixirCount(game_state.player_elixir_count);
     }
     catch(const std::out_of_range& e)
     {
@@ -872,9 +857,9 @@ void Game::restoreGameState(const GameState& game_state)
     _scripting_engine->registerPlayer(_player);
 
     std::istringstream ss;
-    if(!game_state._player_inventory.empty())
+    if(!game_state.player_inventory.empty())
     {
-        ss.str(game_state._player_inventory);
+        ss.str(game_state.player_inventory);
         ss.clear();
         while(!ss.eof())
         {
@@ -884,9 +869,9 @@ void Game::restoreGameState(const GameState& game_state)
         }
     }
 
-    if(!game_state._player_conditions.empty())
+    if(!game_state.player_conditions.empty())
     {
-        ss.str(game_state._player_conditions);
+        ss.str(game_state.player_conditions);
         ss.clear();
         while(!ss.eof())
         {
@@ -897,9 +882,9 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _game_vars->clear();
-    if(!game_state._variables.empty())
+    if(!game_state.variables.empty())
     {
-        ss.str(game_state._variables);
+        ss.str(game_state.variables);
         ss.clear();
         while(!ss.eof())
         {
@@ -922,14 +907,14 @@ void Game::restoreGameState(const GameState& game_state)
             }
             else
             {
-                reportError("Incorrect game state loaded. Error code: 3189");
+                reportError("Incorrect game state loaded. Error code: 2775");
                 return;
             }
         }
     }
 
-    _current_event = _scripting_engine->parseEvent(game_state._event_id);
-    if(game_state._event_enemy_present)
+    _current_event = _scripting_engine->parseEvent(game_state.event_id);
+    if(game_state.event_enemy_present)
     {
         if(!_current_event.hasEnemies())
         {
@@ -937,24 +922,29 @@ void Game::restoreGameState(const GameState& game_state)
             return;
         }
 
-        while(_current_event.getCurrentEnemy().getName() != game_state._event_enemy_name)
+        while(_current_event.getCurrentEnemy().getName() != game_state.event_enemy_name)
         {
             _current_event.defeatCurrentEnemy();
+            if(!_current_event.hasEnemies())
+            {
+                reportError("Incorrect game state loaded. Error code: 5145");
+                return;
+            }
         }
 
         try
         {
-            _current_event.getCurrentEnemy().setConstitution(game_state._event_enemy_constitution);
+            _current_event.getCurrentEnemy().setConstitution(game_state.event_enemy_constitution);
         }
         catch(const std::out_of_range& e)
         {
             reportError(e.what());
             return;
         }
-        _current_event.getCurrentEnemy().setEscapeEnabled(game_state._event_enemy_escape_enabled);
-        if(game_state._event_enemy_escape_enabled)
+        _current_event.getCurrentEnemy().setEscapeEnabled(game_state.event_enemy_escape_enabled);
+        if(game_state.event_enemy_escape_enabled)
         {
-            _current_event.getCurrentEnemy().setEscapeRedirect(game_state._event_enemy_escape_redirect);
+            _current_event.getCurrentEnemy().setEscapeRedirect(game_state.event_enemy_escape_redirect);
         }
     }
     else
@@ -965,33 +955,33 @@ void Game::restoreGameState(const GameState& game_state)
         }
     }
 
-    _current_event.setHasGold(game_state._event_gold_present);
-    _current_event.setRationsEnabled(game_state._event_rations_enabled);
+    _current_event.setHasGold(game_state.event_gold_present);
+    _current_event.setRationsEnabled(game_state.event_rations_enabled);
 
-    if(game_state._event_items_present)
+    if(game_state.event_items_present)
     {
         if(!_current_event.hasItems())
         {
             reportError("Incorrect game state loaded. Error code: 9254");
             return;
         }
-        _current_event.setItemLimit(game_state._event_item_limit);
+        _current_event.setItemLimit(game_state.event_item_limit);
     }
 
-    _combat_state._combat_in_progress = game_state._combat_in_progress;
-    if(game_state._combat_in_progress)
+    _combat_state.combat_in_progress = game_state.combat_in_progress;
+    if(game_state.combat_in_progress)
     {
         if(!_current_event.hasEnemies())
         {
             reportError("Incorrect game state loaded. Error code: 3642");
             return;
         }
-        _combat_state._combat_round = game_state._combat_round;
-        _combat_state._enemy_score = game_state._combat_enemy_score;
-        _combat_state._player_score = game_state._combat_player_score;
+        _combat_state.combat_round = game_state.combat_round;
+        _combat_state.enemy_score = game_state.combat_enemy_score;
+        _combat_state.player_score = game_state.combat_player_score;
     }
 
-    _console.setLog(game_state._log);
+    _console.setLog(game_state.log);
     emit _console.forceLogPrint();
 }
 
@@ -1040,7 +1030,7 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
         resolveDamage(false, damage);
         resolveCombatEndTriggers();
         _current_event.defeatAllEnemies();
-        _combat_state._combat_in_progress = false;
+        _combat_state.combat_in_progress = false;
         _console.writeText("You have escaped!");
     }
 
@@ -1120,9 +1110,9 @@ InputMode Game::resolveGameInput(const std::string& user_input)
             _current_event.triggerLocalCommandCallback(utils::toLower(user_input));
             UserOption local_command = _current_event.getLocalCommand(utils::toLower(user_input));
 
-            if(local_command._redirect != 0)
+            if(local_command.redirect != 0)
             {
-                mode = updateCurrentEvent(local_command._redirect, local_command._new_room);
+                mode = updateCurrentEvent(local_command.redirect, local_command.new_room);
             }
         }
         else
@@ -1134,12 +1124,12 @@ InputMode Game::resolveGameInput(const std::string& user_input)
 
     if(perform_game_checks)
     {
-        bool combat_happened = _combat_state._combat_in_progress;
+        bool combat_happened = _combat_state.combat_in_progress;
         if(performGameChecks())
         {
             mode = InputMode::KEY_DEATH;
         }
-        else if(combat_happened && !_combat_state._combat_in_progress)
+        else if(combat_happened && !_combat_state.combat_in_progress)
         {
             mode = updateRoomExit(mode);
         }
@@ -1187,9 +1177,9 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
         _current_event.triggerChoiceOptionCallback(answer);
         UserOption option = _current_event.getChoiceOption(answer);
 
-        if(option._redirect != 0)
+        if(option.redirect != 0)
         {
-            mode = updateCurrentEvent(option._redirect, option._new_room);
+            mode = updateCurrentEvent(option.redirect, option.new_room);
         }
         if(performGameChecks())
         {
@@ -1298,9 +1288,9 @@ InputMode Game::resolveYesNoChoice(const std::string& user_input)
         _current_event.triggerChoiceOptionCallback(answer_string);
         UserOption option = _current_event.getChoiceOption(answer_string);
 
-        if(option._redirect != 0)
+        if(option.redirect != 0)
         {
-            mode = updateCurrentEvent(option._redirect, option._new_room);
+            mode = updateCurrentEvent(option.redirect, option.new_room);
         }
         if(performGameChecks())
         {
@@ -1394,7 +1384,7 @@ void Game::onRemoveCondition(const QVariant& name)
 
 void Game::onStopCombat()
 {
-    _combat_state._combat_in_progress = false;
+    _combat_state.combat_in_progress = false;
     resolveCombatEndTriggers();
     _current_event.defeatAllEnemies();
 }

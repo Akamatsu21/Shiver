@@ -41,63 +41,63 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     std::ostringstream ss;
 
     // Player stats.
-    ss << game_state._player_agility << "\n"
-       << game_state._player_constitution << "\n"
-       << game_state._player_luck << "\n"
-       << game_state._player_start_agility << "\n"
-       << game_state._player_start_constitution << "\n"
-       << game_state._player_start_luck << "\n"
-       << game_state._player_gold << "\n"
-       << game_state._player_rations << "\n"
-       << game_state._player_elixir_count << "\n"
-       << game_state._player_elixir_type << "\n"
+    ss << game_state.player_agility << "\n"
+       << game_state.player_constitution << "\n"
+       << game_state.player_luck << "\n"
+       << game_state.player_start_agility << "\n"
+       << game_state.player_start_constitution << "\n"
+       << game_state.player_start_luck << "\n"
+       << game_state.player_gold << "\n"
+       << game_state.player_rations << "\n"
+       << game_state.player_elixir_count << "\n"
+       << game_state.player_elixir_type << "\n"
        << "INVENTORY_START\n"
-       << game_state._player_inventory
-       << (game_state._player_inventory.empty() ? "" : "\n")
+       << game_state.player_inventory
+       << (game_state.player_inventory.empty() ? "" : "\n")
        << "INVENTORY_END\n"
        << "CONDITIONS_START\n"
-       << game_state._player_conditions
-       << (game_state._player_conditions.empty() ? "" : "\n")
+       << game_state.player_conditions
+       << (game_state.player_conditions.empty() ? "" : "\n")
        << "CONDITIONS_END\n";
 
     // Current event description.
-    ss << game_state._event_id << "\n"
-       << game_state._event_enemy_present << "\n";
-    if(game_state._event_enemy_present)
+    ss << game_state.event_id << "\n"
+       << game_state.event_enemy_present << "\n";
+    if(game_state.event_enemy_present)
     {
-        ss << game_state._event_enemy_name << "\n"
-           << game_state._event_enemy_constitution << "\n"
-           << game_state._event_enemy_escape_enabled << "\n";
-        if(game_state._event_enemy_escape_enabled)
+        ss << game_state.event_enemy_name << "\n"
+           << game_state.event_enemy_constitution << "\n"
+           << game_state.event_enemy_escape_enabled << "\n";
+        if(game_state.event_enemy_escape_enabled)
         {
-            ss << game_state._event_enemy_escape_redirect << "\n";
+            ss << game_state.event_enemy_escape_redirect << "\n";
         }
     }
-    ss << game_state._event_gold_present << "\n";
-    ss << game_state._event_items_present << "\n";
-    if(game_state._event_items_present)
+    ss << game_state.event_gold_present << "\n";
+    ss << game_state.event_items_present << "\n";
+    if(game_state.event_items_present)
     {
-        ss << game_state._event_item_limit << "\n";
+        ss << game_state.event_item_limit << "\n";
     }
-    ss << game_state._event_rations_enabled << "\n";
+    ss << game_state.event_rations_enabled << "\n";
 
     // Combat status.
-    ss << game_state._combat_in_progress << "\n";
-    if(game_state._combat_in_progress)
+    ss << game_state.combat_in_progress << "\n";
+    if(game_state.combat_in_progress)
     {
-        ss << game_state._combat_round << "\n"
-           << game_state._combat_enemy_score << "\n"
-           << game_state._combat_player_score << "\n";
+        ss << game_state.combat_round << "\n"
+           << game_state.combat_enemy_score << "\n"
+           << game_state.combat_player_score << "\n";
     }
 
     // Console log.
     ss << "LOG_START\n"
-       << game_state._log
+       << game_state.log
        << "\nLOG_END\n";
 
     // Game variables.
     ss << "VARS_START\n"
-       << game_state._variables
+       << game_state.variables
        << "VARS_END\n";
 
     _save_file_contents = ss.str();
@@ -108,16 +108,16 @@ GameState SaveStateManager::parseSaveFileContents()
     std::istringstream ss(_save_file_contents);
     GameState game_state = {};
 
-    ss >> game_state._player_agility
-       >> game_state._player_constitution
-       >> game_state._player_luck
-       >> game_state._player_start_agility
-       >> game_state._player_start_constitution
-       >> game_state._player_start_luck
-       >> game_state._player_gold
-       >> game_state._player_rations
-       >> game_state._player_elixir_count
-       >> game_state._player_elixir_type;
+    ss >> game_state.player_agility
+       >> game_state.player_constitution
+       >> game_state.player_luck
+       >> game_state.player_start_agility
+       >> game_state.player_start_constitution
+       >> game_state.player_start_luck
+       >> game_state.player_gold
+       >> game_state.player_rations
+       >> game_state.player_elixir_count
+       >> game_state.player_elixir_type;
     ss.get(); // eat the final newline
 
     std::string line;
@@ -126,7 +126,7 @@ GameState SaveStateManager::parseSaveFileContents()
     {
         throw std::runtime_error("Corrupted savefile. Error code: 9545");
     }
-    game_state._player_inventory = "";
+    game_state.player_inventory = "";
     bool first = true;
     for(;;)
     {
@@ -139,13 +139,13 @@ GameState SaveStateManager::parseSaveFileContents()
         {
             if(!first)
             {
-                game_state._player_inventory += "\n";
+                game_state.player_inventory += "\n";
             }
             else
             {
                 first = false;
             }
-            game_state._player_inventory += line;
+            game_state.player_inventory += line;
         }
     }
 
@@ -154,7 +154,7 @@ GameState SaveStateManager::parseSaveFileContents()
     {
         throw std::runtime_error("Corrupted savefile. Error code: 3654");
     }
-    game_state._player_conditions = "";
+    game_state.player_conditions = "";
     first = true;
     for(;;)
     {
@@ -167,44 +167,44 @@ GameState SaveStateManager::parseSaveFileContents()
         {
             if(!first)
             {
-                game_state._player_conditions += "\n";
+                game_state.player_conditions += "\n";
             }
             else
             {
                 first = false;
             }
-            game_state._player_conditions += line;
+            game_state.player_conditions += line;
         }
     }
 
-    ss >> game_state._event_id
-       >> game_state._event_enemy_present;
+    ss >> game_state.event_id
+       >> game_state.event_enemy_present;
     ss.get(); // eat the final newline
-    if(game_state._event_enemy_present)
+    if(game_state.event_enemy_present)
     {
-        std::getline(ss, game_state._event_enemy_name);
-        ss >> game_state._event_enemy_constitution
-           >> game_state._event_enemy_escape_enabled;
-        if(game_state._event_enemy_escape_enabled)
+        std::getline(ss, game_state.event_enemy_name);
+        ss >> game_state.event_enemy_constitution
+           >> game_state.event_enemy_escape_enabled;
+        if(game_state.event_enemy_escape_enabled)
         {
-            ss >> game_state._event_enemy_escape_redirect;
+            ss >> game_state.event_enemy_escape_redirect;
         }
     }
 
-    ss >> game_state._event_gold_present
-       >> game_state._event_items_present;
-    if(game_state._event_items_present)
+    ss >> game_state.event_gold_present
+       >> game_state.event_items_present;
+    if(game_state.event_items_present)
     {
-        ss >> game_state._event_item_limit;
+        ss >> game_state.event_item_limit;
     }
-    ss >> game_state._event_rations_enabled;
+    ss >> game_state.event_rations_enabled;
 
-    ss >> game_state._combat_in_progress;
-    if(game_state._combat_in_progress)
+    ss >> game_state.combat_in_progress;
+    if(game_state.combat_in_progress)
     {
-        ss >> game_state._combat_round
-           >> game_state._combat_enemy_score
-           >> game_state._combat_player_score;
+        ss >> game_state.combat_round
+           >> game_state.combat_enemy_score
+           >> game_state.combat_player_score;
     }
     ss.get(); // eat the final newline
 
@@ -213,7 +213,7 @@ GameState SaveStateManager::parseSaveFileContents()
     {
         throw std::runtime_error("Corrupted savefile. Error code: 3670");
     }
-    game_state._log = "";
+    game_state.log = "";
     for(;;)
     {
         std::getline(ss, line);
@@ -223,17 +223,17 @@ GameState SaveStateManager::parseSaveFileContents()
         }
         else
         {
-            game_state._log += line;
-            game_state._log += "\n";
+            game_state.log += line;
+            game_state.log += "\n";
         }
     }
 
     std::getline(ss, line);
     if(line != "VARS_START")
     {
-        throw std::runtime_error("Corrupted savefile. Error code: 4190");
+        throw std::runtime_error("Corrupted savefile. Error code: 4191");
     }
-    game_state._variables = "";
+    game_state.variables = "";
     first = true;
     for(;;)
     {
@@ -246,13 +246,13 @@ GameState SaveStateManager::parseSaveFileContents()
         {
             if(!first)
             {
-              game_state._variables += "\n";
+              game_state.variables += "\n";
             }
             else
             {
               first = false;
             }
-            game_state._variables += line;
+            game_state.variables += line;
         }
     }
 

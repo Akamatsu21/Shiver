@@ -14,16 +14,16 @@ enum class ChoiceType
 
 struct UserOption
 {
-    int _redirect;
-    bool _new_room;
-    QJSValue _callback;
+    int redirect;
+    bool new_room;
+    QJSValue callback;
 };
 
 struct Choice
 {
-    ChoiceType _type = ChoiceType::NONE;
-    std::string _question;
-    std::map<std::string, UserOption> _options;
+    ChoiceType type = ChoiceType::NONE;
+    std::string question;
+    std::map<std::string, UserOption> options;
 };
 
 #endif // CHOICE_H

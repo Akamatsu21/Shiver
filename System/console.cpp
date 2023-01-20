@@ -7,6 +7,46 @@
 
 #include "Utils/utils.h"
 
+static std::string replaceTag(const std::string& text,
+                              const std::string& open_tag,
+                              const std::string& close_tag,
+                              const std::string& colour_code)
+{
+    std::ostringstream ss;
+    std::string buffer = text;
+    std::string::iterator open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
+                                                     std::begin(open_tag), std::end(open_tag));
+    while(open_tag_pos != std::end(buffer))
+    {
+        std::string::iterator close_tag_pos = std::search(open_tag_pos, std::end(buffer),
+                                                          std::begin(close_tag), std::end(close_tag));
+        ss << std::string(std::begin(buffer), open_tag_pos)
+           << colour_code
+           << std::string(open_tag_pos + open_tag.length(), close_tag_pos)
+           << "</font>"
+           << std::string(close_tag_pos + close_tag.length(), std::end(buffer));
+
+        buffer = ss.str();
+        ss.str("");
+        open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
+                                   std::begin(open_tag), std::end(open_tag));
+    }
+
+    return buffer;
+}
+
+static std::string parseMarkup(const std::string& text)
+{
+    std::string buffer = text;
+    buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
+    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
+    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"dodgerblue\">"); // item
+    buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
+    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"darkviolet\">"); // option
+    buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name
+    return buffer;
+}
+
 Console::Console(QObject* parent):
     QObject(parent),
     _log(""),
@@ -84,46 +124,6 @@ void Console::setHelpVisible(bool value)
         _help_visible = value;
         emit helpVisibleChanged();
     }
-}
-
-std::string Console::replaceTag(const std::string& text,
-                                const std::string& open_tag,
-                                const std::string& close_tag,
-                                const std::string& colour_code) const
-{
-    std::stringstream ss;
-    std::string buffer = text;
-    std::string::iterator open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
-                                                     std::begin(open_tag), std::end(open_tag));
-    while(open_tag_pos != std::end(buffer))
-    {
-        std::string::iterator close_tag_pos = std::search(open_tag_pos, std::end(buffer),
-                                                          std::begin(close_tag), std::end(close_tag));
-        ss << std::string(std::begin(buffer), open_tag_pos)
-           << colour_code
-           << std::string(open_tag_pos + open_tag.length(), close_tag_pos)
-           << "</font>"
-           << std::string(close_tag_pos + close_tag.length(), std::end(buffer));
-
-        buffer = ss.str();
-        ss.str("");
-        open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
-                                   std::begin(open_tag), std::end(open_tag));
-    }
-
-    return buffer;
-}
-
-std::string Console::parseMarkup(const std::string& text) const
-{
-    std::string buffer = text;
-    buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
-    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
-    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"dodgerblue\">"); // item
-    buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
-    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"darkviolet\">"); // option
-    buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name
-    return buffer;
 }
 
 void Console::clearVisibleText()

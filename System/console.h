@@ -21,12 +21,6 @@ class Console: public QObject
     std::vector<std::string> _input_history;
     std::vector<std::string>::iterator _history_it;
 
-    std::string replaceTag(const std::string& text,
-                           const std::string& open_tag,
-                           const std::string& close_tag,
-                           const std::string& colour_code) const;
-    std::string parseMarkup(const std::string& text) const;
-
     void clearVisibleText();
 
 public:

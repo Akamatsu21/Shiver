@@ -121,27 +121,27 @@ bool Event::rationsEnabled() const
 
 bool Event::hasYesNoChoice() const
 {
-    return _choice._type == ChoiceType::YES_NO;
+    return _choice.type == ChoiceType::YES_NO;
 }
 
 bool Event::hasMultiChoice() const
 {
-    return _choice._type == ChoiceType::MULTI;
+    return _choice.type == ChoiceType::MULTI;
 }
 
 std::string Event::getChoiceQuestion() const
 {
-    return _choice._question;
+    return _choice.question;
 }
 
 std::vector<std::string> Event::getChoiceOptions() const
 {
-    return utils::getKeys(_choice._options);
+    return utils::getKeys(_choice.options);
 }
 
 UserOption Event::getChoiceOption(const std::string& option) const
 {
-    return _choice._options.at(option);
+    return _choice.options.at(option);
 }
 
 bool Event::hasLocalCommands() const
@@ -252,20 +252,20 @@ void Event::takeItem()
 
 void Event::setChoice(ChoiceType type, const std::string& question)
 {
-    _choice._type = type;
-    _choice._question = question;
+    _choice.type = type;
+    _choice.question = question;
 }
 
 void Event::addChoiceOption(const std::string& answer, int redirect, bool new_room, QJSValue callback)
 {
-    _choice._options[answer] = {redirect, new_room, callback};
+    _choice.options[answer] = {redirect, new_room, callback};
 }
 
 void Event::triggerChoiceOptionCallback(const std::string& option)
 {
-    if(getChoiceOption(option)._callback.isCallable())
+    if(getChoiceOption(option).callback.isCallable())
     {
-        getChoiceOption(option)._callback.call();
+        getChoiceOption(option).callback.call();
     }
 }
 
@@ -276,9 +276,9 @@ void Event::addLocalCommand(const std::string& command, int redirect, bool new_r
 
 void Event::triggerLocalCommandCallback(const std::string& command)
 {
-    if(getLocalCommand(command)._callback.isCallable())
+    if(getLocalCommand(command).callback.isCallable())
     {
-        getLocalCommand(command)._callback.call();
+        getLocalCommand(command).callback.call();
     }
 }
 

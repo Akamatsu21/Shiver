@@ -3,10 +3,10 @@
 
 struct CombatState
 {
-    bool _combat_in_progress;
-    int _combat_round;
-    int _enemy_score;
-    int _player_score;
+    bool combat_in_progress;
+    int combat_round;
+    int enemy_score;
+    int player_score;
 };
 
 #endif // COMBATSTATE_H

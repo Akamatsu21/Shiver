@@ -172,6 +172,35 @@ export const events =
         redirect: 171,
         new_room: true
     },
+    event28:
+    {
+        description: function()
+        {
+            let desc = "You notice a large stone by the wall that seems to be covering something up. You attempt to pick it up.";
+            if(player.getConstitution() >= 18)
+            {
+                desc += "With your high Constitution, you are able to lift the stone.";
+            }
+            else
+            {
+                desc += "Unfortunately, your Constitution is not high enough to lift the stone.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getConstitution() >= 18)
+            {
+                return 177;
+            }
+            else
+            {
+                return 330;
+            }
+        },
+        new_room: false
+    },
     event29:
     {
         description: "You trip over a pebble. Your sword hits a rock and makes a sound. [e]Orc[/e] lifts its head. It's noticed you. It throws itself into battle.",
@@ -544,6 +573,46 @@ export const events =
         north: 212,
         rations: true
     },
+    event69:
+    {
+        description: "You asked for this. By a wall, you see two nightmarish [e]Ghouls[/e]. This encounter can only end in a fight, although they are fighting you one at a time.",
+        enemies:
+        [
+            {
+                name: "Ghoul",
+                agility: 5,
+                constitution: 3
+            },
+            {
+                name: "Ghoul",
+                agility: 5,
+                constitution: 4,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            system.message("You may [c]search[/c] the chamber or [c]leave[/c].");
+                        }
+                    }
+                ]
+            }
+        ],
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 291,
+                new_room: false
+            },
+            {
+                command: "search",
+                redirect: 305,
+                new_room: false
+            }
+        ]
+    },
     event70:
     {
         description: "You may leave through the [c]east[/c] exit.",
@@ -660,6 +729,13 @@ export const events =
 
             return loc;
         }
+    },
+    event84:
+    {
+        description: "You approach an intersection. You may head [c]north[/c], [c]east[/c] or [c]south[/c].",
+        north: 209,
+        south: 170,
+        east: 144
     },
     event85:
     {
@@ -854,6 +930,40 @@ export const events =
                 ]
             }
         ]
+    },
+    event111:
+    {
+        description: "Luck check failed!<br /><br />Your only choice is to turn back. The underground chapel is now completely empty. You pass through it and leave through the [c]west[/c] exit.",
+        west: 194
+    },
+    event112:
+    {
+        description: function()
+        {
+            let desc = "You attempt to search through every nook and cranny of the chamber.<br /><br />";
+            if(game_vars.getFlag("112_search_success"))
+            {
+                desc += "You find something interesting...";
+            }
+            else
+            {
+                desc += "After a long, fruitless search, you decide to give up.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("112_search_success"))
+            {
+                return 28;
+            }
+            else
+            {
+                return 291;
+            }
+        },
+        new_room: false
     },
     event113:
     {
@@ -1102,6 +1212,13 @@ export const events =
         redirect: 385,
         new_room: true
     },
+    event134:
+    {
+        description: "There is an intersection in front of you. You may proceed [c]north[/c], [c]east[/c] or [c]south[/c].",
+        north: 270,
+        south: 276,
+        east: 384
+    },
     event139:
     {
         description: "You safely return to the northern shore of the lake.",
@@ -1302,6 +1419,13 @@ export const events =
             }
         ]
     },
+    event170:
+    {
+        description: "You reach an intersection. It's shaped like the letter T. You can go [c]north[/c], [c]east[/c] or [c]south[/c].",
+        north: 84,
+        south: 357,
+        east: 319
+    },
     event171:
     {
         description: "You hurry out of the chamber. There are two exits. One to the [c]south[/c], which you originally came from, and one to the [c]west[/c].",
@@ -1333,6 +1457,27 @@ export const events =
             }
         },
         new_room: false
+    },
+    event177:
+    {
+        description: function()
+        {
+            player.modifyLuck(+3);
+            return "A [i]Fire Orb[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
+        },
+        items:
+        [
+            "Fire Orb"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 330,
+                new_room: false
+            }
+        ]
     },
     event178:
     {
@@ -1925,6 +2070,11 @@ export const events =
             return game_vars.getFlag("sword_upgraded");
         }
     },
+    event233:
+    {
+        description: "Luck check successful!<br /><br />Suddenly, as if on a moving stage, the floor turns along with the wall. You end up in a corridor that runs from the north to the south. The secret passage is now nowhere to be found.",
+        redirect: 78
+    },
     event234:
     {
         description: "You decide to finish off the [e]Demon[/e].",
@@ -1985,6 +2135,32 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event242:
+    {
+        description: "You take a bunch of steps and... The path is blocked by a stone wall.",
+        redirect: function()
+        {
+            if(game_vars.getFlag("242_luck_check"))
+            {
+                return 233;
+            }
+            else
+            {
+                return 111;
+            }
+        },
+        new_room: false
+    },
+    event245:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-1);
+            return "You hit it with your shoulder, using all of your strength. The door won't even budge. You take 1 damage.";
+        },
+        redirect: 108,
+        new_room: false
     },
     event251:
     {
@@ -2207,6 +2383,16 @@ export const events =
         description: "After some time, you see an intersection in the distance. The corridor continues [c]west[/c].",
         west: 50
     },
+    event291:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-2);
+            return "You approach the exit, when out of nowhere a small, blue dart hits you in the stomach. You take 2 damage.";
+        },
+        redirect: 330,
+        new_room: false
+    },
     event294:
     {
         description: function()
@@ -2326,6 +2512,26 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event305:
+    {
+        description: "This chamber hides something extremely valuable. You will have to put a lot of effort in looking for it, but you'll also need luck. If you think your Luck stat is high, you could perform a luck check in hopes of finding it. Otherwise, you might be better off just searching everywhere, hoping to get lucky the old-fashioned way.",
+        yes_no_choice:
+        {
+            question: "Do you want to perform a luck check?",
+            no: 112,
+            no_new_room: false,
+            on_no: function()
+            {
+                game_vars.setFlag("112_search_success", system.rollD6(4) >= 18);
+            },
+            yes: 381,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setFlag("381_luck_check", player.performLuckCheck());
+            }
+        }
     },
     event306:
     {
@@ -2457,10 +2663,26 @@ export const events =
         redirect: 90,
         new_room: true
     },
+    event319:
+    {
+        description: "Going down a short, narrow corridor, you reach a door. It's open.",
+        yes_no_choice:
+        {
+            question: "Do you want to see what's inside?",
+            no: 170,
+            no_new_room: true,
+            yes: 69,
+            yes_new_room: true
+        }
+    },
     event322:
     {
         description: "The chamber is completely empty. You may exit through the [c]east[/c] or [c]west[/c] door (where you came from).",
-        east: 242,
+        east: function()
+        {
+            game_vars.setFlag("242_luck_check", player.performLuckCheck());
+            return 242;
+        },
         west: 194
     },
     event324:
@@ -2524,6 +2746,12 @@ export const events =
             yes: 151,
             yes_new_room: true
         }
+    },
+    event330:
+    {
+        description: "There is only one exit from this chamber: The one you came from. You return to the corridor.",
+        redirect: 170,
+        new_room: true
     },
     event331:
     {
@@ -2742,6 +2970,18 @@ export const events =
         redirect: 141,
         new_room: true
     },
+    event357:
+    {
+        description: "After some time, you notice a door on the west wall of the corridor.",
+        yes_no_choice:
+        {
+            question: "Do you want to break the door down?",
+            no: 108,
+            no_new_room: false,
+            yes: 245,
+            yes_new_room: false
+        }
+    },
     event359:
     {
         description: function()
@@ -2781,6 +3021,11 @@ export const events =
             yes: 263,
             yes_new_room: false
         }
+    },
+    event363:
+    {
+        description: "A long corridor leads you straight to the [c]north[/c]. After some time, you notice an intersection ahead.",
+        north: 170
     },
     event364:
     {
@@ -2896,6 +3141,35 @@ export const events =
         north: 178,
         rations: true
     },
+    event381:
+    {
+        description: function()
+        {
+            let desc = "You decide to rely on luck...<br /><br />";
+            if(game_vars.getFlag("381_luck_check"))
+            {
+                desc += "Luck check successful!";
+            }
+            else
+            {
+                desc += "Luck check failed!";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("381_luck_check"))
+            {
+                return 28;
+            }
+            else
+            {
+                return 291;
+            }
+        },
+        new_room: false
+    },
     event382:
     {
         description: "At some point the corridor turns to the [c]north[/c]. At the turn, you may eat a ration.",
@@ -2911,7 +3185,11 @@ export const events =
     event385:
     {
         description: "You can exit the [e]Demon[/e]'s chamber through the [c]east[/c] or [c]west[/c] door.",
-        east: 242,
+        east: function()
+        {
+            game_vars.setFlag("242_luck_check", player.performLuckCheck());
+            return 242;
+        },
         west: 194
     }
 };

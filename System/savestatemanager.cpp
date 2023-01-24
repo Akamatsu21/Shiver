@@ -100,6 +100,9 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        << game_state.variables
        << "VARS_END\n";
 
+    // Secret switch.
+    ss << game_state.conan << "\n";
+
     _save_file_contents = ss.str();
 }
 
@@ -255,6 +258,8 @@ GameState SaveStateManager::parseSaveFileContents()
             game_state.variables += line;
         }
     }
+
+    ss >> game_state.conan;
 
     return game_state;
 }

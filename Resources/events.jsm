@@ -410,7 +410,7 @@ export const events =
         description: function()
         {
             player.modifyLuck(+2);
-            return "You approach the fountain. You take some [i]Magical Water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
+            return "You approach the fountain. You take some [i]magical water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
         },
         items:
         [
@@ -1529,7 +1529,7 @@ export const events =
         description: function()
         {
             player.modifyLuck(+3);
-            return "A [i]Fireball[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
+            return "A [i]fireball[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
         },
         items:
         [
@@ -2212,7 +2212,7 @@ export const events =
     },
     event241:
     {
-        description: "You may take some [i]Lake Water[/i] with you, if you wish. It's now time to [l]leave[/l].",
+        description: "You may take some [i]lake water[/i] with you, if you wish. It's now time to [l]leave[/l].",
         items:
         [
             "Lake Water"
@@ -2578,7 +2578,7 @@ export const events =
         description: function()
         {
             player.modifyLuck(+2);
-            return "In a crevice in the wall you find [i]Elixir of Invisibility[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
+            return "In a crevice in the wall you find the [i]Elixir of Invisibility[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
         },
         items:
         [

@@ -36,6 +36,7 @@ struct GameState
 
     std::string log;
     std::string variables;
+    bool conan;
 };
 
 #endif // GAMESTATE_H

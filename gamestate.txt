@@ -49,3 +49,6 @@ name
 value
 ...
 VARS_END
+
+// Secret switch
+Conan (1 or 0)

@@ -822,6 +822,7 @@ GameState Game::createGameState()
 
     game_state.log = _console.getLogContents();
     game_state.variables = _game_vars->toString();
+    game_state.conan = _conan;
 
     return game_state;
 }
@@ -986,6 +987,8 @@ void Game::restoreGameState(const GameState& game_state)
 
     _console.setLog(game_state.log);
     emit _console.forceLogPrint();
+
+    _conan = game_state.conan;
 }
 
 InputMode Game::resolveCharacterCreationInput(const std::string& user_input)

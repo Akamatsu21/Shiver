@@ -128,6 +128,15 @@ Event ScriptingEngine::parseEvent(int id)
         }
     }
 
+    if(event_object.hasProperty("escape_redirect"))
+    {
+        QJSValue escape_redirect_value = getObjectProperty(event_object, "escape_redirect");
+        if(!escape_redirect_value.isUndefined())
+        {
+            event.setEscapeRedirect(escape_redirect_value.toInt());
+        }
+    }
+
     for(Direction direction: utils::getAllDirections())
     {
         QString direction_string = QString::fromStdString(utils::directionToString(direction));
@@ -250,11 +259,11 @@ Event ScriptingEngine::parseEvent(int id)
             event.addChoiceOption("yes",
                                   getObjectProperty(choice, "yes").toInt(),
                                   getObjectProperty(choice, "yes_new_room").toBool(),
-                                  on_no_callback);
+                                  on_yes_callback);
             event.addChoiceOption("no",
                                   getObjectProperty(choice, "no").toInt(),
                                   getObjectProperty(choice, "no_new_room").toBool(),
-                                  on_yes_callback);
+                                  on_no_callback);
         }
     }
     else if(event_object.hasProperty("choice"))

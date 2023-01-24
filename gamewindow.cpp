@@ -58,10 +58,14 @@ void GameWindow::setupGameConnections()
             _game, &Game::onAddCondition);
     connect(_game->getScriptApi(), &ScriptApi::removeCondition,
             _game, &Game::onRemoveCondition);
-    connect(_game->getScriptApi(), &ScriptApi::disableEscape,
-            _game, &Game::onDisableEscape);
-    connect(_game->getScriptApi(), &ScriptApi::enableEscape,
-            _game, &Game::onEnableEscape);
+    connect(_game->getScriptApi(), &ScriptApi::disableEnemyEscape,
+            _game, &Game::onDisableEnemyEscape);
+    connect(_game->getScriptApi(), &ScriptApi::disableRoomEscape,
+            _game, &Game::onDisableRoomEscape);
+    connect(_game->getScriptApi(), &ScriptApi::enableEnemyEscape,
+            _game, &Game::onEnableEnemyEscape);
+    connect(_game->getScriptApi(), &ScriptApi::enableRoomEscape,
+            _game, &Game::onEnableRoomEscape);
 }
 
 void GameWindow::updateInputState()

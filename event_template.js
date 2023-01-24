@@ -3,6 +3,7 @@ eventX:
     description: "Description of the event, and also a place to put the function that executes on entry.",
     redirect: 20, // Automatically moves to that event - movement commands redundant
     new_room: true, // if false, won't clear screen
+    escape_redirect: 10,
     north: 1,
     south: 2,
     east: 3,
@@ -37,6 +38,7 @@ eventX:
                     callback: function()
                     {
                         // Trigger to execute on defeat.
+                        // This will not trigger when escaping or ending combat through the system.stopCombat() function.
                     }
                 }
             ]

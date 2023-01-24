@@ -8,6 +8,7 @@ Event::Event(int id):
     _id(id),
     _redirect(0),
     _new_room(false),
+    _escape_redirect(0),
     _description(""),
     _destinations{},
     _enemies{},
@@ -36,6 +37,11 @@ int Event::getRedirect() const
 bool Event::leadsToNewRoom() const
 {
     return _new_room;
+}
+
+int Event::getEscapeRedirect() const
+{
+    return _escape_redirect;
 }
 
 std::string Event::getDescription() const
@@ -167,6 +173,11 @@ void Event::setRedirect(int value)
 void Event::setNewRoom(bool value)
 {
     _new_room = value;
+}
+
+void Event::setEscapeRedirect(int value)
+{
+    _escape_redirect = value;
 }
 
 void Event::setDescription(const std::string& value)

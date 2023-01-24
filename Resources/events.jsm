@@ -16,7 +16,23 @@ export const events =
             no_new_room: false,
             yes: 318,
             yes_new_room: false
+        }
+    },
+    event5:
+    {
+        description: function()
+        {
+            game_vars.setFlag("270_door_open", true);
+            return "You like fighting? Yes? Perfect. Come and have a closer look. From left to right, there is a [e]Skeleton[/e], a [e]Zombie[/e] and a [e]Man-Eater[/e] waiting for you.";
         },
+        yes_no_choice:
+        {
+            question: "Is this enough?",
+            no: 140,
+            no_new_room: false,
+            yes: 312,
+            yes_new_room: false
+        }
     },
     event6:
     {
@@ -49,7 +65,7 @@ export const events =
         description: function()
         {
             game_vars.setFlag("331_visited", true);
-            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word resounds and you freeze. \"Hello [p]Adventurer[/p], hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll feel yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are many strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
+            return "The entrance stands wide open. There are no doors to this chamber. You enter confidently. \"Hello\" - a single word resounds and you freeze. \"Hello adventurer, hehe.\" In a corner of the chamber there is a small, wrinkled creature, sitting down. \"Are you thirsty? Have some water. It's delicious and cold. It'll feel yummy in your tummy, hehe.\" In the middle of the chamber there is a stone fountain. Water surrounds a statue of some extraordinary being. A small stream of water is pouring from its stout. \"It's a strange fountain. At the bottom there are many strange things, there are pebbles...\" The creature grabs a few pebbles from the ground and throws them into the water. \"...and there are real treasures. Would you like to try some of the water? It's delicious and cold.\" You're completely dumbfounded. This small, funny creature has managed to astonish you. You've completely lost your mind.";
         },
         choice:
         {
@@ -176,7 +192,7 @@ export const events =
     {
         description: function()
         {
-            let desc = "You notice a large stone by the wall that seems to be covering something up. You attempt to pick it up.";
+            let desc = "You notice a large stone by the wall that seems to be covering something up. You attempt to pick it up. ";
             if(player.getConstitution() >= 18)
             {
                 desc += "With your high Constitution, you are able to lift the stone.";
@@ -446,6 +462,12 @@ export const events =
         east: 130,
         west: 64
     },
+    event51:
+    {
+        description: "You can choose the door that leads to the [c]north[/c] or the one that leads to the [c]south[/c].",
+        north: 33,
+        south: 134
+    },
     event53:
     {
         description: "You end up at a spacious footpath. It leads to the north, and then swerves heavily to the west. You take several dozen steps and stop in front of a heavy door.",
@@ -593,7 +615,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            system.message("You may [c]search[/c] the chamber or [c]leave[/c].");
+                            system.message("You may [l]search[/l] the chamber or [l]leave[/l].");
                         }
                     }
                 ]
@@ -782,13 +804,45 @@ export const events =
                 command: "leave",
                 redirect: 120,
                 new_room: true
-            },
+            }
         ]
     },
     event90:
     {
         description: "You climb up a set of stairs. The corridor leads west first, and then turns [c]south[/c].",
         south: 212
+    },
+    event92:
+    {
+        description: "This is going to be a real carnage. You start with the [e]Minotaur[/e].",
+        enemies:
+        [
+            {
+                name: "Minotaur",
+                agility: 10,
+                constitution: 10,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            system.enableRoomEscape(193);
+                            system.message("If you don't think you can keep going, you may [c]escape[/c]. Otherwise, you [l]remain[/l] on the battlefield.");
+                        }
+                    }
+                ]
+            }
+        ],
+        locals:
+        [
+            {
+                command: "remain",
+                redirect: 277,
+                new_room: false
+            }
+        ]
     },
     event95:
     {
@@ -1208,9 +1262,8 @@ export const events =
     },
     event133:
     {
-        description: "You drop down on your knees and begin to gather this enormous treasure into one pile. But the monsters where waiting for this. They charge at you. Your only choice is to escape.",
-        redirect: 385,
-        new_room: true
+        description: "You drop down on your knees and begin to gather this enormous treasure into one pile. But the monsters where waiting for this. They charge at you. Your only choice is to [c]escape[/c].",
+        escape_redirect: 385
     },
     event134:
     {
@@ -1224,6 +1277,18 @@ export const events =
         description: "You safely return to the northern shore of the lake.",
         redirect: 195,
         new_room: false
+    },
+    event140:
+    {
+        description: "In that case, look behind you. An [e]Orc[/e] and a [e]Vampire[/e] are hiding behind the door.",
+        yes_no_choice:
+        {
+            question: "Is this enough?",
+            no: 235,
+            no_new_room: false,
+            yes: 277,
+            yes_new_room: false
+        }
     },
     event141:
     {
@@ -1302,15 +1367,16 @@ export const events =
     },
     event154:
     {
-        description: "You attach one of the buoys to your leather strap. You swim towards the shore. Yes, you could have seen this coming: In front of a green thicket you see three pairs of shiny eyes. The net seems too valuable of a find to lose it like this. You won't abandon it, although you don't necessarily need to fight the monsters.",
-        yes_no_choice:
-        {
-            question: "Would you like to attempt to escape?",
-            no: 341,
-            no_new_room: false,
-            yes: 88,
-            yes_new_room: false,
-        },
+        description: "You attach one of the buoys to your leather strap. You swim towards the shore. Yes, you could have seen this coming: In front of a green thicket you see three pairs of shiny eyes. The net seems too valuable of a find to lose it like this. You won't abandon it, although you have two choices: [l]attack[/l] the monsters or [c]escape[/c].",
+        escape_redirect: 88,
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 341,
+                new_room: false
+            }
+        ]
     },
     event155:
     {
@@ -1403,7 +1469,7 @@ export const events =
                         {
                             if(system.getCurrentPlayerScore() < system.getCurrentEnemyScore())
                             {
-                                system.enableEscape(385);
+                                system.enableEnemyEscape(385);
                             }
                         }
                     },
@@ -1412,7 +1478,7 @@ export const events =
                         round: 2,
                         callback: function()
                         {
-                            system.disableEscape();
+                            system.disableEnemyEscape();
                         }
                     }
                 ]
@@ -1463,11 +1529,11 @@ export const events =
         description: function()
         {
             player.modifyLuck(+3);
-            return "A [i]Fire Orb[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
+            return "A [i]Fireball[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
         },
         items:
         [
-            "Fire Orb"
+            "Fireball"
         ],
         item_limit: 1,
         locals:
@@ -1745,6 +1811,19 @@ export const events =
             }
         }
     },
+    event193:
+    {
+        description: function()
+        {
+            let gold = 5 * game_vars.getCounter("193_enemies_defeated");
+            player.modifyGold(+gold);
+            player.modifyAgility(+2);
+            player.modifyLuck(+2);
+            return `You are awarded ${gold} gold for the monsters you defeated. For this courageous deed, you gain 2 Agility and 2 Luck.`;
+        },
+        redirect: 51,
+        new_room: true
+    },
     event194:
     {
         description: "You walk back down the spacious footpath all the way to its end. You climb up to the opening. You squeeze through and end up at the shore.",
@@ -1774,7 +1853,7 @@ export const events =
     },
     event197:
     {
-        description: "A long pavement leads stright [c]north[/c].",
+        description: "A long pavement leads straight [c]north[/c].",
         north: 276
     },
     event199:
@@ -2113,6 +2192,18 @@ export const events =
             }
         ]
     },
+    event235:
+    {
+        description: "A [e]Minotaur[/e] stands in the door.",
+        yes_no_choice:
+        {
+            question: "Is this enough?",
+            no: 327,
+            no_new_room: false,
+            yes: 92,
+            yes_new_room: false
+        }
+    },
     event236:
     {
         description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
@@ -2160,7 +2251,7 @@ export const events =
             return "You hit it with your shoulder, using all of your strength. The door won't even budge. You take 1 damage.";
         },
         redirect: 108,
-        new_room: false
+        new_room: true
     },
     event251:
     {
@@ -2170,13 +2261,8 @@ export const events =
     },
     event254:
     {
-        description: function()
-        {
-            player.modifyGold(+10);
-            return "Suddenly, from the other side of the chamber you hear a powerful roar. You manage to grab some gold (you later count 10 pieces) and escape.";
-        },
-        redirect: 385,
-        new_room: true
+        description: "Suddenly, from the other side of the chamber you hear a powerful roar. You have time to grab some [i]gold[/i] and then you must [c]escape[/c].",
+        escape_redirect: 385
     },
     event257:
     {
@@ -2285,6 +2371,44 @@ export const events =
             }
         }
     },
+    event270:
+    {
+        description: function()
+        {
+            let desc = "After taking a few steps you find yourself in front of a door decorated with leather. ";
+            if(game_vars.getFlag("270_door_open"))
+            {
+                desc += " You've already been here. You should [l]leave[/l].";
+            }
+            else
+            {
+                desc += " You can [l]open[/l] it or turn back and [l]leave[/l]."
+            }
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                {
+                    command: "leave",
+                    redirect: 134,
+                    new_room: true
+                }
+            ];
+
+            if(!game_vars.getFlag("270_door_open"))
+            {
+                loc.push({
+                    command: "open",
+                    redirect: 5,
+                    new_room: true
+                });
+            }
+
+            return loc;
+        }
+    },
     event271:
     {
         description: function()
@@ -2335,6 +2459,62 @@ export const events =
         north: 308,
         south: 215,
         east: 382
+    },
+    event277:
+    {
+        description: "Let's do this. First, the [e]Vampire[/e]. Then, the [e]Orc[/e].",
+        enemies:
+        [
+            {
+                name: "Vampire",
+                agility: 9,
+                constitution: 7,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Orc",
+                agility: 7,
+                constitution: 7,
+                escape_redirect: 193,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    },
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            system.enableRoomEscape(193);
+                            system.message("If you don't think you can keep going, you may [c]escape[/c]. Otherwise, you [l]remain[/l] on the battlefield.");
+                        }
+                    }
+                ]
+            }
+        ],
+        locals:
+        [
+            {
+                command: "remain",
+                redirect: 312,
+                new_room: false
+            }
+        ]
     },
     event278:
     {
@@ -2613,6 +2793,78 @@ export const events =
         },
         new_room: false
     },
+    event312:
+    {
+        description: "[e]Man-Eater[/e], [e]Zombie[/e] and [e]Skeleton[/e] await you. You will fight them in this order.",
+        enemies:
+        [
+            {
+                name: "Man-Eater",
+                agility: 7,
+                constitution: 5,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Zombie",
+                agility: 6,
+                constitution: 5,
+                escape_redirect: 193,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    },
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Skeleton",
+                agility: 5,
+                constitution: 4,
+                escape_redirect: 193,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    },
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                        }
+                    }
+                ]
+            }
+        ],
+        redirect: 193,
+        new_room: false
+    },
     event317:
     {
         description: function()
@@ -2734,6 +2986,11 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event327:
+    {
+        description: "Don't play hero, just run away as fast as you can. [c]Escape[/c] is your only option.",
+        escape_redirect: 51
     },
     event328:
     {
@@ -3172,7 +3429,7 @@ export const events =
     },
     event382:
     {
-        description: "At some point the corridor turns to the [c]north[/c]. At the turn, you may eat a ration.",
+        description: "At some point the corridor turns to the [c]north[/c]. At the turn, you may [c]eat[/c] a ration.",
         north: 134,
         rations: true
     },
@@ -3181,6 +3438,11 @@ export const events =
         description: "You become agitated. You grab your sword and attack.",
         redirect: 318,
         new_room: false
+    },
+    event384:
+    {
+        description: "50 steps ahead, then turn left (to the [c]north[/c] and take 30 steps.",
+        north: 221
     },
     event385:
     {

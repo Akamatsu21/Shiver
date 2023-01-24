@@ -119,8 +119,10 @@ public:
 
 public slots:
     void onAddCondition(const QVariant& name);
-    void onDisableEscape();
-    void onEnableEscape(int redirect);
+    void onDisableEnemyEscape();
+    void onDisableRoomEscape();
+    void onEnableEnemyEscape(int redirect);
+    void onEnableRoomEscape(int redirect);
     void onRemoveCondition(const QVariant& name);
     void onStopCombat();
 

@@ -14,6 +14,7 @@ class Event
     int _id;
     int _redirect;
     bool _new_room;
+    int _escape_redirect;
     std::string _description;
     std::map<Direction, int> _destinations;
     std::queue<Enemy> _enemies;
@@ -32,6 +33,7 @@ public:
     int getId() const;
     int getRedirect() const;
     bool leadsToNewRoom() const;
+    int getEscapeRedirect() const;
     std::string getDescription() const;
     int getDestination(Direction direction) const;
     bool isDirectionAvailable(Direction direction) const;
@@ -55,6 +57,7 @@ public:
 
     void setRedirect(int value);
     void setNewRoom(bool value);
+    void setEscapeRedirect(int value);
     void setDescription(const std::string& value);
     void setDestination(Direction direction, int destination);
     void setHasGold(bool value);

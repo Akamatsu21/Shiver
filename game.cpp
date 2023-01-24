@@ -139,15 +139,18 @@ void Game::handleEatCommand()
 
 bool Game::handleEscapeCommand()
 {
-    if(!_combat_state.combat_in_progress)
+    if(_current_event.getEscapeRedirect() == 0)
     {
-        _console.writeText("No enemies present!");
-        return false;
-    }
-    else if(!_current_event.getCurrentEnemy().isEscapeEnabled())
-    {
-        _console.writeText("Escape not enabled in this fight!");
-        return false;
+        if(!_combat_state.combat_in_progress)
+        {
+            _console.writeText("No enemies present!");
+            return false;
+        }
+        else if(!_current_event.getCurrentEnemy().isEscapeEnabled())
+        {
+            _console.writeText("Escape not enabled in this fight!");
+            return false;
+        }
     }
 
     _console.writeText("Would you like to attempt a luck check to reduce the damage received while escaping?");
@@ -1024,13 +1027,23 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
         }
 
         mode = InputMode::KEY_REDIRECT;
-        _current_event.setRedirect(_current_event.getCurrentEnemy().getEscapeRedirect());
         _current_event.setNewRoom(true);
 
-        resolveDamage(false, damage);
-        resolveCombatEndTriggers();
-        _current_event.defeatAllEnemies();
-        _combat_state.combat_in_progress = false;
+        if(_combat_state.combat_in_progress)
+        {
+            _current_event.setRedirect(_current_event.getCurrentEnemy().getEscapeRedirect());
+            resolveDamage(false, damage);
+            _current_event.defeatAllEnemies();
+            _combat_state.combat_in_progress = false;
+        }
+        else
+        {
+            _current_event.setRedirect(_current_event.getEscapeRedirect());
+            _player->modifyConstitution(-damage);
+            std::string msg = utils::createString("You take ", damage, " damage.");
+            _console.writeText(msg);
+        }
+
         _console.writeText("You have escaped!");
     }
 
@@ -1366,15 +1379,25 @@ void Game::onAddCondition(const QVariant& name)
     _player->addCondition(_scripting_engine->parseCondition(name.toString()));
 }
 
-void Game::onDisableEscape()
+void Game::onDisableEnemyEscape()
 {
     _current_event.getCurrentEnemy().setEscapeEnabled(false);
 }
 
-void Game::onEnableEscape(int redirect)
+void Game::onDisableRoomEscape()
+{
+    _current_event.setEscapeRedirect(0);
+}
+
+void Game::onEnableEnemyEscape(int redirect)
 {
     _current_event.getCurrentEnemy().setEscapeEnabled(true);
     _current_event.getCurrentEnemy().setEscapeRedirect(redirect);
+}
+
+void Game::onEnableRoomEscape(int redirect)
+{
+    _current_event.setEscapeRedirect(redirect);
 }
 
 void Game::onRemoveCondition(const QVariant& name)
@@ -1385,6 +1408,5 @@ void Game::onRemoveCondition(const QVariant& name)
 void Game::onStopCombat()
 {
     _combat_state.combat_in_progress = false;
-    resolveCombatEndTriggers();
     _current_event.defeatAllEnemies();
 }

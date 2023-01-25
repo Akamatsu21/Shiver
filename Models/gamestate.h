@@ -25,9 +25,10 @@ struct GameState
     bool event_enemy_escape_enabled;
     int event_enemy_escape_redirect;
     bool event_gold_present;
+    bool event_rations_present;
     bool event_items_present;
     int event_item_limit;
-    bool event_rations_enabled;
+    bool event_eating_enabled;
 
     bool combat_in_progress;
     int combat_round;

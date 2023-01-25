@@ -20,9 +20,11 @@ class Event
     std::queue<Enemy> _enemies;
     int _gold;
     bool _has_gold;
+    int _rations;
+    bool _has_rations;
     std::vector<std::string> _items;
     int _item_limit;
-    bool _rations_enabled;
+    bool _eating_enabled;
     Choice _choice;
     std::map<std::string, UserOption> _local_commands;
     QJSValue _exit_callback;
@@ -40,12 +42,14 @@ public:
     bool hasEnemies() const;
     bool hasGold() const;
     int getGold() const;
+    bool hasRations() const;
+    int getRations() const;
     bool hasItems() const;
     bool hasItem(const std::string& item) const;
     std::string getItemList() const;
     std::string findItem(const std::string& item) const;
     int getItemLimit() const;
-    bool rationsEnabled() const;
+    bool isEatingEnabled() const;
     bool hasYesNoChoice() const;
     bool hasMultiChoice() const;
     std::string getChoiceQuestion() const;
@@ -62,8 +66,10 @@ public:
     void setDestination(Direction direction, int destination);
     void setHasGold(bool value);
     void setGold(int value);
+    void setHasRations(bool value);
+    void setRations(int value);
     void setItemLimit(int value);
-    void setRationsEnabled(bool value);
+    void setEatingEnabled(bool value);
     void setExitCallback(QJSValue callback);
 
     Enemy getCurrentEnemy() const;

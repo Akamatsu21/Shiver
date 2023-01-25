@@ -120,7 +120,7 @@ void Game::handleEatCommand()
         _console.writeText("You have to defeat all enemies before you can eat.");
         return;
     }
-    else if(!_current_event.rationsEnabled())
+    else if(!_current_event.isEatingEnabled())
     {
         _console.writeText("Eating not allowed in this location.");
         return;
@@ -128,7 +128,7 @@ void Game::handleEatCommand()
 
     if(_player->eatRation())
     {
-        _current_event.setRationsEnabled(false);
+        _current_event.setEatingEnabled(false);
         _console.writeText("You consume a Ration and recover 4 Constitution.");
     }
     else
@@ -394,6 +394,34 @@ void Game::handleTakeCommand(const std::string& item)
         else
         {
             _console.writeText("No gold to pick up here.");
+        }
+        return;
+    }
+    else if(utils::toLower(item) == "ration" || utils::toLower(item) == "rations")
+    {
+        if(_current_event.hasRations())
+        {
+            _player->modifyRations(_current_event.getRations());
+            _current_event.setHasRations(false);
+
+            if(_current_event.getRations() == 1)
+            {
+                _console.writeText("You picked up a ration.");
+            }
+            else
+            {
+                _console.writeText(utils::createString("You picked up ",
+                                                       _current_event.getRations(),
+                                                       " rations."));
+            }
+
+            QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
+                                                                       "_rations_taken"));
+            _game_vars->setFlag(flag, true);
+        }
+        else
+        {
+            _console.writeText("No rations to pick up here.");
         }
         return;
     }
@@ -805,12 +833,13 @@ GameState Game::createGameState()
         }
     }
     game_state.event_gold_present = _current_event.hasGold();
+    game_state.event_rations_present = _current_event.hasRations();
     game_state.event_items_present = _current_event.hasItems();
     if(_current_event.hasItems())
     {
         game_state.event_item_limit = _current_event.getItemLimit();
     }
-    game_state.event_rations_enabled = _current_event.rationsEnabled();
+    game_state.event_eating_enabled = _current_event.isEatingEnabled();
 
     game_state.combat_in_progress = _combat_state.combat_in_progress;
     if(_combat_state.combat_in_progress)
@@ -960,7 +989,8 @@ void Game::restoreGameState(const GameState& game_state)
     }
 
     _current_event.setHasGold(game_state.event_gold_present);
-    _current_event.setRationsEnabled(game_state.event_rations_enabled);
+    _current_event.setHasRations(game_state.event_rations_present);
+    _current_event.setEatingEnabled(game_state.event_eating_enabled);
 
     if(game_state.event_items_present)
     {

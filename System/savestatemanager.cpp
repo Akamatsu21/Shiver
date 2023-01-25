@@ -73,13 +73,14 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
             ss << game_state.event_enemy_escape_redirect << "\n";
         }
     }
-    ss << game_state.event_gold_present << "\n";
-    ss << game_state.event_items_present << "\n";
+    ss << game_state.event_gold_present << "\n"
+       << game_state.event_rations_present << "\n"
+       << game_state.event_items_present << "\n";
     if(game_state.event_items_present)
     {
         ss << game_state.event_item_limit << "\n";
     }
-    ss << game_state.event_rations_enabled << "\n";
+    ss << game_state.event_eating_enabled << "\n";
 
     // Combat status.
     ss << game_state.combat_in_progress << "\n";
@@ -195,12 +196,13 @@ GameState SaveStateManager::parseSaveFileContents()
     }
 
     ss >> game_state.event_gold_present
+       >> game_state.event_rations_present
        >> game_state.event_items_present;
     if(game_state.event_items_present)
     {
         ss >> game_state.event_item_limit;
     }
-    ss >> game_state.event_rations_enabled;
+    ss >> game_state.event_eating_enabled;
 
     ss >> game_state.combat_in_progress;
     if(game_state.combat_in_progress)

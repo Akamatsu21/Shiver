@@ -133,10 +133,10 @@ export const events =
     {
         description: function()
         {
-            player.modifyRations(+1);
             player.modifyLuck(+2);
-            return "[e]Dwarves[/e] bid you farewell and kindly offer two lettuces to you. That can serve you as one ration. They lead you to the eastern door. It's time to [l]leave[/l]. You gain 2 Luck.";
+            return "[e]Dwarves[/e] bid you farewell and kindly offer two lettuces to you. That can serve you as one [i]ration[/i]. They lead you to the eastern door. It's time to [l]leave[/l]. You gain 2 Luck.";
         },
+        rations: 1,
         locals:
         [
             {
@@ -266,6 +266,13 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event33:
+    {
+        description: "A little more, and you reach an intersection. You can go [c]north[/c], [c]east[/c] or [c]south[/c].",
+        north: 293,
+        south: 147,
+        east: 188
     },
     event34:
     {
@@ -593,7 +600,7 @@ export const events =
     {
         description: "You leave the armoury. The only exit leads to the [c]north[/c]. You follow the corridor to the nearest crossing. On the way, you may [c]eat[/c] a ration.",
         north: 212,
-        rations: true
+        eat: true
     },
     event69:
     {
@@ -1037,7 +1044,7 @@ export const events =
     event114:
     {
         description: "You don't find anything here, but you can [c]eat[/c] a ration and then [l]leave[/l].",
-        rations: true,
+        eat: true,
         locals:
         [
             {
@@ -1294,7 +1301,32 @@ export const events =
     {
         description: "You are at a dead end of a corridor that stops here. It leads directly [c]north[/c]. You may [c]eat[/c] a ration. You have no other choice but to go down the corridor.",
         north: 357,
-        rations: true
+        eat: true
+    },
+    event144:
+    {
+        description: function()
+        {
+            let desc = "You enter a short corridor. It's barely just begun, but it's already over: a smooth wall blocks the way. You sit down on a stone doorstep. You may [c]eat[/c] one of your rations. ";
+            if(player.hasItem("Crushed Lettuce"))
+            {
+                player.modifyRations(-1);
+                player.removeItem("Crushed Lettuce");
+                desc += "You find out the crushed lettuce in your backpack got spoiled and contaminated one of your rations. You throw it away. ";
+            }
+            desc += "Suddenly, you hear rumbling. You hide in a gap between rocks. A herd of monsters run through the main corridor. You got lucky this time. You gain 1 Luck. It's time to [l]leave[/l]."
+
+            return desc;
+        },
+        eat: true,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 84,
+                new_room: true
+            }
+        ]
     },
     event145:
     {
@@ -1923,6 +1955,11 @@ export const events =
         redirect: 254,
         new_room: false
     },
+    event209:
+    {
+        description: "A long corridor leads north, then turns west with a deep arc only to abruptly change back to [c]north[/c]. It ends at a small opening, through which you can see red light.",
+        north: 207
+    },
     event212:
     {
         description: "You reach a large square, where the paths lead in four directions. Which one do you choose?",
@@ -2027,6 +2064,13 @@ export const events =
             }
         },
         new_room: false
+    },
+    event221:
+    {
+        description: "You reach an intersection which leads [c]north[/c], [c]east[/c] and [c]south[/c].",
+        north: 339,
+        south: 173,
+        east: 41
     },
     event224:
     {
@@ -2152,7 +2196,8 @@ export const events =
     event233:
     {
         description: "Luck check successful!<br /><br />Suddenly, as if on a moving stage, the floor turns along with the wall. You end up in a corridor that runs from the north to the south. The secret passage is now nowhere to be found.",
-        redirect: 78
+        redirect: 78,
+        new_room: true
     },
     event234:
     {
@@ -2627,7 +2672,7 @@ export const events =
     {
         description: "The corridor leads west, and then turns to the [c]north[/c]. At the turn, you may [c]eat[/c] a ration. You keep going. There is an intersection up ahead.",
         north: 39,
-        rations: true
+        eat: true
     },
     event297:
     {
@@ -3223,7 +3268,11 @@ export const events =
     },
     event356:
     {
-        description: "You go without much care for what you step on. And, of course, you end up stepping on the lettuce. Twice. This time you definitely did not manage to win them over. They say good-bye in a cold tone and lead you to the eastern door. Oh, and on top of that they give you two lettuces. The ones you stepped on. With a bang, they close the door behind you.",
+        description: function()
+        {
+            player.addItem("Crushed Lettuce");
+            return "You go without much care for what you step on. And, of course, you end up stepping on the lettuce. Twice. This time you definitely did not manage to win them over. They say good-bye in a cold tone and lead you to the eastern door. Oh, and on top of that they give you two lettuces. The ones you stepped on. With a bang, they close the door behind you.<br /><br />[i]Crushed Lettuce[/i] added to your inventory.";
+        },
         redirect: 141,
         new_room: true
     },
@@ -3396,7 +3445,7 @@ export const events =
     {
         description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
         north: 178,
-        rations: true
+        eat: true
     },
     event381:
     {
@@ -3431,7 +3480,7 @@ export const events =
     {
         description: "At some point the corridor turns to the [c]north[/c]. At the turn, you may [c]eat[/c] a ration.",
         north: 134,
-        rations: true
+        eat: true
     },
     event383:
     {

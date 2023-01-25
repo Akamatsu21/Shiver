@@ -24,9 +24,10 @@ Enemy constitution
 Enemy escape enabled
 Enemy escape redirect
 Gold present
+Rations present
 Item present
 Item Limit
-Rations enabled
+Eating enabled
 
 // Combat state
 Combat in progress

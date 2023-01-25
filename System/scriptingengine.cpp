@@ -219,6 +219,20 @@ Event ScriptingEngine::parseEvent(int id)
         }
     }
 
+    if(event_object.hasProperty("rations"))
+    {
+        QVariant flag = QString::fromStdString(utils::createString(id, "_rations_taken"));
+        if(_game_variables_obj->getFlag(flag))
+        {
+            event.setHasRations(false);
+        }
+        else
+        {
+            event.setHasRations(true);
+            event.setRations(getObjectProperty(event_object, "rations").toInt());
+        }
+    }
+
     if(event_object.hasProperty("items"))
     {
         assert(event_object.hasProperty("item_limit"));
@@ -237,9 +251,9 @@ Event ScriptingEngine::parseEvent(int id)
         }
     }
 
-    if(event_object.hasProperty("rations"))
+    if(event_object.hasProperty("eat"))
     {
-        event.setRationsEnabled(getObjectProperty(event_object, "rations").toBool());
+        event.setEatingEnabled(getObjectProperty(event_object, "eat").toBool());
     }
 
     if(event_object.hasProperty("yes_no_choice"))

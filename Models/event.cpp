@@ -14,9 +14,11 @@ Event::Event(int id):
     _enemies{},
     _gold(0),
     _has_gold(false),
+    _rations(0),
+    _has_rations(false),
     _items{},
     _item_limit(0),
-    _rations_enabled(false),
+    _eating_enabled(false),
     _choice(),
     _local_commands{},
     _exit_callback(false)
@@ -74,6 +76,16 @@ int Event::getGold() const
     return _gold;
 }
 
+bool Event::hasRations() const
+{
+    return _has_rations;
+}
+
+int Event::getRations() const
+{
+    return _rations;
+}
+
 bool Event::hasItems() const
 {
     return !_items.empty();
@@ -120,9 +132,9 @@ int Event::getItemLimit() const
     return _item_limit;
 }
 
-bool Event::rationsEnabled() const
+bool Event::isEatingEnabled() const
 {
-    return _rations_enabled;
+    return _eating_enabled;
 }
 
 bool Event::hasYesNoChoice() const
@@ -200,14 +212,24 @@ void Event::setGold(int value)
     _gold = value;
 }
 
+void Event::setHasRations(bool value)
+{
+    _has_rations = value;
+}
+
+void Event::setRations(int value)
+{
+    _rations = value;
+}
+
 void Event::setItemLimit(int value)
 {
     _item_limit = value;
 }
 
-void Event::setRationsEnabled(bool value)
+void Event::setEatingEnabled(bool value)
 {
-    _rations_enabled = value;
+    _eating_enabled = value;
 }
 
 void Event::setExitCallback(QJSValue callback)

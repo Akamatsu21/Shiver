@@ -1,0 +1,30 @@
+Bone Hunting Dagger - found in 115
+Bunch of Keys - found in 128
+Crushed Lettuce - found in 356, spoils a ration in 144
+Cursed Gloves - found in 95, agility debuff, removed after next combat
+Decorative Shield - found in 37
+Decrepit Flask - found in 119, can be turned into Filled Flask in 83 or into Magical Water in 192
+Elixir of Invisibility - found in 294
+Emerald - found in 263
+Enchanted Sword - found in 153, combat buff, permanent
+Filled Flask - found in 83, can be turned into Magical Water in 192, used for a feast with the Dwarves in 371, allows entering the chamber in 167
+Fireball - found in 177
+Fireproof Rope - found in 119
+Heavy Hammer - found in 115
+Helmet - found in 298
+Jar of All-Eaters - found in 192
+Key#45 - found 180
+Key#122 - found in 278
+Lake Water - found in 241
+Leather Shield - found in 37
+Magical Water - found in 45
+Metal Shield - found in 37
+Monster's Bone - found in 192
+Net - found in 88
+Short Sword - found in 190
+Small Shiny Key - found in 192, can be turned into Key#122 in 278, opens the door in 131
+Spear - found in 192
+Stone Sword - found in 190
+Thin Sword - found in 190
+Tin Butterfly - found in 192
+Werewolf's Scalp - found in 119

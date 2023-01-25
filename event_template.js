@@ -45,13 +45,14 @@ eventX:
         }
     ],
     gold: 100,
+    rations: 1,
     items:
     [
         "Item1",
         "Item2"
     ],
     item_limit: 1,
-    rations: true,
+    eat: true,
     yes_no_choice:
     {
         question: "Make a choice",

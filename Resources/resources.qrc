@@ -8,6 +8,7 @@
     <qresource prefix="/static">
         <file>title.txt</file>
         <file>gameover.txt</file>
+        <file>dragonwagon.txt</file>
     </qresource>
     <qresource prefix="/qml">
         <file>main.qml</file>

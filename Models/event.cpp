@@ -19,6 +19,7 @@ Event::Event(int id):
     _items{},
     _item_limit(0),
     _eating_enabled(false),
+    _eating_callback(false),
     _choice(),
     _local_commands{},
     _exit_callback(false)
@@ -137,6 +138,11 @@ bool Event::isEatingEnabled() const
     return _eating_enabled;
 }
 
+bool Event::hasEatingCallback() const
+{
+    return _eating_callback.isCallable();
+}
+
 bool Event::hasYesNoChoice() const
 {
     return _choice.type == ChoiceType::YES_NO;
@@ -232,6 +238,11 @@ void Event::setEatingEnabled(bool value)
     _eating_enabled = value;
 }
 
+void Event::setEatingCallback(QJSValue callback)
+{
+    _eating_callback = callback;
+}
+
 void Event::setExitCallback(QJSValue callback)
 {
     _exit_callback = callback;
@@ -312,6 +323,14 @@ void Event::triggerLocalCommandCallback(const std::string& command)
     if(getLocalCommand(command).callback.isCallable())
     {
         getLocalCommand(command).callback.call();
+    }
+}
+
+void Event::triggerEatingCallback()
+{
+    if(_eating_callback.isCallable())
+    {
+        _eating_callback.call();
     }
 }
 

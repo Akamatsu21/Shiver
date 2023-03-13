@@ -15,6 +15,8 @@
 namespace utils
 {
 
+std::string accessStaticResource(const std::string filename);
+
 Direction commandToDirection(Command command);
 
 template<typename... Args>
@@ -33,8 +35,6 @@ std::vector<Direction> getAllDirections();
 
 std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels();
 
-std::string getGameOverText();
-
 template<typename K, typename V>
 std::vector<K> getKeys(const std::map<K, V>& map)
 {
@@ -45,8 +45,6 @@ std::vector<K> getKeys(const std::map<K, V>& map)
     }
     return keys;
 }
-
-std::string getTitleScreenText();
 
 std::string parseParams(std::queue<std::string>& params);
 

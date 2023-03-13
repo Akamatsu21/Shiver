@@ -3,7 +3,9 @@
 #include <random>
 #include <QFile>
 
-static std::string accessStaticResource(const std::string filename)
+namespace utils {
+
+std::string accessStaticResource(const std::string filename)
 {
     QFile file(":static/" + QString::fromStdString(filename));
     if(file.open(QIODevice::ReadOnly))
@@ -13,8 +15,6 @@ static std::string accessStaticResource(const std::string filename)
 
     throw std::system_error(std::make_error_code(std::errc::io_error), "File cannot be opened");
 }
-
-namespace utils {
 
 std::string directionToString(Direction direction)
 {
@@ -60,11 +60,6 @@ std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels()
                                               {"Constitution", PlayerStat::CONSTITUTION},
                                               {"Luck", PlayerStat::LUCK},
                                               {"CombatStrength", PlayerStat::COMBAT_STRENGTH}};
-}
-
-std::string getGameOverText()
-{
-    return accessStaticResource("gameover.txt");
 }
 
 Direction commandToDirection(Command command)
@@ -132,11 +127,6 @@ std::string toLower(const std::string& s)
     std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
                    [](char c){ return std::tolower(c); });
     return result;
-}
-
-std::string getTitleScreenText()
-{
-    return accessStaticResource("title.txt");
 }
 
 }

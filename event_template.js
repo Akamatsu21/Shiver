@@ -53,6 +53,10 @@ eventX:
     ],
     item_limit: 1,
     eat: true,
+    on_eat: function()
+    {
+        // Trigger to execute instead of the normal eat command.
+    },
     yes_no_choice:
     {
         question: "Make a choice",

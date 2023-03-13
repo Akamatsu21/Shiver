@@ -1,3 +1,26 @@
+function payCommandEvent35()
+{
+    if(player.getGold() >= 10)
+    {
+        game_vars.setFlag("35_luck_check", player.performLuckCheck());
+    }
+}
+
+function jumpCommandEvent110()
+{
+    if(player.getConstitution() < 14 || player.getAgility() < 9)
+    {
+        game_vars.setFlag("110_jump_possible", false);
+    }
+    else
+    {
+        game_vars.setFlag("110_jump_possible", true);
+        game_vars.setCounter("110_jump_result", system.rollD6(1));
+        game_vars.setFlag("110_ration_required", (player.getConstitution() < 18));
+        game_vars.setFlag("110_ration_available", (player.getRations() !== 0));
+    }
+}
+
 export const events =
 {
     event1:
@@ -5,6 +28,65 @@ export const events =
         description: "The entrance to the dungeon is wide, covered in moss and lush bushes. You check your clothing and equipment. Remember to light the lantern!<br /><br />You enter the corridor. It's so tall you don't even need to bend over. It leads straight towards the north. Soon you reach an intersection. It's shaped like the letter T. The roads lead towards [c]west[/c], [c]east[/c] and south (where you came from).",
         redirect: 25,
         new_room: false
+    },
+    event3:
+    {
+        description: function()
+        {
+            let desc = "Your patience and, even more so, your gold supply are running out. Why not try a different approach? Old dungeon dwellers say that the [e]Dragon[/e] has some weaknesses. In particular, the left side of his body, where he carries his money bag, is a weak point.";
+            if(player.getGold() >= 13)
+            {
+                desc += "You could attempt to [l]bribe[/l] the [e]Dragon[/e] by paying over the tariff? The alternatives are ";
+            }
+            else
+            {
+                desc += "Bribing the dragon would be a great idea, but you don't have enough money to try that. The alternatives are ";
+            }
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                desc += "[l]throw[/l]ing the rope, ";
+            }
+            desc += "[l]walk[/l]ing on the bridge or [l]jump[/l]ing over the gap.";
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                {
+                    command: "jump",
+                    redirect: 110,
+                    new_room: false,
+                    on_command: jumpCommandEvent110
+                },
+                {
+                    command: "walk",
+                    redirect: 74,
+                    new_room: false
+                }
+            ];
+
+            if(player.getGold() >= 13)
+            {
+                loc.push({
+                    command: "bribe",
+                    redirect: 136,
+                    new_room: false
+                });
+            }
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 269,
+                    new_room: false
+                });
+            }
+
+            return loc;
+        }
     },
     event4:
     {
@@ -46,7 +128,7 @@ export const events =
     },
     event10:
     {
-        description: "[e]Dwarves[/e] invite you to seat at the table. They are smiling. \"Finally a well-behaved monster\" they say. \"Whenever someone comes here, they just steal our lettuce and run. But we honestly can't blame them. At least our produce is useful to someone, hehe.\" You start thinking about the \"hehe\", and before you realise, the [e]Dwarves[/e] are already reeling off their tales. Few of them have ever explored further depths of the dungeon. The ones who came back say that the scariest thing you can come across is fire. The maze is also home to a fat Dragon. It is said to be extremely sinister, but some claim it can be bribed.<br /><br />You listen to these tales, but something is still bothering you.",
+        description: "[e]Dwarves[/e] invite you to seat at the table. They are smiling. \"Finally a well-behaved monster\" they say. \"Whenever someone comes here, they just steal our lettuce and run. But we honestly can't blame them. At least our produce is useful to someone, hehe.\" You start thinking about the \"hehe\", and before you realise, the [e]Dwarves[/e] are already reeling off their tales. Few of them have ever explored further depths of the dungeon. The ones who came back say that the scariest thing you can come across is fire. The maze is also home to a fat [e]Dragon[/e]. It is said to be extremely sinister, but some claim it can be bribed.<br /><br />You listen to these tales, but something is still bothering you.",
         redirect: function()
         {
             if(game_vars.getFlag("85_door_discovered"))
@@ -174,11 +256,11 @@ export const events =
             player.modifyGold(+gold);
             if(pranksters_left === 5)
             {
-                return "You didn't manage to kill any pranksters. You leave the room in shame."
+                return "You didn't manage to kill any pranksters. You leave the room in shame.";
             }
             else if(pranksters_left === 4)
             {
-                return "You only managed to kill 1 prankster. You loot his corpse and find 5 gold. Then, you leave the room."
+                return "You only managed to kill 1 prankster. You loot his corpse and find 5 gold. Then, you leave the room.";
             }
             else
             {
@@ -286,6 +368,49 @@ export const events =
             }
         ]
     },
+    event35:
+    {
+        description: function()
+        {
+            if(player.getGold() < 10)
+            {
+                return "You don't have enough gold to pay the [e]Dragon[/e]. You will have to come up with another way to cross the gap.";
+            }
+
+            player.modifyGold(-10);
+            let desc = "You pay the agreed tariff of 10 gold. He spreads his legs over the whole gap and pushes his tail towards you. You get on. He's about to carry you to the other side of the canyon, but... This [e]Dragon[/e] can be very moody. The tail suddenly stops right above the red abyss, with you clutching it desperately.<br /><br />";
+
+            if(game_vars.getFlag("35_luck_check"))
+            {
+                desc += "Luck check successful!<br />The tail begins moving again and you get to the other side.";
+            }
+            else
+            {
+                desc += "Luck check failed!<br />The tail moves the other way and you're thrown back to the same edge.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getGold() < 10)
+            {
+                return 207;
+            }
+            else if(game_vars.getFlag("35_luck_check"))
+            {
+                return 186;
+            }
+            else
+            {
+                return 158;
+            }
+        },
+        new_room: function()
+        {
+            return player.getGold() < 10;
+        }
+    },
     event37:
     {
         description: "You may choose a [o]metal[/o], [o]decorative[/o] or [o]leather[/o] shield.",
@@ -307,7 +432,7 @@ export const events =
                         else
                         {
                             player.addItem("Metal Shield");
-                            system.message("[i]Metal Shield[/i] added to your inventory.")
+                            system.message("[i]Metal Shield[/i] added to your inventory.");
                         }
                     }
                 },
@@ -324,7 +449,7 @@ export const events =
                         else
                         {
                             player.addItem("Decorative Shield");
-                            system.message("[i]Decorative Shield[/i] added to your inventory.")
+                            system.message("[i]Decorative Shield[/i] added to your inventory.");
                         }
                     }
                 },
@@ -341,7 +466,7 @@ export const events =
                         else
                         {
                             player.addItem("Leather Shield");
-                            system.message("[i]Leather Shield[/i] added to your inventory.")
+                            system.message("[i]Leather Shield[/i] added to your inventory.");
                         }
                     }
                 }
@@ -674,6 +799,91 @@ export const events =
             }
         ],
     },
+    event74:
+    {
+        description: function()
+        {
+            let desc = "You approach the bridge. Wooden planks squeak at every step. Suddenly one of them slips from under your legs and falls down the chasm with a crash. ";
+            let success = system.rollD6(1);
+            if(success < 3)
+            {
+                player.modifyConstitution(-1);
+                desc += "You got unlucky! You fall over and scrape your leg. You take 1 damage. You slowly pull yourself back up and continue forward. ";
+            }
+            else
+            {
+                desc += "You got lucky! You manage to regain your balance quickly and continue forward. ";
+            }
+
+            desc += "The bridge arches upwards. You can see a mighty hole at the peak of the arch. There is only one way to overcome it and it requires a net.";
+            if(!player.hasItem("Net"))
+            {
+                desc += " Unfortunately, you don't have one! You must turn back. You can [l]pay[/l] the [e]Dragon[/e]";
+                if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+                {
+                    desc += ", [l]throw[/l] your rope";
+                }
+                desc += " or attempt a [l]jump[/l].";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Net"))
+            {
+                return 240;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: function()
+        {
+            if(player.hasItem("Net"))
+            {
+                return false;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        locals: function()
+        {
+            if(player.hasItem("Net"))
+            {
+                return undefined;
+            }
+            
+            let loc = [
+                {
+                    command: "jump",
+                    redirect: 110,
+                    new_room: false,
+                    on_command: jumpCommandEvent110
+                },
+                {
+                    command: "pay",
+                    redirect: 35,
+                    new_room: false,
+                    on_command: payCommandEvent35
+                }
+            ];
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 269,
+                    new_room: false
+                });
+            }
+            
+            return loc;
+        }
+    },
     event75:
     {
         description: "You back off and go back towards the intersection. You pass the elderly man.",
@@ -751,7 +961,6 @@ export const events =
                     {
                         player.removeItem("Decrepit Flask");
                         player.addItem("Filled Flask");
-                        system.message("You fill up your flask and leave the chamber.");
                     }
                 });
             }
@@ -781,7 +990,7 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            return "You swim like a madman. You manage to safely reach the shore. You're in the same place you ended up in after crossing the lake. You take the [i]net[/i] and unfold it on the ground. You throw away entangles leaves and roots. Suddenly, the white marine rat, [e]Uruburu[/e], jumps out from underneath the floating trash. It bites your foot and runs: You take 2 damage. You may clean the [i]net[/i] and put it in your backpack. Then, it's time to [l]leave[/l]."
+            return "You swim like a madman. You manage to safely reach the shore. You're in the same place you ended up in after crossing the lake. You take the [i]net[/i] and unfold it on the ground. You throw away entangles leaves and roots. Suddenly, the white marine rat, [e]Uruburu[/e], jumps out from underneath the floating trash. It bites your foot and runs: You take 2 damage. You may clean the [i]net[/i] and put it in your backpack. Then, it's time to [l]leave[/l].";
         },
         items:
         [
@@ -955,7 +1164,19 @@ export const events =
     },
     event108:
     {
-        description: "You may go [c]north[/c] or [c]south[/c].",
+        description: function()
+        {
+            let desc = "";
+
+            if(game_vars.getFlag("108_show_exit_prompt"))
+            {
+                desc += "You insert your sword and clench your muscles. The rock slides to the side. You escape the stinky room promptly. Right behind you, the exit closes with a bang. You're now in a corridor.<br /><br />";
+                game_vars.setFlag("108_show_exit_prompt", false);
+            }
+
+            desc += "You may go [c]north[/c] or [c]south[/c].";
+            return desc;
+        },
         north: 363,
         south: 141
     },
@@ -991,6 +1212,65 @@ export const events =
                 ]
             }
         ]
+    },
+    event110:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("110_jump_possible"))
+            {
+                return "You haven't saved up enough of your strength to perform this feat. You will have to try something else.";
+            }
+
+            let desc = "";
+            
+            if(game_vars.getFlag("110_ration_required"))
+            {
+                desc += "You haven't saved up enough of your strength to perform this feat. You will have to eat a ration to recover some strength.<br />";
+                if(player.eatRation())
+                {
+                    desc += "You consume a ration and recover 4 Constitution.<br /><br />";
+                }
+                else
+                {
+                    desc += "You don't have any rations left. You will have to try something else.";
+                    return desc;
+                }
+            }
+
+            const constitution_cost = Math.floor(player.getConstitution() / 2);
+            player.modifyAgility(-3);
+            player.modifyConstitution(-constitution_cost);
+            desc += "This jump comes at a cost of 3 Agility points and half of your remaining Constitution (rounded down). You start running to gain momentum and...<br /><br />";
+
+            if(game_vars.getCounter("110_jump_result") < 3)
+            {
+                desc += "You failed!<br />The jump was too short.";
+            }
+            else
+            {
+                desc += "You succeeded!<br />You make it to the other side.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(!game_vars.getFlag("110_jump_possible") ||
+                (game_vars.getFlag("110_jump_possible") && game_vars.getFlag("110_ration_required") && !game_vars.getFlag("110_ration_available")))
+            {
+                return 207;
+            }
+            else if(game_vars.getCounter("110_jump_result") < 3)
+            {
+                return 314;
+            }
+            else
+            {
+                return 288;
+            }
+        },
+        new_room: true
     },
     event111:
     {
@@ -1095,7 +1375,7 @@ export const events =
                         else
                         {
                             player.addItem("Bone Hunting Dagger");
-                            system.message("[i]Bone Hunting Dagger[/i] added to your inventory.")
+                            system.message("[i]Bone Hunting Dagger[/i] added to your inventory.");
                         }
                     }
                 },
@@ -1117,7 +1397,7 @@ export const events =
                         else
                         {
                             player.addItem("Heavy Hammer");
-                            system.message("[i]Heavy Hammer[/i] added to your inventory.")
+                            system.message("[i]Heavy Hammer[/i] added to your inventory.");
                         }
                     }
                 },
@@ -1241,7 +1521,7 @@ export const events =
                 new_room: true,
                 on_command: function()
                 {
-                    system.message("You insert your sword and clench your muscles. The rock slides to the side. You escape the stinky room promptly. Right behind you, the exit closes with a bang. You're now in a corridor.");
+                    game_vars.setFlag("108_show_exit_prompt", true);
                 }
             }
         ]
@@ -1256,7 +1536,7 @@ export const events =
         description: function()
         {
             player.removeItem("Small Shiny Key");
-            return "Indeed, the metal bars are lifted up, but you can't get the key out. You will have to leave it here."
+            return "Indeed, the metal bars are lifted up, but you can't get the key out. You will have to leave it here.";
         },
         redirect: 251,
         new_room: false
@@ -1278,6 +1558,16 @@ export const events =
         north: 270,
         south: 276,
         east: 384
+    },
+    event136:
+    {
+        description: function()
+        {
+            player.modifyGold(-13);
+            return "The [e]Dragon[/e] politely invites you on his tail. Admittedly, it sways a lot over the gap, but soon after you end up on the other side.";
+        },
+        redirect: 186,
+        new_room: false
     },
     event139:
     {
@@ -1314,7 +1604,7 @@ export const events =
                 player.removeItem("Crushed Lettuce");
                 desc += "You find out the crushed lettuce in your backpack got spoiled and contaminated one of your rations. You throw it away. ";
             }
-            desc += "Suddenly, you hear rumbling. You hide in a gap between rocks. A herd of monsters run through the main corridor. You got lucky this time. You gain 1 Luck. It's time to [l]leave[/l]."
+            desc += "Suddenly, you hear rumbling. You hide in a gap between rocks. A herd of monsters run through the main corridor. You got lucky this time. You gain 1 Luck. It's time to [l]leave[/l].";
 
             return desc;
         },
@@ -1333,10 +1623,10 @@ export const events =
         description: function()
         {
             const result = system.rollD6(2);
-            let desc = `You lost ${result} gold playing the game.`
+            let desc = `You lost ${result} gold playing the game.`;
             if(result > player.getGold())
             {
-                desc += " Looks like you don't even have that much, so you just pay up all your gold."
+                desc += " Looks like you don't even have that much, so you just pay up all your gold.";
             }
             else
             {
@@ -1365,7 +1655,7 @@ export const events =
         description: function()
         {
             game_vars.setFlag("38_door_open", true);
-            return "Thus far, none of the doors you've come across have opened as quietly and gently as this one. You come in. The room has a regular shape and straight, smooth walls. In each of them, there is a torch holder. They all have torches. In the torchlight you notice a group of small creatures moving about. These are [e]Dwarves[/e]. They are running around flower beds. They're weeding and harvesting their greatest treasure - the dungeon lettuce. This is what all the inhabitants of this maze call their favourite snack. You can try to [l]befriend[/l] the [e]Dwarves[/e]. Or you can just [l]walk[/l] to the door on the eastern  side of the room. You may also [l]attack[/l] the innocent creatures.";
+            return "Thus far, none of the doors you've come across have opened as quietly and gently as this one. You come in. The room has a regular shape and straight, smooth walls. In each of them, there is a torch holder. They all have torches. In the torchlight you notice a group of small creatures moving about. These are [e]Dwarves[/e]. They are running around flower beds. They're weeding and harvesting their greatest treasure - the dungeon lettuce. This is what all the inhabitants of this maze call their favourite snack. You can try to [l]befriend[/l] the [e]Dwarves[/e]. Or you can just [l]walk[/l] to the door on the eastern side of the room. You may also [l]attack[/l] the innocent creatures.";
         },
         locals:
         [
@@ -1395,7 +1685,7 @@ export const events =
             system.addCondition("enchanted_sword");
             return "The rat is a good sign. This sword is enchanted. It will add 1 to your combat score in all future fights. You also gain 1 Luck.<br />[i]Enchanted Sword[/i] added to your inventory.";
         },
-        redirect: 324,
+        redirect: 324
     },
     event154:
     {
@@ -1415,6 +1705,72 @@ export const events =
         description: "You observe the walls, move the lighter stones - nothing! All you can do now is go back [c]west[/c].",
         west: 212
     },
+    event158:
+    {
+        description: function()
+        {
+            let desc = "Haven't you had enough? ";
+            if(player.getGold() >= 10)
+            {
+                desc += "You still have money left, so you could try to [l]pay[/l] the [e]Dragon[/e] again. Alternatively, you could try ";
+            }
+            else
+            {
+                desc += "You don't have enough money to try this again, so you'll have to come up with something else. You could try ";
+            }
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                desc += "[l]throw[/l]ing the rope, ";
+            }
+            desc += "[l]walk[/l]ing on the bridge or [l]jump[/l]ing over the gap.";
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                {
+                    command: "jump",
+                    redirect: 110,
+                    new_room: false,
+                    on_command: jumpCommandEvent110
+                },
+                {
+                    command: "walk",
+                    redirect: 74,
+                    new_room: false
+                }
+            ];
+
+            if(player.getGold() >= 10)
+            {
+                loc.push({
+                    command: "pay",
+                    redirect: 225,
+                    new_room: false,
+                    on_command: function()
+                    {
+                        if(player.getGold() >= 10)
+                        {
+                            game_vars.setFlag("225_luck_check", player.performLuckCheck());
+                        }
+                    }
+                });
+            }
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 269,
+                    new_room: false
+                });
+            }
+
+            return loc;
+        }
+    },
     event159:
     {
         description: "The wall opens up. It was hiding a corridor. You quickly enter the opening, as the wall closes back behind you.",
@@ -1426,6 +1782,95 @@ export const events =
         description: "You thread carefully. Your legs are caressed by the lush lettuce leaves. When you get to the middle of the room, you notice a beam of light piercing through the ceiling. You stay quiet about this discovery. You reach the table.",
         redirect: 10,
         new_room: false
+    },
+    event162:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-1);
+            let desc = "You take 1 damage as you plummet downwards.<br /><br />";
+
+            if(game_vars.getFlag("162_luck_check"))
+            {
+                desc += "Luck check successful! A [e]Bat[/e] catches you as you're falling. The scoundrel wants gold as a reward for saving you. You can offer a [o]low[/o] reward of 10 gold, and it'll bring you back to the edge you came from. You can also offer a [o]high[/o] reward of 20 gold, and it'll bring you to the other edge. You have to make an offer regardless of whether you have the money or not.";
+            }
+            else
+            {
+                player.modifyAgility(+2);
+                player.modifyLuck(+3);
+                desc += "Luck check failed! You fall down the abyss, getting hit by many of the protruding rocks on the way. You manage to grab onto one of them, and you notice an opening leading to some sort of a tunnel. You manage to crawl into the orifice. You are dreadfully tired. You should [c]eat[/c] something - you might get a special bonus if you do! For the heroic feat, you gain 2 Agility. Additionally, your unbelievable fortune earns you 3 Luck. You get up. The corridor is wide and lit, it leads into a round room. A rope is hanging from the top. You pull yourself upwards. At the top of this \"chimney\" you find yourself in another identical room. You see a door ahead of you. You push it. It turns out to be a revolving door. You end up in another corridor, and the door closes shut. It's impossible to find it anymore. You end up at a turning point of a tunnel, which goes from the north towards the east. You move east. You reach a thick door. You may [l]open[/l] it.";
+            }
+
+            return desc;
+        },
+        eat: function()
+        {
+            return !game_vars.getFlag("162_luck_check");
+        },
+        on_eat: function()
+        {
+            if(player.getRations() === 0)
+            {
+                system.message("You don't have any rations left!");
+            }
+            else
+            {
+                player.modifyConstitution(+5);
+                player.modifyRations(-1);
+                system.message("You consume a ration. Even the simplest food tastes amazing after getting out of a dangerous situation. You recover 5 Constitution.");
+            }
+        },
+        choice: function()
+        {
+            if(game_vars.getFlag("162_luck_check"))
+            {
+                return {
+                    question: "What will your offer be?",
+                    options:
+                    [
+                        {
+                            answer: "high",
+                            redirect: 57,
+                            new_room: true,
+                            on_option: function()
+                            {
+                                game_vars.setFlag("57_offer_high", true);
+                            }
+                        },
+                        {
+                            answer: "low",
+                            redirect: 57,
+                            new_room: true,
+                            on_option: function()
+                            {
+                                game_vars.setFlag("57_offer_high", false);
+                            }
+                        }
+                    ]
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        locals: function()
+        {
+            if(game_vars.getFlag("162_luck_check"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return [
+                    {
+                        command: "open",
+                        redirect: 13,
+                        new_room: true
+                    }
+                ];
+            }
+        }
     },
     event163:
     {
@@ -1671,6 +2116,20 @@ export const events =
             }
         ]
     },
+    event186:
+    {
+        description: "You made it to the other edge. You see three exits: one leading to the [c]west[/c], one to the [l]northwest[/l] and one to the [c]north[/c].",
+        north: 360,
+        west: 368,
+        locals:
+        [
+            {
+                command: "northwest",
+                redirect: 117,
+                new_room: true
+            }
+        ]
+    },
     event190:
     {
         description: "You may choose a [o]thin[/o], [o]stone[/o] or [o]short[/o] sword.",
@@ -1692,7 +2151,7 @@ export const events =
                         else
                         {
                             player.addItem("Thin Sword");
-                            system.message("[i]Thin Sword[/i] added to your inventory.")
+                            system.message("[i]Thin Sword[/i] added to your inventory.");
                         }
                     }
                 },
@@ -1709,7 +2168,7 @@ export const events =
                         else
                         {
                             player.addItem("Stone Sword");
-                            system.message("[i]Stone Sword[/i] added to your inventory.")
+                            system.message("[i]Stone Sword[/i] added to your inventory.");
                         }
                     }
                 },
@@ -1726,7 +2185,7 @@ export const events =
                         else
                         {
                             player.addItem("Short Sword");
-                            system.message("[i]Short Sword[/i] added to your inventory.")
+                            system.message("[i]Short Sword[/i] added to your inventory.");
                         }
                     }
                 }
@@ -1749,7 +2208,7 @@ export const events =
             }
             else
             {
-                desc += " If you had a flask, you might also have been able to take some of the water..."
+                desc += " If you had a flask, you might also have been able to take some of the water...";
             }
 
             return desc;
@@ -1764,7 +2223,7 @@ export const events =
                 }
                 else
                 {
-                    return "So: which item do you want? Remember that you can only take one thing."
+                    return "So: which item do you want? Remember that you can only take one thing.";
                 }
             },
             options: function()
@@ -1880,7 +2339,7 @@ export const events =
                 {
                     game_vars.setCounter("lake_return_point", 195);
                 }
-            },
+            }
         ]
     },
     event197:
@@ -1955,6 +2414,81 @@ export const events =
         redirect: 254,
         new_room: false
     },
+    event207:
+    {
+        description: function()
+        {
+            let desc = "One leg, both legs, then a deep breath, push your head through and finally you fall out of the narrow rock crevice onto a flat, stone floor, with all your equipment now scattered around you. Great Almanhagor, if only you could see this! Your entire palace would fit inside this cave. Including the towers! Everything around is purple and shiny. Steep rocky cliffs hang from the ceiling. Their shadows are reflected in the sparkly stone parquetry. You feel like an ant that's being squished by a hedgehog warming up its belly.<br /><br />\"I can see all of this... Why can I see? My lantern is only strong enough to light up a small cavern. Dear Zargaana, my goddess, this is hellfire!\" In the middle of the reflective floor, a deep chasm is open. That's where the bright red light is coming from. You crawl quietly, pulling yourself with hands that are now sweaty from fear. You cover your eyes with your hand, then peek into the abyss. The ground is on fire. \"Haruum, my dear father, I was so naive, thinking it is enough to tie a sword to your belt, pack the rations and dive deep into the corridors to tear out the mystery from the Dungeon.\" You return next to the wall.";
+
+            if(player.hasItem("Magical Water"))
+            {
+                player.modifyAgility(+3);
+                player.modifyConstitution(+3);
+                player.removeItem("Magical Water");
+                desc += " You decide this is a good time to drink the magical water. You gain 3 Constitution and 3 Agility.";
+            }
+
+            desc += "<br /><br />You look around the cave. You have to somehow overcome the hellish rift. This is the only path forward. On another end of the cavern you can see a bridge. So there is hope...<br /><br />You look through your equipment. ";
+
+            let options = "three";
+            if(player.hasItem("Fireproof Rope"))
+            {
+                options = "four";
+                desc += "You have a rope with a hook, which just happens to be fireproof. Your chances of crossing the chasm suddenly aren't looking too bad. This thought gives you courage. ";
+            }
+            else
+            {
+                desc += "You can't find anything in your backpack that could help you cross the chasm. If only you had picked up a rope at any point... You immediately feel discouraged. ";
+            }
+
+            desc += "You get up and approach the rift once again. Looking at it while standing straight, it doesn't seem as wide as before. The fire also isn't looking that scary anymore. It's interesing: so huge, so bright, and yet... so quiet. But no. Can you hear singing? From another direction you can hear a deep voice that's getting louder and louder. A fat body covered with green and yellow stripes and red spikes on the back appears from behind the rocks. It's a [e]Dragon[/e]! Have you heard the tales of a crazy [e]Dragon[/e] from the Dungeon dwellers? It's him. You confidently approach the [e]Dragon[/e]. It's just hung a sign on the rock. The sign says:";
+            desc += system.getFileContents("dragonwagon.txt");
+            desc += "He's looking at you as if you came here everyday. You must make a decision. You have " + options + " options:<br />* [l]Pay[/l] for the dragon transport.<br />";
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                desc += "* Attempt to [l]throw[/l] a rope to the other side and pull yourself on it.<br />";
+            }
+
+            desc += "* Risk [l]walk[/l]ing through the bridge.<br />* Make an enormous [l]jump[/l] at the expense of all your strength.";
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                
+                {
+                    command: "jump",
+                    redirect: 110,
+                    new_room: false,
+                    on_command: jumpCommandEvent110
+                },
+                {
+                    command: "pay",
+                    redirect: 35,
+                    new_room: false,
+                    on_command: payCommandEvent35
+                },
+                {
+                    command: "walk",
+                    redirect: 74,
+                    new_room: false
+                }
+            ];
+
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 269,
+                    new_room: false
+                });
+            }
+
+            return loc;
+        }
+    },
     event209:
     {
         description: "A long corridor leads north, then turns west with a deep arc only to abruptly change back to [c]north[/c]. It ends at a small opening, through which you can see red light.",
@@ -2002,7 +2536,7 @@ export const events =
             let pranksters_left = game_vars.getCounter("pranksters_left");
             for(let i = 0; i < 2; ++i)
             {
-                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />";
                 let result1 = system.rollD6(1);
                 let result2 = system.rollD6(1);
                 if(result1 === 5 || result2 === 5)
@@ -2103,6 +2637,37 @@ export const events =
             return game_vars.getFlag("200_door_open");
         }
     },
+    event225:
+    {
+        description: function()
+        {
+            player.modifyGold(-10);
+            let desc = "You pay another 10 gold. The [e]Dragon[/e] does a huge split over the gap... And once again it begins.";
+
+            if(game_vars.getFlag("225_luck_check"))
+            {
+                desc += "<br /><br />Luck check successful!<br />You get to the other side.";
+            }
+            else
+            {
+                desc += "<br /><br />Luck check failed!<br />The [e]Dragon[/e] throws you back.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("225_luck_check"))
+            {
+                return 186;
+            }
+            else
+            {
+                return 3;
+            }
+        },
+        new_room: false
+    },
     event226:
     {
         description: "The battle continues. The [e]Demon[/e] seems intimidated. If you ran away, it most likely wouldn't chase you.",
@@ -2173,7 +2738,7 @@ export const events =
             }
             else
             {
-                return "You reach for the sword rack."
+                return "You reach for the sword rack.";
             }
         },
         redirect: function()
@@ -2186,8 +2751,7 @@ export const events =
             {
                 return 271;
             }
-        }
-        ,
+        },
         new_room: function()
         {
             return game_vars.getFlag("sword_upgraded");
@@ -2254,6 +2818,27 @@ export const events =
         description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
         redirect: 4,
         new_room: false
+    },
+    event240:
+    {
+        description: function()
+        {
+            player.removeItem("Net");
+            let desc = "You tread carefully. You can feel the strain on the net and hear its sinister crunches. Only one step left. You throw your body onto the rotten planks. The net catches onto your leg. It falls down and immediately catches on fire. You're almost on the other side. You're out of strength and grasping for air. You lean against the handrail, which breaks and falls into the abyss. You barely manage to regain your balance.";
+
+            let damage = system.rollD6(1);
+            const constitution = player.getConstitution();
+            if(damage >= constitution)
+            {
+                damage = constitution - 1;
+            }
+            player.modifyConstitution(-damage);
+            desc += " You take " + damage + " damage. Dragging on, you reach the desired edge of the rift.";
+
+            return desc;
+        },
+        redirect: 288,
+        new_room: true
     },
     event241:
     {
@@ -2356,7 +2941,7 @@ export const events =
             let pranksters_left = 5;
             for(let i = 0; i < 3; ++i)
             {
-                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />";
                 let result = system.rollD6(1);
                 if(result === 5)
                 {
@@ -2416,6 +3001,46 @@ export const events =
             }
         }
     },
+    event269:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-2);
+            player.removeItem("Fireproof Rope");
+            game_vars.setFlag("269_rope_present", true);
+            return "You take the rope out of your backpack. It's fireproof and has a hook attached. You approach the edge. With a wide swing, you throw the hook in between the rocks on the other side. It's secured. You tie the other end to a rock next to you. You will attempt to go through the chasm, holding onto the rope with your hands. You grab the rope. Suddenly... Bang! The hook falls off. You climb back up. You take 2 damage. You can choose another way to cross the gap: [l]pay[/l] the dragon, [l]walk[/l] on the bridge or [l]jump[/l] over the chasm. The rope will remain here, so you could attempt to [l]throw[/l] it again. But first, you can [c]eat[/c] a ration.";
+        },
+        eat: true,
+        locals:
+        [
+            {
+                command: "jump",
+                redirect: 110,
+                new_room: false,
+                on_command: jumpCommandEvent110
+            },
+            {
+                command: "pay",
+                redirect: 35,
+                new_room: false,
+                on_command: payCommandEvent35
+            },
+            {
+                command: "throw",
+                redirect: 358,
+                new_room: false,
+                on_command: function()
+                {
+                    game_vars.setFlag("358_elixir_present", player.hasItem("Elixir of Inviolability"));
+                }
+            },
+            {
+                command: "walk",
+                redirect: 74,
+                new_room: false
+            }
+        ]
+    },
     event270:
     {
         description: function()
@@ -2427,7 +3052,7 @@ export const events =
             }
             else
             {
-                desc += " You can [l]open[/l] it or turn back and [l]leave[/l]."
+                desc += " You can [l]open[/l] it or turn back and [l]leave[/l].";
             }
 
             return desc;
@@ -2596,7 +3221,7 @@ export const events =
             else
             {
                 player.modifyConstitution(-2);
-                desc += "Luck check failed!<br />You take 2 damage."
+                desc += "Luck check failed!<br />You take 2 damage.";
             }
 
             return desc;
@@ -2623,11 +3248,11 @@ export const events =
         description: function()
         {
             player.modifyLuck(+2);
-            return "In a crevice in the wall you find the [i]Elixir of Invisibility[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
+            return "In a crevice in the wall you find the [i]Elixir of Inviolability[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
         },
         items:
         [
-            "Elixir of Invisibility"
+            "Elixir of Inviolability"
         ],
         item_limit: 1,
         locals:
@@ -3122,10 +3747,10 @@ export const events =
 
             if(result % 2 === 0)
             {
-                desc += `You lost ${result} gold playing the game.`
+                desc += `You lost ${result} gold playing the game.`;
                 if(result > player.getGold())
                 {
-                    desc += " Looks like you don't even have that much, so you just pay up all your gold."
+                    desc += " Looks like you don't even have that much, so you just pay up all your gold.";
                 }
                 else
                 {
@@ -3245,6 +3870,12 @@ export const events =
         redirect: 259,
         new_room: true
     },
+    event343:
+    {
+        description: "With the rest of your strength, you reach the other side of the cave, but a surprise is waiting for you here...",
+        redirect: 288,
+        new_room: true
+    },
     event349:
     {
         description: function()
@@ -3288,6 +3919,37 @@ export const events =
             yes_new_room: false
         }
     },
+    event358:
+    {
+        description: function()
+        {
+            let desc = "You attach the rope again and proceed to pull yourself forward. Out of nowhere, pillars of fire start shooting out of the fissure. ";
+            if(game_vars.getFlag("358_elixir_present"))
+            {
+                player.removeItem("Elixir of Inviolability");
+                desc += "You drink the elixir of inviolability. The fire can't hurt you. The magical effects of this potion only last until you reach the other edge.";
+            }
+            else
+            {
+                desc += "You have nothing that could protect you. A flame shoots right next to you, throwing you off the rope...";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("358_elixir_present"))
+            {
+                return 343;
+            }
+            else
+            {
+                game_vars.setFlag("162_luck_check", player.performLuckCheck());
+                return 162;
+            }
+        },
+        new_room: false
+    },
     event359:
     {
         description: function()
@@ -3296,7 +3958,7 @@ export const events =
             let pranksters_left = game_vars.getCounter("pranksters_left");
             for(let i = 0; i < 2; ++i)
             {
-                desc += "You aim at prankster no. " + pranksters_left + ".<br />"
+                desc += "You aim at prankster no. " + pranksters_left + ".<br />";
                 let result = system.rollD6(1);
                 if(result === 5)
                 {

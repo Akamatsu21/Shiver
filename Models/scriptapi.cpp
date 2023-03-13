@@ -31,6 +31,18 @@ int ScriptApi::getCurrentRound() const
     return _combat_state.combat_round;
 }
 
+QString ScriptApi::getFileContents(const QString& path) const
+{
+    try
+    {
+        return QString::fromStdString(utils::accessStaticResource(path.toStdString()));
+    }
+    catch(const std::system_error& e)
+    {
+        return "<font color=\"red\">Error occured. Content not loaded.</font>";
+    }
+}
+
 int ScriptApi::rollD6(int count) const
 {
     return utils::rollD6(count);

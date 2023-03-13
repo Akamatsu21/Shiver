@@ -50,7 +50,7 @@ public:
     int getStartingLuck() const;
 
     Q_INVOKABLE int getGold() const;
-    int getRations() const;
+    Q_INVOKABLE int getRations() const;
     int getElixirCount() const;
     PlayerStat getElixirType() const;
     std::string getElixirTypeAsString() const;
@@ -74,7 +74,7 @@ public:
     Q_INVOKABLE void modifyGold(int value);
     Q_INVOKABLE void modifyRations(int value);
 
-    bool eatRation();
+    Q_INVOKABLE bool eatRation();
     bool drinkElixir();
     void addItem(const std::string& item);
     Q_INVOKABLE void addItem(const QVariant& item);

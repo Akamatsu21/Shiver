@@ -126,10 +126,15 @@ void Game::handleEatCommand()
         return;
     }
 
-    if(_player->eatRation())
+    if(_current_event.hasEatingCallback())
+    {
+        _current_event.triggerEatingCallback();
+        _current_event.setEatingEnabled(false);
+    }
+    else if(_player->eatRation())
     {
         _current_event.setEatingEnabled(false);
-        _console.writeText("You consume a Ration and recover 4 Constitution.");
+        _console.writeText("You consume a ration and recover 4 Constitution.");
     }
     else
     {
@@ -1035,6 +1040,12 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
         auto [agility, constitution, luck] = _generated_stats;
         _player = new Player(this, agility, constitution, luck, elixir);
         _scripting_engine->registerPlayer(_player);
+
+        _player->addItem(std::string("Sword"));
+        _player->addItem(std::string("Shield"));
+        _player->addItem(std::string("Backpack"));
+        _player->addItem(std::string("Lantern"));
+
         _console.writeText("<br />This is your character. Type [c]stats[/c] at any point to see this list.");
         handleStatsCommand();
         _console.writeText("<br />You are now ready to begin your adventure.<br />Please press enter to continue.");
@@ -1352,7 +1363,7 @@ void Game::gameOverScreen()
     try
     {
         _console.clearScreen();
-        _console.pasteText(utils::getGameOverText());
+        _console.pasteText(utils::accessStaticResource("gameover.txt"));
     }
     catch(const std::system_error& e)
     {
@@ -1367,7 +1378,7 @@ void Game::titleScreen()
     try
     {
         _console.clearScreen();
-        _console.pasteText(utils::getTitleScreenText());
+        _console.pasteText(utils::accessStaticResource("title.txt"));
     }
     catch(const std::system_error& e)
     {

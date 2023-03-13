@@ -25,6 +25,7 @@ class Event
     std::vector<std::string> _items;
     int _item_limit;
     bool _eating_enabled;
+    QJSValue _eating_callback;
     Choice _choice;
     std::map<std::string, UserOption> _local_commands;
     QJSValue _exit_callback;
@@ -50,6 +51,7 @@ public:
     std::string findItem(const std::string& item) const;
     int getItemLimit() const;
     bool isEatingEnabled() const;
+    bool hasEatingCallback() const;
     bool hasYesNoChoice() const;
     bool hasMultiChoice() const;
     std::string getChoiceQuestion() const;
@@ -70,6 +72,7 @@ public:
     void setRations(int value);
     void setItemLimit(int value);
     void setEatingEnabled(bool value);
+    void setEatingCallback(QJSValue callback);
     void setExitCallback(QJSValue callback);
 
     Enemy getCurrentEnemy() const;
@@ -93,6 +96,7 @@ public:
     void addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback);
     void triggerLocalCommandCallback(const std::string& command);
 
+    void triggerEatingCallback();
     void triggerExitCallback();
 };
 

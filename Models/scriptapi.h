@@ -20,6 +20,7 @@ public:
     Q_INVOKABLE int getCurrentEnemyScore() const;
     Q_INVOKABLE int getCurrentPlayerScore() const;
     Q_INVOKABLE int getCurrentRound() const;
+    Q_INVOKABLE QString getFileContents(const QString& path) const;
     Q_INVOKABLE int rollD6(int count) const;
 
 signals:

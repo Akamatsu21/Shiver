@@ -19,7 +19,7 @@ Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerS
     _rations(8),
     _elixir_count(2),
     _elixir_type(elixir_type),
-    _inventory{"Sword", "Shield", "Backpack", "Lantern"},
+    _inventory{},
     _conditions{}
 {
 
@@ -313,7 +313,7 @@ bool Player::eatRation()
     }
 
     modifyConstitution(+4);
-    --_rations;
+    modifyRations(-1);
     return true;
 }
 

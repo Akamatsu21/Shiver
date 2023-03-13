@@ -153,107 +153,125 @@ Event ScriptingEngine::parseEvent(int id)
     if(event_object.hasProperty("enemies"))
     {
         QJSValue enemies = getObjectProperty(event_object, "enemies");
-        assert(enemies.isArray());
-        int length = enemies.property("length").toInt();
-        for(int i = 0; i < length; ++i)
+        if(!enemies.isUndefined())
         {
-            QJSValue enemy = enemies.property(i);
-
-            bool escape_enabled = false;
-            int escape_redirect = -1;
-            if(enemy.hasProperty("escape_redirect"))
+            assert(enemies.isArray());
+            int length = enemies.property("length").toInt();
+            for(int i = 0; i < length; ++i)
             {
-                escape_enabled = true;
-                escape_redirect = getObjectProperty(enemy, "escape_redirect").toInt();
-            }
+                QJSValue enemy = enemies.property(i);
 
-            std::vector<Callback> enemy_callbacks;
-            if(enemy.hasProperty("callbacks"))
-            {
-                QJSValue callbacks = getObjectProperty(enemy, "callbacks");
-                assert(callbacks.isArray());
-                int callbacks_length = callbacks.property("length").toInt();
-                for(int k = 0; k < callbacks_length; ++k)
+                bool escape_enabled = false;
+                int escape_redirect = -1;
+                if(enemy.hasProperty("escape_redirect"))
                 {
-                    QJSValue callback = callbacks.property(k);
-                    CallbackTiming timing = static_cast<CallbackTiming>(
-                                getObjectProperty(callback, "timing").toInt());
-                    QJSValue effect = callback.property("callback");
+                    escape_enabled = true;
+                    escape_redirect = getObjectProperty(enemy, "escape_redirect").toInt();
+                }
 
-                    switch(timing)
+                std::vector<Callback> enemy_callbacks;
+                if(enemy.hasProperty("callbacks"))
+                {
+                    QJSValue callbacks = getObjectProperty(enemy, "callbacks");
+                    assert(callbacks.isArray());
+                    int callbacks_length = callbacks.property("length").toInt();
+                    for(int k = 0; k < callbacks_length; ++k)
                     {
-                    case CallbackTiming::ROUND_ACTION:
-                    case CallbackTiming::ROUND_END:
-                    {
-                        assert(callback.hasProperty("round"));
-                        int round = getObjectProperty(callback, "round").toInt();
-                        enemy_callbacks.emplace_back(timing, round, effect);
-                    } break;
-                    default:
-                        enemy_callbacks.emplace_back(timing, effect);
-                        break;
+                        QJSValue callback = callbacks.property(k);
+                        CallbackTiming timing = static_cast<CallbackTiming>(
+                                    getObjectProperty(callback, "timing").toInt());
+                        QJSValue effect = callback.property("callback");
+
+                        switch(timing)
+                        {
+                        case CallbackTiming::ROUND_ACTION:
+                        case CallbackTiming::ROUND_END:
+                        {
+                            assert(callback.hasProperty("round"));
+                            int round = getObjectProperty(callback, "round").toInt();
+                            enemy_callbacks.emplace_back(timing, round, effect);
+                        } break;
+                        default:
+                            enemy_callbacks.emplace_back(timing, effect);
+                            break;
+                        }
                     }
                 }
-            }
 
-            event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
-                           getObjectProperty(enemy, "agility").toInt(),
-                           getObjectProperty(enemy, "constitution").toInt(),
-                           escape_enabled,
-                           escape_redirect,
-                           enemy_callbacks);
+                event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
+                               getObjectProperty(enemy, "agility").toInt(),
+                               getObjectProperty(enemy, "constitution").toInt(),
+                               escape_enabled,
+                               escape_redirect,
+                               enemy_callbacks);
+            }
         }
     }
 
     if(event_object.hasProperty("gold"))
     {
-        QVariant flag = QString::fromStdString(utils::createString(id, "_gold_taken"));
-        if(_game_variables_obj->getFlag(flag))
+        QJSValue gold = getObjectProperty(event_object, "gold");
+        if(!gold.isUndefined())
         {
-            event.setHasGold(false);
-        }
-        else
-        {
-            event.setHasGold(true);
-            event.setGold(getObjectProperty(event_object, "gold").toInt());
+            QVariant flag = QString::fromStdString(utils::createString(id, "_gold_taken"));
+            if(_game_variables_obj->getFlag(flag))
+            {
+                event.setHasGold(false);
+            }
+            else
+            {
+                event.setHasGold(true);
+                event.setGold(gold.toInt());
+            }
         }
     }
 
     if(event_object.hasProperty("rations"))
     {
-        QVariant flag = QString::fromStdString(utils::createString(id, "_rations_taken"));
-        if(_game_variables_obj->getFlag(flag))
+        QJSValue rations = getObjectProperty(event_object, "rations");
+        if(!rations.isUndefined())
         {
-            event.setHasRations(false);
-        }
-        else
-        {
-            event.setHasRations(true);
-            event.setRations(getObjectProperty(event_object, "rations").toInt());
+            QVariant flag = QString::fromStdString(utils::createString(id, "_rations_taken"));
+            if(_game_variables_obj->getFlag(flag))
+            {
+                event.setHasRations(false);
+            }
+            else
+            {
+                event.setHasRations(true);
+                event.setRations(rations.toInt());
+            }
         }
     }
 
     if(event_object.hasProperty("items"))
     {
-        assert(event_object.hasProperty("item_limit"));
-
-        QVariant counter = QString::fromStdString(utils::createString(id, "_items_taken"));
-        int items_allowed = getObjectProperty(event_object, "item_limit").toInt();
-        int items_taken = _game_variables_obj->getCounter(counter);
-        event.setItemLimit(items_allowed - items_taken);
-
         QJSValue items = getObjectProperty(event_object, "items");
-        assert(items.isArray());
-        int length = items.property("length").toInt();
-        for(int i = 0; i < length; ++i)
+        if(!items.isUndefined())
         {
-            event.addItem(items.property(i).toString().toStdString());
+            assert(event_object.hasProperty("item_limit"));
+            QVariant counter = QString::fromStdString(utils::createString(id, "_items_taken"));
+            int items_allowed = getObjectProperty(event_object, "item_limit").toInt();
+            int items_taken = _game_variables_obj->getCounter(counter);
+            event.setItemLimit(items_allowed - items_taken);
+
+            assert(items.isArray());
+            int length = items.property("length").toInt();
+            for(int i = 0; i < length; ++i)
+            {
+                event.addItem(items.property(i).toString().toStdString());
+            }
         }
     }
 
     if(event_object.hasProperty("eat"))
     {
         event.setEatingEnabled(getObjectProperty(event_object, "eat").toBool());
+
+        if(event_object.hasProperty("on_eat"))
+        {
+            event.setEatingCallback(event_object.property("on_eat"));
+        }
     }
 
     if(event_object.hasProperty("yes_no_choice"))
@@ -308,19 +326,22 @@ Event ScriptingEngine::parseEvent(int id)
     if(event_object.hasProperty("locals"))
     {
         QJSValue locals = getObjectProperty(event_object, "locals");
-        assert(locals.isArray());
-        int length = locals.property("length").toInt();
-        for(int i = 0; i < length; ++i)
+        if(!locals.isUndefined())
         {
-            QJSValue command = locals.property(i);
-            QJSValue on_command_callback = command.hasProperty("on_command")
-                                           ? command.property("on_command")
-                                           : QJSValue::UndefinedValue;
+            assert(locals.isArray());
+            int length = locals.property("length").toInt();
+            for(int i = 0; i < length; ++i)
+            {
+                QJSValue command = locals.property(i);
+                QJSValue on_command_callback = command.hasProperty("on_command")
+                                               ? command.property("on_command")
+                                               : QJSValue::UndefinedValue;
 
-            event.addLocalCommand(getObjectProperty(command, "command").toString().toStdString(),
-                                  getObjectProperty(command, "redirect").toInt(),
-                                  getObjectProperty(command, "new_room").toBool(),
-                                  on_command_callback);
+                event.addLocalCommand(getObjectProperty(command, "command").toString().toStdString(),
+                                      getObjectProperty(command, "redirect").toInt(),
+                                      getObjectProperty(command, "new_room").toBool(),
+                                      on_command_callback);
+            }
         }
     }
 

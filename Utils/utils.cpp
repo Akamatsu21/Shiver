@@ -54,6 +54,14 @@ std::vector<Direction> getAllDirections()
     return std::vector {Direction::NORTH, Direction::SOUTH, Direction::EAST, Direction::WEST};
 }
 
+std::map<std::string, Direction> getAllDirectionsWithLabels()
+{
+    return std::map<std::string, Direction> {{"North", Direction::NORTH},
+                                             {"South", Direction::SOUTH},
+                                             {"East", Direction::EAST},
+                                             {"West", Direction::WEST}};
+}
+
 std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels()
 {
     return std::map<std::string, PlayerStat> {{"Agility", PlayerStat::AGILITY},

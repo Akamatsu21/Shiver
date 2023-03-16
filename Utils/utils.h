@@ -33,6 +33,8 @@ std::map<std::string, CallbackTiming> getAllCallbackTimingsWithLabels();
 
 std::vector<Direction> getAllDirections();
 
+std::map<std::string, Direction> getAllDirectionsWithLabels();
+
 std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels();
 
 template<typename K, typename V>

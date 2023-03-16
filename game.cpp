@@ -1112,12 +1112,15 @@ InputMode Game::resolveGameInput(const std::string& user_input)
     case Command::SOUTH:
     case Command::EAST:
     case Command::WEST:
-        if(handleDirectionCommand(utils::commandToDirection(command)))
+    {
+        Direction direction = utils::commandToDirection(command);
+        if(handleDirectionCommand(direction))
         {
+            _current_event.triggerDirectionCallback(direction);
             perform_game_checks = true;
             mode = updateCurrentEvent(_current_event.getDestination(utils::commandToDirection(command)), true);
         }
-        break;
+    }   break;
     case Command::FIGHT:
         perform_game_checks = handleFightCommand();
         break;

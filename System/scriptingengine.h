@@ -28,6 +28,7 @@ class ScriptingEngine : public QObject
 
     //Enums to be registered with the engine
     QJSValue _callback_timings;
+    QJSValue _directions;
     QJSValue _player_stats;
 
     // Objects to import from JS

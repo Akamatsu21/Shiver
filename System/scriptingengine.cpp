@@ -12,6 +12,7 @@ ScriptingEngine::ScriptingEngine(QObject* parent):
     _game_vars(),
     _player(),
     _callback_timings(),
+    _directions(),
     _player_stats(),
     _condition_list(),
     _event_list(),
@@ -43,11 +44,19 @@ void ScriptingEngine::registerEnums()
     }
     _js_engine.globalObject().setProperty("PlayerStat", _player_stats);
 
+    _directions = _js_engine.newObject();
+    for(const auto &[key, val]: utils::getAllDirectionsWithLabels())
+    {
+        _directions.setProperty(QString::fromStdString(key),
+                                QJSValue(static_cast<int>(val)));
+    }
+    _js_engine.globalObject().setProperty("Direction", _directions);
+
     _callback_timings = _js_engine.newObject();
     for(const auto &[key, val]: utils::getAllCallbackTimingsWithLabels())
     {
         _callback_timings.setProperty(QString::fromStdString(key),
-                                             QJSValue(static_cast<int>(val)));
+                                      QJSValue(static_cast<int>(val)));
     }
     _js_engine.globalObject().setProperty("CallbackTiming", _callback_timings);
 }
@@ -148,6 +157,11 @@ Event ScriptingEngine::parseEvent(int id)
                 event.setDestination(direction, direction_value.toInt());
             }
         }
+    }
+
+    if(event_object.hasProperty("on_direction"))
+    {
+        event.setDirectionCallback(event_object.property("on_direction"));
     }
 
     if(event_object.hasProperty("enemies"))

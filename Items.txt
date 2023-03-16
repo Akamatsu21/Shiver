@@ -4,8 +4,8 @@ Crushed Lettuce - found in 356, spoils a ration in 144
 Cursed Gloves - found in 95, agility debuff, removed after next combat
 Decorative Shield - found in 37
 Decrepit Flask - found in 119, can be turned into Filled Flask in 83 or into Magical Water in 192
-Elixir of Inviolability - found in 294, can be used to avoid the fire in 358
-Emerald - found in 263
+Elixir of Inviolability - found in 294, used to avoid the fire in 358
+Emerald - found in 263, allows entering the room in 135, can be shown to the Gnome in 22
 Enchanted Sword - found in 153, combat buff, permanent
 Filled Flask - found in 83, can be turned into Magical Water in 192, used for a feast with the Dwarves in 371, allows entering the chamber in 167
 Fireball - found in 177
@@ -13,6 +13,7 @@ Fireproof Rope - found in 119, can be used in 207, 74, 158, 3 to cross the chasm
 Heavy Hammer - found in 115
 Helmet - found in 298
 Jar of All-Eaters - found in 192
+Jar of Corrosive Dust - found in 147 or 55
 Key#45 - found 180
 Key#122 - found in 278
 Lake Water - found in 241
@@ -26,5 +27,7 @@ Small Shiny Key - found in 192, can be turned into Key#122 in 278, opens the doo
 Spear - found in 192
 Stone Sword - found in 190
 Thin Sword - found in 190
-Tin Butterfly - found in 192
+Tin Butterfly - found in 192, allows entering the room 135, can be used to play with the Gnome in 321, which may lead to it being given away in 202 or sold in 104 or 262 
+Toy Dragon - found in 369
 Werewolf's Scalp - found in 119
+Wooden Stake - found in 147 or 55, allows entering the room in 135, can be used to attack the Gnome in 22, which may lead to it being sold in 289 or 369

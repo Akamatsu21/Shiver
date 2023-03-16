@@ -126,6 +126,24 @@ export const events =
         redirect: 115,
         new_room: false
     },
+    event7:
+    {
+        description: "\"Maybe you have something that would work as a gift?\" you say. \"But of course! I'm always prepared for such requests. I have a lovely wooden stake and a jar of corrosive dust. Would you like it gift-wrapped?\"",
+        redirect: 219,
+        new_room: false
+    },
+    event9:
+    {
+        description: "You get ready to strike the [e]Gnome[/e] with a wooden stake. He notices this. \"Oh, what a beautiful stake\" he says. \"Sell it to me for 20 gold.\"",
+        yes_no_choice:
+        {
+            question: "Do you agree to do it?",
+            no: 375,
+            no_new_room: false,
+            yes: 289,
+            yes_new_room: false
+        }
+    },
     event10:
     {
         description: "[e]Dwarves[/e] invite you to seat at the table. They are smiling. \"Finally a well-behaved monster\" they say. \"Whenever someone comes here, they just steal our lettuce and run. But we honestly can't blame them. At least our produce is useful to someone, hehe.\" You start thinking about the \"hehe\", and before you realise, the [e]Dwarves[/e] are already reeling off their tales. Few of them have ever explored further depths of the dungeon. The ones who came back say that the scariest thing you can come across is fire. The maze is also home to a fat [e]Dragon[/e]. It is said to be extremely sinister, but some claim it can be bribed.<br /><br />You listen to these tales, but something is still bothering you.",
@@ -241,6 +259,63 @@ export const events =
             }
         ]
     },
+    event22:
+    {
+        description: function()
+        {
+            let desc = "This might be the end of your journey. You haven't seen a chamber this cute yet. It's very bright and there is a green haze in the air. The floor is even smoother than around the chasm. A humanoid creature sits on the floor. Ah, it's a real [e]Gnome[/e] playing with a wound-up toy dragon. The toy is moving its legs and sliding its red tongue in and out. You have the following options:";
+
+            if(player.hasItem("Tin Butterfly"))
+            {
+                desc += "<br />* Take out the tin butterfly and [l]play[/l] with the [e]Gnome[/e].";
+            }
+
+            if(player.hasItem("Emerald"))
+            {
+                desc += "<br />* [l]Show[/l] your emerald to the [e]Gnome[/e].";
+            }
+
+            if(player.hasItem("Wooden Stake"))
+            {
+                desc += "<br />* Intimidate and [l]attack[/l] the [e]Gnome[/e] using the wooden stake.";
+            }
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [];
+
+            if(player.hasItem("Tin Butterfly"))
+            {
+                loc.push({
+                    command: "play",
+                    redirect: 321,
+                    new_room: false
+                });
+            }
+
+            if(player.hasItem("Emerald"))
+            {
+                loc.push({
+                    command: "show",
+                    redirect: 187,
+                    new_room: false
+                });
+            }
+
+            if(player.hasItem("Wooden Stake"))
+            {
+                loc.push({
+                    command: "attack",
+                    redirect: 9,
+                    new_room: false
+                });
+            }
+
+            return loc;
+        }
+    },
     event25:
     {
         description: "There is an elderly man sitting on a stone. He recommends you go to the [c]west[/c], and then turn right on the next few intersections.",
@@ -353,7 +428,7 @@ export const events =
     {
         description: "A little more, and you reach an intersection. You can go [c]north[/c], [c]east[/c] or [c]south[/c].",
         north: 293,
-        south: 147,
+        south: 247,
         east: 188
     },
     event34:
@@ -524,6 +599,36 @@ export const events =
             }
         }
     },
+    event41:
+    {
+        description: function()
+        {
+            let desc = "You barely managed to take a few steps before you realised the corridor in front of you is blocked with stone rubble and sand. You attempt to stomp on the floor with all your might. The old gremlins say the dungeon floor carries shockwaves far.<br /><br />";
+
+            if(game_vars.getFlag("41_luck_check"))
+            {
+                desc += "Luck check successful! The stone rubble crumbles and reveals a path. You can move forward.";
+            }
+            else
+            {
+                desc += "Luck check failed! You have to turn back.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("41_luck_check"))
+            {
+                return 348;
+            }
+            else
+            {
+                return 221;
+            }
+        },
+        new_room: true
+    },
     event44:
     {
         description: "You go east. You can see a bulky door in front of you. You try to open it, but it won't even budge. You may give up and go back [c]west[/c], or try to [l]break[/l] down the door.",
@@ -616,6 +721,46 @@ export const events =
         },
         new_room: false
     },
+    event55:
+    {
+        description: function()
+        {
+            let desc = "";
+            if(game_vars.getFlag("55_buy_stake"))
+            {
+                if(player.hasItem("Wooden Stake"))
+                {
+                    desc += "You already have a wooden stake!<br />"
+                }
+                else
+                {
+                    player.modifyGold(-15);
+                    player.addItem("Wooden Stake");
+                    desc += "You pay 15 gold. [i]Wooden Stake[/i] added to your inventory.<br />";
+                }
+            }
+
+            if(game_vars.getFlag("55_buy_jar"))
+            {
+                if(player.hasItem("Jar of Corrosive Dust"))
+                {
+                    desc += "You already have a jar of corrosive dust!<br />";
+                }
+                else
+                {
+                    player.modifyGold(-10);
+                    player.addItem("Jar of Corrosive Dust");
+                    desc += "You pay 10 gold. [i]Jar of Corrosive Dust[/i] added to your inventory.<br />";
+                }
+            }
+
+            desc += "There is nothing else for you to do here.";
+
+            return desc;
+        },
+        redirect: 196,
+        new_room: false
+    },
     event56:
     {
         description: function()
@@ -641,6 +786,22 @@ export const events =
             }
         },
         new_room: false
+    },
+    event60:
+    {
+        description: "The [e]Gnome[/e] offers 20 gold.",
+        yes_no_choice:
+        {
+            question: "Do you accept the offer?",
+            no: 338,
+            no_new_room: false,
+            yes: 262,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setCounter("262_offer", 20);
+            }
+        }
     },
     event62:
     {
@@ -908,6 +1069,17 @@ export const events =
         north: 170,
         south: 357
     },
+    event81:
+    {
+        description: function()
+        {
+            player.modifyConstitution(+2);
+            player.modifyAgility(+1);
+            return "You decide to sit down and rest after all you've been through. You gain 2 Constitution and 1 Agility.";
+        },
+        redirect: 121,
+        new_room: false
+    },
     event82:
     {
         description: "You only make a few steps, then suddenly the corridor turns south and ends. The passage is blocked by rocks. Maybe the monsters have built another path? You could [l]search[/l] for it, or go back [c]west[/c] towards the intersection.",
@@ -1126,6 +1298,12 @@ export const events =
         },
         new_room: false
     },
+    event100:
+    {
+        description: "\"I would like something that will recover my strength\" you say. \"My good sir, we've just received fresh new goods - a wonderful wooden stake and a jar of corrosive dust\" replies the [e]Orc[/e].",
+        redirect: 249,
+        new_room: false
+    },
     event101:
     {
         description: "[e]Demon[/e] begs for your mercy.",
@@ -1145,6 +1323,18 @@ export const events =
         south: 351,
         east: 374,
         west: 123
+    },
+    event104:
+    {
+        description: function()
+        {
+            player.modifyGold(+30);
+            player.addItem("Toy Dragon");
+            player.removeItem("Tin Butterfly");
+            return "You give him the butterfly and take his gold and toy.";
+        },
+        redirect: 121,
+        new_room: false
     },
     event105:
     {
@@ -1454,6 +1644,12 @@ export const events =
             }
         ]
     },
+    event117:
+    {
+        description: "A short corridor leads north, then immediately turns west and thus you end up in a new room. There is no door, so...",
+        redirect: 280,
+        new_room: true
+    },
     event119:
     {
         description: "What was the beast trying to cover up so desperately? You touch the wall at the spot that the hairy [e]Ogre[/e] was pressing its back against. Suddenly, part of the wall moves. There is a secret stash here! Inside, there is a long [i]fireproof rope[/i] with a hook, an empty [i]decrepit flask[/i] and a [i]Werewolf's scalp[/i]. You may only take up to two of these items. You may also [l]loot[/l] the body or [l]leave[/l] the chamber.",
@@ -1482,6 +1678,11 @@ export const events =
     {
         description: "You go west. The corridor takes a gentle turn to the right and is now leading [c]north[/c]. You see an intersection.",
         north: 64
+    },
+    event121:
+    {
+        description: "You leave the chamber using the [c]east[/c]ern door.",
+        east: 325
     },
     event123:
     {
@@ -1558,6 +1759,36 @@ export const events =
         north: 270,
         south: 276,
         east: 384
+    },
+    event135:
+    {
+        description: function()
+        {
+            let desc = "This room requires one of three special items to enter: a tin butterfly, a wooden stake, or an emerald that grants the Gift of Wings.<br /><br />";
+
+            if(player.hasItem("Tin Butterfly") || player.hasItem("Wooden Stake") || player.hasItem("Emerald"))
+            {
+                desc += "Since you have at least one of the items in question, you may proceed.";
+            }
+            else
+            {
+                desc += "You don't have any of these items. Try wandering around this area, maybe someone would be willing to sell you one of them.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Tin Butterfly") || player.hasItem("Wooden Stake") || player.hasItem("Emerald"))
+            {
+                return 22;
+            }
+            else
+            {
+                return 43;
+            }
+        },
+        new_room: false
     },
     event136:
     {
@@ -1649,6 +1880,25 @@ export const events =
     {
         description: "The corridor runs south, and then turns [c]east[/c]. You see an intersection ahead.",
         east: 64
+    },
+    event147:
+    {
+        description: function()
+        {
+            if(!player.hasItem("Wooden Stake"))
+            {
+                player.addItem("Wooden Stake");
+            }
+
+            if(!player.hasItem("Jar of Corrosive Dust"))
+            {
+                player.addItem("Jar of Corrosive Dust");
+            }
+
+            return "\"It was such a pleasure talking to you, good sir. Here, a wooden stake and a jar of corrosive dust, on the house.";
+        },
+        redirect: 196,
+        new_room: false
     },
     event151:
     {
@@ -1900,6 +2150,23 @@ export const events =
             }
         ]
     },
+    event166:
+    {
+        description: function()
+        {
+            player.modifyConstitution(+3);
+            player.modifyAgility(+2);
+            return "You banter with the [e]Gnome[/e] for a bit. This is strangely relaxing: you gain 3 Constitution and 2 Agility. Eventually, you give in and surrender the butterfly.";
+        },
+        yes_no_choice:
+        {
+            question: "Will you ask for gold in exchange for the butterfly?",
+            no: 202,
+            no_new_room: false,
+            yes: 353,
+            yes_new_room: false
+        }
+    },
     event167:
     {
         description: function()
@@ -2000,6 +2267,11 @@ export const events =
             }
         },
         new_room: false
+    },
+    event173:
+    {
+        description: "After some time, the corridor turns [c]west[/c].",
+        west: 134
     },
     event177:
     {
@@ -2129,6 +2401,17 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event187:
+    {
+        description: "Unfortunately, the [e]Gnome[/e] is not interested in your emerald.",
+        redirect: 81,
+        new_room: false
+    },
+    event188:
+    {
+        description: "The corridor turns [c]south[/c].",
+        south: 221
     },
     event190:
     {
@@ -2342,6 +2625,11 @@ export const events =
             }
         ]
     },
+    event196:
+    {
+        description: "You leave the chamber through the [c]north[/c]ern door.",
+        north: 282
+    },
     event197:
     {
         description: "A long pavement leads straight [c]north[/c].",
@@ -2407,6 +2695,16 @@ export const events =
             yes: 40,
             yes_new_room: false
         }
+    },
+    event202:
+    {
+        description: function()
+        {
+            player.removeItem("Tin Butterfly");
+            return "The [e]Gnome[/e] grants you a smile in exchange, but nothing else.";
+        },
+        redirect: 81,
+        new_room: false
     },
     event205:
     {
@@ -2557,6 +2855,18 @@ export const events =
         redirect: 26,
         new_room: false
     },
+    event219:
+    {
+        description: "So: are you taking the wooden stake and a jar of corrosive dust? Maybe it's not a bad idea? Think about it.",
+        yes_no_choice:
+        {
+            question: "Do you want them?",
+            no: 147,
+            no_new_room: false,
+            yes: 323,
+            yes_new_room: false
+        }
+    },
     event220:
     {
         description: function()
@@ -2604,7 +2914,25 @@ export const events =
         description: "You reach an intersection which leads [c]north[/c], [c]east[/c] and [c]south[/c].",
         north: 339,
         south: 173,
-        east: 41
+        east: 41,
+        on_direction: function(dir)
+        {
+            if(dir === Directions.East)
+            {
+                game_vars.setFlag("41_luck_check", player.performLuckCheck());
+            }
+        }
+    },
+    event223:
+    {
+        description: function()
+        {
+            player.removeItem("Wooden Stake");
+            return "You've blown through all your chances. The [e]Gnome[/e] disappears, taking your stake with it. You're left alone in the room.";
+        },
+        redirect: 121,
+        new_room: false
+
     },
     event224:
     {
@@ -2883,6 +3211,77 @@ export const events =
         redirect: 108,
         new_room: true
     },
+    event246:
+    {
+        description: "No can do. But the [e]Gnome[/e] changes its offer: You can take the 20 gold or the toy dragon, whichever one you prefer.",
+        choice:
+        {
+            question: "You may choose the [o]gold[/o], the [o]toy[/o], or just give up on the transaction and [o]rest[/o].",
+            options:
+            [
+                {
+                    answer: "gold",
+                    redirect: 289,
+                    new_room: false
+                },
+                {
+                    answer: "rest",
+                    redirect: 81,
+                    new_room: false
+                },
+                {
+                    answer: "toy",
+                    redirect: 369,
+                    new_room: false
+                }
+            ]
+        }
+    },
+    event247:
+    {
+        description: function()
+        {
+            let desc = "After a few steps you reach a door to some chamber. ";
+
+            if(game_vars.getFlag("270_door_open"))
+            {
+                desc += "You've already been here, and you'd rather stay away. It's best to [l]leave[/l].";
+            }
+            else
+            {
+                desc += "It's closed. You should be able to [l]open[/l] it. Alternatively, you may [l]leave[/l].";
+            }
+
+            return desc;
+        },
+        locals: function()
+        {
+            let loc = [
+                {
+                    command: "leave",
+                    redirect: 33,
+                    new_room: true
+                }
+            ];
+
+            if(!game_vars.getFlag("270_door_open"))
+            {
+                loc.push({
+                    command: "open",
+                    redirect: 5,
+                    new_room: true
+                });
+            }
+
+            return loc;
+        }
+    },
+    event249:
+    {
+        description: "\"How about some magical remedy for treating wounds?\" you ask. \"I think I can get something like that. What do we have here? Ah, there it is. A wooden stake and a jar of corrosive dust.\"",
+        redirect: 7,
+        new_room: false
+    },
     event251:
     {
         description: "You leave the way you came in.",
@@ -2904,6 +3303,17 @@ export const events =
     {
         description: "You go back down the corridor, until you reach the pranksters' chamber. You open the door confidently. No one is there. You promptly reach the other door and come out to another corridor, continuing [c]south[/c].",
         south: 50
+    },
+    event262:
+    {
+        description: function()
+        {
+            player.modifyGold(+game_vars.getCounter("262_offer"));
+            player.removeItem("Tin Butterfly");
+            return "You give him the butterfly and take his gold.";
+        },
+        redirect: 121,
+        new_room: false
     },
     event263:
     {
@@ -2971,14 +3381,14 @@ export const events =
     {
         description: function()
         {
-            let desc = "A short tunnel ends with a decrepit old door.";
+            let desc = "A short tunnel ends with a decrepit old door. ";
             if(game_vars.getFlag("268_door_open"))
             {
-                desc += " It's open. You've already visited this place. You decide to go back [c]south[/c].";
+                desc += "It's open. You've already visited this place. You decide to go back [c]south[/c].";
             }
             else
             {
-                desc += " It's closed. You should be able to [l]open[/l] it. Alternatively, you may go back [c]south[/c].";
+                desc += "It's closed. You should be able to [l]open[/l] it. Alternatively, you may go back [c]south[/c].";
             }
             return desc;
         },
@@ -3197,6 +3607,36 @@ export const events =
         redirect: 109,
         new_room: false
     },
+    event280:
+    {
+        description: function()
+        {
+            let desc = "\"Good morning. Oh, pardon me. Night good. How can I help you?\" A slouched [e]Orc[/e] is rubbing its spiky, wrinkly fingers. It points to a seat at a table and then sits down himself.<br /><br />";
+
+            if(player.getGold() < 10)
+            {
+                desc += "Unfortunately, you don't have much money on you. You should get away from here as soon as you can!";
+            }
+            else
+            {
+                desc += "You have a feeling that the money you've collected up till now is about to come in handy. You sit down opposite the [e]Orc[/e].";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getGold() < 10)
+            {
+                return 196;
+            }
+            else
+            {
+                return 100;
+            }
+        },
+        new_room: false
+    },
     event283:
     {
         description: "\"Such a dangerous lake, and yet it was so easy to cross? I shall look for adventures\" you decide. You venture into the rushes. In a close vicinity of the shore you see red balls floating on the surface. Intriguing, isn't it? You enter the water slowly. You swim closer. You reach under the water. It turns out to be a net hanging on some cork buoys.",
@@ -3233,6 +3673,31 @@ export const events =
         description: "After some time, you see an intersection in the distance. The corridor continues [c]west[/c].",
         west: 50
     },
+    event288:
+    {
+        description: "Barely breathing, you lie on the smooth rocks. Out of nowhere, you're attacked by a [e]Bat[/e].",
+        redirect: 186,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Bat",
+                agility: 7,
+                constitution: 6
+            }
+        ]
+    },
+    event289:
+    {
+        description: function()
+        {
+            player.modifyGold(+20);
+            player.removeItem("Wooden Stake");
+            return "You give him the stake and take his gold.";
+        },
+        redirect: 121,
+        new_room: false
+    },
     event291:
     {
         description: function()
@@ -3242,6 +3707,19 @@ export const events =
         },
         redirect: 330,
         new_room: false
+    },
+    event293:
+    {
+        description: "You can barely squeeze through scattered rock fragments. The corridor takes a turn. At the curve, there is a small stone bench. You can rest here and [c]eat[/c]. Then, get up and go east. After some time, the tunnel changes directions and goes north. You reach the end of the corridor. There is a small opening in the rocks. You will have to [l]squeeze[/l] through it.",
+        eat: true,
+        locals:
+        [
+            {
+                command: "squeeze",
+                redirect: 207,
+                new_room: true
+            }
+        ]
     },
     event294:
     {
@@ -3349,6 +3827,12 @@ export const events =
             yes: 349,
             yes_new_room: false,
         }
+    },
+    event300:
+    {
+        description: "No means no.",
+        redirect: 81,
+        new_room: false
     },
     event301:
     {
@@ -3597,6 +4081,18 @@ export const events =
             yes_new_room: true
         }
     },
+    event321:
+    {
+        description: "The [e]Gnome[/e] has taken a liking to the tin butterfly. He's now jockeying for it.",
+        yes_no_choice:
+        {
+            question: "Will you give him the butterfly?",
+            no: 81,
+            no_new_room: false,
+            yes: 166,
+            yes_new_room: false
+        }
+    },
     event322:
     {
         description: "The chamber is completely empty. You may exit through the [c]east[/c] or [c]west[/c] door (where you came from).",
@@ -3606,6 +4102,84 @@ export const events =
             return 242;
         },
         west: 194
+    },
+    event323:
+    {
+        description: "\"How much is this?\" you ask. \"It is but a trifle: 15 gold pieces for the stake and 10 gold pieces for the jar of dust. It's basically free.\"",
+        choice:
+        {
+            question: function()
+            {
+                if(player.getGold() >= 25)
+                {
+                    return "You can buy the [o]stake[/o], the [o]jar[/o] or [o]both[/o]. You could also buy [o]nothing[/o]. What's your choice?";
+                }
+                else if(player.getGold() >= 15)
+                {
+                    return "You can buy the [o]stake[/o] or the [o]jar[/o]. You could also buy [o]nothing[/o]. What's your choice?";
+                }
+                else if(player.getGold() >= 10)
+                {
+                    return "Unfortunately, you can only afford the [o]jar[/o]. You could also buy [o]nothing[/o]. What's your choice?";
+                }
+                else
+                {
+                    return "Unfortunately, there is [o]nothing[/o] you can afford. What's your choice?";
+                }
+            },
+            options: function()
+            {
+                let opt = [
+                    {
+                        answer: "nothing",
+                        redirect: 196,
+                        new_room: false
+                    }
+                ];
+
+                if(player.getGold() >= 10)
+                {
+                    opt.push({
+                        answer: "jar",
+                        redirect: 55,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            game_vars.setFlag("55_buy_jar", true);
+                        }
+                    });
+                }
+
+                if(player.getGold() >= 15)
+                {
+                    opt.push({
+                        answer: "stake",
+                        redirect: 55,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            game_vars.setFlag("55_buy_stake", true);
+                        }
+                    });
+                }
+
+                if(player.getGold() >= 25)
+                {
+                    opt.push({
+                        answer: "both",
+                        redirect: 55,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            game_vars.setFlag("55_buy_jar", true);
+                            game_vars.setFlag("55_buy_stake", true);
+                        }
+                    });
+                }
+
+                return opt;
+            }
+        }
     },
     event324:
     {
@@ -3833,6 +4407,24 @@ export const events =
             }
         }
     },
+    event338:
+    {
+        description: "The [e]Gnome[/e] offers 30 gold and his toy dragon.",
+        yes_no_choice:
+        {
+            question: "Do you accept the offer?",
+            no: 300,
+            no_new_room: false,
+            yes: 104,
+            yes_new_room: false
+        }
+    },
+    event339:
+    {
+        description: "After some time, the corridor turns [c]west[/c]. You can [c]eat[/c] a ration here.",
+        west: 33,
+        eat: true
+    },
     event340:
     {
         description: "[e]Kormaa[/e] listens to your order and... runs away.",
@@ -3896,6 +4488,22 @@ export const events =
     {
         description: "You squeeze through the corridor, largely inhibited by the stone rubble lying around. You move further [c]south[/c].",
         south: 64
+    },
+    event353:
+    {
+        description: "The [e]Gnome[/e] offers 10 gold for the butterfly.",
+        yes_no_choice:
+        {
+            question: "Do you accept the offer?",
+            no: 60,
+            no_new_room: false,
+            yes: 262,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setCounter("262_offer", 10);
+            }
+        }
     },
     event356:
     {
@@ -3978,6 +4586,12 @@ export const events =
         redirect: 26,
         new_room: false
     },
+    event360:
+    {
+        description: "A short corridor leads to a door.",
+        redirect: 135,
+        new_room: false
+    },
     event362:
     {
         description: "The grateful monster reveals a secret to you. In the stone box on the altar, there is an enchanted emerald. It's owner can gain the Gift of Flight, although it only works once. But you must be careful: you're not allowed to touch the emerald. You must tilt the box and drop the gem straight to your backpack.",
@@ -4054,6 +4668,17 @@ export const events =
             yes_new_room: false
         }
     },
+    event369:
+    {
+        description: function()
+        {
+            player.removeItem("Wooden Stake");
+            player.addItem("Toy Dragon");
+            return "You give him the stake and take his toy dragon.";
+        },
+        redirect: 121,
+        new_room: false
+    },
     event371:
     {
         description: function()
@@ -4108,6 +4733,32 @@ export const events =
         description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
         north: 178,
         eat: true
+    },
+    event375:
+    {
+        description: "You can try and [o]negotiate[/o] a higher price. You can [o]attack[/o] the creature to see if it's hiding even more gold. Or, if you just don't want gold, you can just [o]rest[/o].",
+        choice:
+        {
+            question: "What's your decision?",
+            options:
+            [
+                {
+                    choice: "attack",
+                    redirect: 223,
+                    new_room: false
+                },
+                {
+                    choice: "negotiate",
+                    redirect: 246,
+                    new_room: false
+                },
+                {
+                    choice: "rest",
+                    redirect: 81,
+                    new_room: false
+                }
+            ]
+        }
     },
     event381:
     {

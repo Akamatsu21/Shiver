@@ -17,6 +17,7 @@ class Event
     int _escape_redirect;
     std::string _description;
     std::map<Direction, int> _destinations;
+    QJSValue _direction_callback;
     std::queue<Enemy> _enemies;
     int _gold;
     bool _has_gold;
@@ -66,6 +67,7 @@ public:
     void setEscapeRedirect(int value);
     void setDescription(const std::string& value);
     void setDestination(Direction direction, int destination);
+    void setDirectionCallback(QJSValue callback);
     void setHasGold(bool value);
     void setGold(int value);
     void setHasRations(bool value);
@@ -96,6 +98,7 @@ public:
     void addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback);
     void triggerLocalCommandCallback(const std::string& command);
 
+    void triggerDirectionCallback(Direction direction);
     void triggerEatingCallback();
     void triggerExitCallback();
 };

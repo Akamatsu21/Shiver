@@ -11,6 +11,7 @@ Event::Event(int id):
     _escape_redirect(0),
     _description(""),
     _destinations{},
+    _direction_callback(false),
     _enemies{},
     _gold(0),
     _has_gold(false),
@@ -208,6 +209,11 @@ void Event::setDestination(Direction direction, int destination)
     _destinations[direction] = destination;
 }
 
+void Event::setDirectionCallback(QJSValue callback)
+{
+    _direction_callback = callback;
+}
+
 void Event::setHasGold(bool value)
 {
     _has_gold = value;
@@ -323,6 +329,15 @@ void Event::triggerLocalCommandCallback(const std::string& command)
     if(getLocalCommand(command).callback.isCallable())
     {
         getLocalCommand(command).callback.call();
+    }
+}
+
+void Event::triggerDirectionCallback(Direction direction)
+{
+    if(_direction_callback.isCallable())
+    {
+        QJSValueList args = {QJSValue(static_cast<int>(direction))};
+        _direction_callback.call(args);
     }
 }
 

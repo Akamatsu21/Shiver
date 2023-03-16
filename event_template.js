@@ -8,6 +8,10 @@ eventX:
     south: 2,
     east: 3,
     west: 4,
+    on_direction: function(direction)
+    {
+        // Trigger when choosing one of the direction commands
+    },
     enemies:
     [
         {

@@ -45,9 +45,9 @@ public:
     int getConstitutionModifier() const;
     int getLuckModifier() const;
     int getCombatModifier() const;
-    int getStartingAgility() const;
-    int getStartingConstitution() const;
-    int getStartingLuck() const;
+    Q_INVOKABLE int getStartingAgility() const;
+    Q_INVOKABLE int getStartingConstitution() const;
+    Q_INVOKABLE int getStartingLuck() const;
 
     Q_INVOKABLE int getGold() const;
     Q_INVOKABLE int getRations() const;

@@ -568,10 +568,19 @@ void Game::resolveDamage(bool player_win, int damage)
     std::string msg;
     if(player_win)
     {
-        _current_event.getCurrentEnemy().modifyConstitution(-damage);
+        if(_current_event.getCurrentEnemy().isInvincible())
+        {
+            msg += utils::createString("Your attack is ineffective. [e]",
+                                       _current_event.getCurrentEnemy().getName(),
+                                       "[/e] takes no damage!");
+        }
+        else
+        {
+            _current_event.getCurrentEnemy().modifyConstitution(-damage);
 
-        msg += utils::createString("You deal ", damage, " damage to [e]",
-                                   _current_event.getCurrentEnemy().getName(), "[/e]");
+            msg += utils::createString("You deal ", damage, " damage to [e]",
+                                       _current_event.getCurrentEnemy().getName(), "[/e]");
+        }
     }
     else
     {

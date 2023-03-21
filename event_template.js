@@ -19,6 +19,7 @@ eventX:
             agility: 10,
             constitution: 10,
             escape_redirect: 50,
+            invincible: true,
             callbacks:
             [
                 {

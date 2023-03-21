@@ -183,6 +183,12 @@ Event ScriptingEngine::parseEvent(int id)
                     escape_redirect = getObjectProperty(enemy, "escape_redirect").toInt();
                 }
 
+                bool invincible = false;
+                if(enemy.hasProperty("invincible"))
+                {
+                    invincible = getObjectProperty(enemy, "invincible").toBool();
+                }
+
                 std::vector<Callback> enemy_callbacks;
                 if(enemy.hasProperty("callbacks"))
                 {
@@ -217,6 +223,7 @@ Event ScriptingEngine::parseEvent(int id)
                                getObjectProperty(enemy, "constitution").toInt(),
                                escape_enabled,
                                escape_redirect,
+                               invincible,
                                enemy_callbacks);
             }
         }

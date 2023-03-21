@@ -1,5 +1,5 @@
-Bone Hunting Dagger - found in 115
-Bunch of Keys - found in 128
+Bone Hunting Dagger - found in 115, can be used to fight the Werewolf in 63
+Bunch of Keys - found in 128, can be used to fight the Werewolf in 63, which leads to losing it in 181
 Crushed Lettuce - found in 356, spoils a ration in 144
 Cursed Gloves - found in 95, agility debuff, removed after next combat
 Decorative Shield - found in 37
@@ -9,19 +9,20 @@ Emerald - found in 263, allows entering the room in 135, can be shown to the Gno
 Enchanted Sword - found in 153, combat buff, permanent
 Filled Flask - found in 83, can be turned into Magical Water in 192, used for a feast with the Dwarves in 371, allows entering the chamber in 167
 Fireball - found in 177
-Fireproof Rope - found in 119, can be used in 207, 74, 158, 3 to cross the chasm
-Heavy Hammer - found in 115
+Fireproof Rope - found in 119, can be used in 207, 74, 158, 3 to cross the chasm or in 181 to recover the lost keys
+Heavy Hammer - found in 115, can be used to fight the Werewolf in 63
 Helmet - found in 298
 Jar of All-Eaters - found in 192
 Jar of Corrosive Dust - found in 147 or 55
 Key#45 - found 180
+Key#70 - found in 329
 Key#122 - found in 278
 Lake Water - found in 241
 Leather Shield - found in 37
 Magical Water - found in 45, used to restore stats in 207
-Metal Shield - found in 37
+Metal Shield - found in 37, can be used to fight the Werewolf in 63
 Monster's Bone - found in 192
-Net - found in 88, can be used in 74 to cross the bridge
+Net - found in 88, can be used to cross the bridge in 74, can be used to fight the Werewolf in 63
 Short Sword - found in 190
 Small Shiny Key - found in 192, can be turned into Key#122 in 278, opens the door in 131
 Spear - found in 192
@@ -30,4 +31,4 @@ Thin Sword - found in 190
 Tin Butterfly - found in 192, allows entering the room 135, can be used to play with the Gnome in 321, which may lead to it being given away in 202 or sold in 104 or 262 
 Toy Dragon - found in 369
 Werewolf's Scalp - found in 119
-Wooden Stake - found in 147 or 55, allows entering the room in 135, can be used to attack the Gnome in 22, which may lead to it being sold in 289 or 369
+Wooden Stake - found in 147 or 55, allows entering the room in 135, can be used to attack the Gnome in 22, which may lead to it being sold in 289 or 369, also can be used to kill the Werewolf in 377

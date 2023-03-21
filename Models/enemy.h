@@ -14,6 +14,7 @@ class Enemy
     const int _starting_constitution;
     bool _escape_enabled;
     int _escape_redirect;
+    bool _invincible;
 
     std::vector<Callback> _callbacks;
 
@@ -23,6 +24,7 @@ public:
           int constitution,
           bool escape_enabled,
           int escape_redirect,
+          bool invincible,
           const std::vector<Callback>& callbacks);
 
     std::string getName() const;
@@ -30,6 +32,7 @@ public:
     int getConstitution() const;
     bool isEscapeEnabled() const;
     int getEscapeRedirect() const;
+    bool isInvincible() const;
     std::vector<Callback> getCallbacks() const;
 
     void setConstitution(int value);

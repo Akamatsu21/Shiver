@@ -5,6 +5,7 @@ Enemy::Enemy(const std::string& name,
              int constitution,
              bool escape_enabled,
              int escape_redirect,
+             bool invincible,
              const std::vector<Callback>& callbacks):
     _name(name),
     _agility(agility),
@@ -12,6 +13,7 @@ Enemy::Enemy(const std::string& name,
     _starting_constitution(constitution),
     _escape_enabled(escape_enabled),
     _escape_redirect(escape_redirect),
+    _invincible(invincible),
     _callbacks(callbacks)
 {
 
@@ -40,6 +42,11 @@ bool Enemy::isEscapeEnabled() const
 int Enemy::getEscapeRedirect() const
 {
     return _escape_redirect;
+}
+
+bool Enemy::isInvincible() const
+{
+    return _invincible;
 }
 
 std::vector<Callback> Enemy::getCallbacks() const

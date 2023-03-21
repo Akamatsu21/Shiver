@@ -185,6 +185,20 @@ export const events =
             ]
         },
     },
+    event13:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-2);
+            return "You don't even need to look around. Let's be completely blunt. This chamber is actually a lair of a [e]Werewolf[/e]. It knows you're here. You take a few steps in the dark. Behind a gap in the rocks you notice a shiny spot. You quietly reach for your sword and take a few more steps. Now there are two spots. Rumbling. It jumps from behind a rock. Within a strip of light that entered the cavern through the half-opened door, all you can see are white fangs and green eyes. Immediately, you grab your sword with both your hands. You take a swing and... Your whole body stops. The green eyes paralyse you and you take 2 damage. But that's just for a short moment. With massive leaps, you dash towards the monster.";
+        },
+        redirect: 126,
+        new_room: false,
+        on_exit: function()
+        {
+            game_vars.setFlag("126_luck_check", player.performLuckCheck());
+        }
+    },
     event14:
     {
         description: "You may leave through the [c]north[/c] exit of the [c]east[/c] exit.",
@@ -424,6 +438,82 @@ export const events =
             }
         ]
     },
+    event32:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("32_question_answered"))
+            {
+                return "You sit by a rock, completely out of breath.";
+            }
+            else
+            {
+                return "You barely manage to sit down, when all of a sudden, [e]Wolfmen[/e] enter the cavern. They are much weaker than the [e]Werewolf[/e], but there are three of them. You have to fight all of them at once.";
+            }
+        },
+        redirect: function()
+        {
+            if(!game_vars.getFlag("32_question_answered"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 275;
+            }
+        },
+        new_room: true,
+        enemies: function()
+        {
+            if(!game_vars.getFlag("32_question_answered"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return [
+                    {
+                        name: "Wolfmen",
+                        agility: 8,
+                        constitution: 7
+                    }
+                ];
+            }
+        },
+        yes_no_choice: function()
+        {
+            if(!game_vars.getFlag("32_question_answered"))
+            {
+                return {
+                    question: "Would you like to eat a ration now?",
+                    no: 32,
+                    no_new_room: false,
+                    on_no: function()
+                    {
+                        game_vars.setFlag("32_question_answered", true);
+                    },
+                    yes: 32,
+                    yes_new_room: false,
+                    on_yes: function()
+                    {
+                        game_vars.setFlag("32_question_answered", true);
+                        if(player.eatRation())
+                        {
+                            system.message("You consume a ration and recover 4 Constitution.");
+                        }
+                        else
+                        {
+                            system.message("You don't have any rations left!");
+                        }
+                    },
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
+    },
     event33:
     {
         description: "A little more, and you reach an intersection. You can go [c]north[/c], [c]east[/c] or [c]south[/c].",
@@ -607,11 +697,11 @@ export const events =
 
             if(game_vars.getFlag("41_luck_check"))
             {
-                desc += "Luck check successful! The stone rubble crumbles and reveals a path. You can move forward.";
+                desc += "Luck check successful!<br />The stone rubble crumbles and reveals a path. You can move forward.";
             }
             else
             {
-                desc += "Luck check failed! You have to turn back.";
+                desc += "Luck check failed!<br />You have to turn back.";
             }
 
             return desc;
@@ -828,6 +918,129 @@ export const events =
             }
         },
         new_room: false
+    },
+    event63:
+    {
+        description: function()
+        {
+            let desc = "The sword isn't an effective weapon against a [e]Werewolf[/e]. ";
+            const items_present = player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+                                  player.hasItem("Metal Shield") || player.hasItem("Net") || player.hasItem("Bunch of Keys");
+
+            if(items_present)
+            {
+                desc += "You can use one of the following items:";
+            }
+            else
+            {
+                desc += "You don't have any items you could use in this fight. Your only choice is to [c]escape[/c].";
+            }
+
+            if(player.hasItem("Bone Hunting Dagger"))
+            {
+                desc += "<br />* A [o]dagger[/o] made out of a bone of an ancient monster";
+            }
+
+            if(player.hasItem("Heavy Hammer"))
+            {
+                desc += "<br />* A [o]hammer[/o] made by the goblins";
+            }
+
+            if(player.hasItem("Metal Shield"))
+            {
+                desc += "<br />* A metal [o]shield[/o]";
+            }
+
+            if(player.hasItem("Net"))
+            {
+                desc += "<br />* A [o]net[/o]";
+            }
+
+            if(player.hasItem("Bunch of Keys"))
+            {
+                desc += "<br />* A bunch of [o]keys[/o]";
+            }
+
+            return desc;
+        },
+        escape_redirect: function()
+        {
+            if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+               player.hasItem("Metal Shield") || player.hasItem("Net") || player.hasItem("Bunch of Keys"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 275;
+            }
+        },
+        choice: function()
+        {
+            if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+               player.hasItem("Metal Shield") || player.hasItem("Net") || player.hasItem("Bunch of Keys"))
+            {
+                let opt = [];
+
+                if(player.hasItem("Bone Hunting Dagger"))
+                {
+                    opt.push({
+                        answer: "dagger",
+                        redirect: 157,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Heavy Hammer"))
+                {
+                    opt.push({
+                        answer: "hammer",
+                        redirect: 346,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Metal Shield"))
+                {
+                    opt.push({
+                        answer: "shield",
+                        redirect: 216,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Net"))
+                {
+                    opt.push({
+                        answer: "net",
+                        redirect: 377,
+                        new_room: false,
+                        on_option: function()
+                        {
+                            game_vars.setFlag("377_wooden_stake_available", player.hasItem("Wooden Stake"));
+                        }
+                    });
+                }
+
+                if(player.hasItem("Bunch of Keys"))
+                {
+                    opt.push({
+                        answer: "keys",
+                        redirect: 181,
+                        new_room: false
+                    });
+                }
+
+                return {
+                    question: "Which one do you use?",
+                    options: opt
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event64:
     {
@@ -1156,6 +1369,12 @@ export const events =
         },
         redirect: 10,
         new_room: false
+    },
+    event87:
+    {
+        description: "Unfortunately, you can't find anything.",
+        redirect: 354,
+        new_room: true
     },
     event88:
     {
@@ -1706,6 +1925,36 @@ export const events =
             }
         ]
     },
+    event126:
+    {
+        description: function()
+        {
+            let desc = "You attack it with your sword.<br /><br />";
+
+            if(game_vars.getFlag("126_luck_check"))
+            {
+                desc += "Luck check successful!<br />You landed the first hit. Begin the battle...";
+            }
+            else
+            {
+                desc += "Luck check failed!<br />Your attack didn't hit. It's the beast's turn now...";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("126_luck_check"))
+            {
+                return 309;
+            }
+            else
+            {
+                return 244;
+            }
+        },
+        new_room: false
+    },
     event128:
     {
         description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]bunch of keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
@@ -1955,6 +2204,46 @@ export const events =
         description: "You observe the walls, move the lighter stones - nothing! All you can do now is go back [c]west[/c].",
         west: 212
     },
+    event157:
+    {
+        description: "Yes, the bone is as hard as steel. It's perfect for this fight.",
+        redirect: 32,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Werewolf",
+                agility: 9,
+                constitution: 6,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            if(system.getCurrentPlayerScore() < system.getCurrentEnemyScore())
+                            {
+                                system.enableEnemyEscape(275);
+                            }
+                        }
+                    },
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 2,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    }
+                ]
+            }
+        ],
+        on_exit: function()
+        {
+            player.removeItem("Bone Hunting Dagger");
+        }
+    },
     event158:
     {
         description: function()
@@ -2042,13 +2331,13 @@ export const events =
 
             if(game_vars.getFlag("162_luck_check"))
             {
-                desc += "Luck check successful! A [e]Bat[/e] catches you as you're falling. The scoundrel wants gold as a reward for saving you. You can offer a [o]low[/o] reward of 10 gold, and it'll bring you back to the edge you came from. You can also offer a [o]high[/o] reward of 20 gold, and it'll bring you to the other edge. You have to make an offer regardless of whether you have the money or not.";
+                desc += "Luck check successful!<br />A [e]Bat[/e] catches you as you're falling. The scoundrel wants gold as a reward for saving you. You can offer a [o]low[/o] reward of 10 gold, and it'll bring you back to the edge you came from. You can also offer a [o]high[/o] reward of 20 gold, and it'll bring you to the other edge. You have to make an offer regardless of whether you have the money or not.";
             }
             else
             {
                 player.modifyAgility(+2);
                 player.modifyLuck(+3);
-                desc += "Luck check failed! You fall down the abyss, getting hit by many of the protruding rocks on the way. You manage to grab onto one of them, and you notice an opening leading to some sort of a tunnel. You manage to crawl into the orifice. You are dreadfully tired. You should [c]eat[/c] something - you might get a special bonus if you do! For the heroic feat, you gain 2 Agility. Additionally, your unbelievable fortune earns you 3 Luck. You get up. The corridor is wide and lit, it leads into a round room. A rope is hanging from the top. You pull yourself upwards. At the top of this \"chimney\" you find yourself in another identical room. You see a door ahead of you. You push it. It turns out to be a revolving door. You end up in another corridor, and the door closes shut. It's impossible to find it anymore. You end up at a turning point of a tunnel, which goes from the north towards the east. You move east. You reach a thick door. You may [l]open[/l] it.";
+                desc += "Luck check failed!<br />You fall down the abyss, getting hit by many of the protruding rocks on the way. You manage to grab onto one of them, and you notice an opening leading to some sort of a tunnel. You manage to crawl into the orifice. You are dreadfully tired. You should [c]eat[/c] something - you might get a special bonus if you do! For the heroic feat, you gain 2 Agility. Additionally, your unbelievable fortune earns you 3 Luck. You get up. The corridor is wide and lit, it leads into a round room. A rope is hanging from the top. You pull yourself upwards. At the top of this \"chimney\" you find yourself in another identical room. You see a door ahead of you. You push it. It turns out to be a revolving door. You end up in another corridor, and the door closes shut. It's impossible to find it anymore. You end up at a turning point of a tunnel, which goes from the north towards the east. You move east. You reach a thick door. You may [l]open[/l] it.";
             }
 
             return desc;
@@ -2302,7 +2591,7 @@ export const events =
     },
     event180:
     {
-        description: "You search the room once again. In the [e]Orc[/e]'s bag, which you didn't have time to search, you find [i]Key#45[/i]. The number 45 is engraved on the key. You may take it with you. You may now [l]leave[/l] the chamber, leaving the door wide open.",
+        description: "You search the room once again. In the [e]Orc[/e]'s bag, which you didn't have time to search, you find [i]Key#45[/i]. The number [k]45[/k] is engraved on the key. You may take it with you. You may now [l]leave[/l] the chamber, leaving the door wide open.",
         items:
         [
             "Key#45"
@@ -2316,6 +2605,36 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event181:
+    {
+        description: function()
+        {
+            let desc = "You throw a bunch of keys found in one of the chambers at the monster. You hit him, but it does no damage. The [e]Werewolf[/e] grabs the keys and runs away. You chase after it. The [e]Werewolf[/e] falls into a narrow but deep rift in the corner of the cavern. It falls to the bottom and dies.<br /><br />You light the chasm up with your lantern. At the bottom you can see the monster's bulky corpse, the keys shining next to it. ";
+            
+            if(player.hasItem("Fireproof Rope"))
+            {
+                desc += "You decide to use your rope to retrieve it.";
+            }
+            else
+            {
+                desc += "You could retrieve it if only you had a rope.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Fireproof Rope"))
+            {
+                return 329;
+            }
+            else
+            {
+                return 32;
+            }
+        },
+        new_room: false
     },
     event182:
     {
@@ -2825,6 +3144,20 @@ export const events =
         description: "You go south, until you reach the chamber with the fountain. The exit is on the [c]east[/c].",
         east: 39
     },
+    event216:
+    {
+        description: "You hit the ceiling with the shield, using all your might. Rock fragments fall down on the monster's head. It loses 2 Agility.",
+        redirect: 32,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Werewolf",
+                agility: 7,
+                constitution: 6
+            }
+        ]
+    },
     event217:
     {
         description: function()
@@ -3201,6 +3534,16 @@ export const events =
         },
         new_room: false
     },
+    event244:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-1);
+            return "The [e]Werewolf[/e] paralyses you again, and then knocks the sword out of your hands - you take 1 damage. You pick your sword back up, but you're thinking that you might need a better weapon.";
+        },
+        redirect: 63,
+        new_room: false
+    },
     event245:
     {
         description: function()
@@ -3292,6 +3635,12 @@ export const events =
     {
         description: "Suddenly, from the other side of the chamber you hear a powerful roar. You have time to grab some [i]gold[/i] and then you must [c]escape[/c].",
         escape_redirect: 385
+    },
+    event256:
+    {
+        description: "Once again, you find nothing.",
+        redirect: 378,
+        new_room: true
     },
     event257:
     {
@@ -3533,6 +3882,11 @@ export const events =
             ]
         },
     },
+    event275:
+    {
+        description: "You run out of this chamber through the [c]east[/c]ern door.",
+        east: 279
+    },
     event276:
     {
         description: "You reach a crossing. You may go [c]north[/c], [c]east[/c] or [c]south[/c].",
@@ -3602,7 +3956,7 @@ export const events =
         {
             player.removeItem("Small Shiny Key");
             player.addItem("Key#122");
-            return "You inspect the key. It has the number 122 engraved into it.<br />Item updated in inventory.";
+            return "You inspect the key. It has the number [k]122[/k] engraved into it.<br />Item updated in inventory.";
         },
         redirect: 109,
         new_room: false
@@ -3915,6 +4269,40 @@ export const events =
             {
                 command: "search",
                 redirect: 114,
+                new_room: false
+            }
+        ]
+    },
+    event309:
+    {
+        description: "[e]Werewolf[/e] approaches you.",
+        escape_redirect: 275,
+        enemies:
+        [
+            {
+                name: "Werewolf",
+                agility: 9,
+                constitution: 6,
+                invincible: true,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.stopCombat();
+                            system.message("Your sword proves to be ineffective against the [e]Werewolf[/e]. You may either [c]escape[/c] or [l]search[/l] for another weapon.")
+                        }
+                    }
+                ]
+            }
+        ],
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 63,
                 new_room: false
             }
         ]
@@ -4248,6 +4636,17 @@ export const events =
             yes_new_room: true
         }
     },
+    event329:
+    {
+        description: function()
+        {
+            player.addItem("Key#70");
+            player.removeItem("Fireproof Rope");
+            return "You drop down to the bottom of the gap. You pick up the keys, and notice one of them has the number [k]70[/k] engraved on it.<br />[i]Key#70[/i] added to your inventory.<br />You pull yourself back up, but the rope slides into the chasm.";
+        },
+        redirect: 32,
+        new_room: false
+    },
     event330:
     {
         description: "There is only one exit from this chamber: The one you came from. You return to the corridor.",
@@ -4468,6 +4867,16 @@ export const events =
         redirect: 288,
         new_room: true
     },
+    event346:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-1);
+            player.removeItem("Heavy Hammer");
+            return "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. You have no choice other than to [c]escape[/c].";
+        },
+        escape_redirect: 275
+    },
     event349:
     {
         description: function()
@@ -4504,6 +4913,19 @@ export const events =
                 game_vars.setCounter("262_offer", 10);
             }
         }
+    },
+    event354:
+    {
+        description: "You walk north. Eventually the corridor turns east. You walk 50 steps and once again, you can hear strange sounds: laughs and squeaks. You may [l]search[/l] for hidden doors in the southern wall or just keep walking [c]east[/c].",
+        east: 378,
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 256,
+                new_room: false
+            }
+        ]
     },
     event356:
     {
@@ -4668,6 +5090,18 @@ export const events =
             yes_new_room: false
         }
     },
+    event368:
+    {
+        description: "You walk a few steps and the corridor turns north. After some time, you can hear cackling. You stick your ear to the eastern wall. It's true, someone is dying from laughter.",
+        yes_no_choice:
+        {
+            question: "Would you like to look for a secret entrance?",
+            no: 354,
+            no_new_room: true,
+            yes: 87,
+            yes_new_room: false
+        }
+    },
     event369:
     {
         description: function()
@@ -4759,6 +5193,77 @@ export const events =
                 }
             ]
         }
+    },
+    event377:
+    {
+        description: function()
+        {
+            player.removeItem("Net");
+            let desc = "You quickly pull a net out of your backpack. You spin it above your head and throw it at the monster. You succeed - the monster is now trapped. ";
+
+            if(game_vars.getFlag("377_wooden_stake_available"))
+            {
+                player.removeItem("Wooden Stake");
+                desc += "You throw your wooden stake at it, and it dies immediately.";
+            }
+            else
+            {
+                desc += "However, you don't have anything you could use to finish it off. It quickly bites through the net and frees itself. Now it's running towards you! ";
+
+                if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+                   player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+                {
+                    desc += "As the sword and net proved ineffective, you may use another weapon.";
+                }
+                else
+                {
+                    desc += "You have nothing else to attack the [e]Werewolf[/e] with - save yourself and [c]escape[/e].";
+                }
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("377_wooden_stake_available"))
+            {
+                return 32;
+            }
+            else if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+                    player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+            {
+                return 63;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        escape_redirect: function()
+        {
+            if(game_vars.getFlag("377_wooden_stake_available") ||
+               player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
+               player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 275;
+            }
+        }
+    },
+    event378:
+    {
+        description: "After a while, you reach a T-shaped intersection, of which the third branch leads south. After some time, it changes directions again and leads west. You reach a thick door and [l]open[/l] it.",
+        locals:
+        [
+            {
+                command: "open",
+                redirect: 13,
+                new_room: true
+            }
+        ]
     },
     event381:
     {

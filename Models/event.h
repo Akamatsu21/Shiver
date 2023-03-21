@@ -84,6 +84,7 @@ public:
                   int constitution,
                   bool escape_enabled,
                   int escape_redirect,
+                  bool invincible,
                   const std::vector<Callback>& callbacks);
     void defeatCurrentEnemy();
     void defeatAllEnemies();

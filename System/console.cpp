@@ -41,6 +41,7 @@ static std::string parseMarkup(const std::string& text)
     buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
     buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
     buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"dodgerblue\">"); // item
+    buffer = replaceTag(buffer, "[k]", "[/k]", "<font color=\"lightpink\">"); // key number
     buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
     buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"darkviolet\">"); // option
     buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name

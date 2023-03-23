@@ -5,7 +5,7 @@ Cursed Gloves - found in 95, agility debuff, removed after next combat
 Decorative Shield - found in 37
 Decrepit Flask - found in 119, can be turned into Filled Flask in 83 or into Magical Water in 192
 Elixir of Inviolability - found in 294, used to avoid the fire in 358
-Emerald - found in 263, allows entering the room in 135, can be shown to the Gnome in 22
+Emerald - found in 263, allows entering the room in 135, can be shown to the Gnome in 22, can also be used to gain flight in 314
 Enchanted Sword - found in 153, combat buff, permanent
 Filled Flask - found in 83, can be turned into Magical Water in 192, used for a feast with the Dwarves in 371, allows entering the chamber in 167
 Fireball - found in 177

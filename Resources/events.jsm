@@ -76,11 +76,19 @@ export const events =
                 });
             }
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("Fireproof Rope"))
             {
                 loc.push({
                     command: "throw",
                     redirect: 269,
+                    new_room: false
+                });
+            }
+            else if(game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 358,
                     new_room: false
                 });
             }
@@ -184,6 +192,16 @@ export const events =
                 }
             ]
         },
+    },
+    event12:
+    {
+        description: function()
+        {
+            player.removeItem("Emerald");
+            return "You take out the magical stone from your pocket. You feel the pain of your back tearing apart, your leather tunic is ripped into little pieces. Long, pale gray wings grow out of your back. This emerald grants the Gift of Wings! You fly upwards and land on the edge of the chasm. The spell loses its power as quickly as it appeared.";
+        },
+        redirect: 288,
+        new_room: true
     },
     event13:
     {
@@ -820,7 +838,7 @@ export const events =
             {
                 if(player.hasItem("Wooden Stake"))
                 {
-                    desc += "You already have a wooden stake!<br />"
+                    desc += "You already have a wooden stake!<br />";
                 }
                 else
                 {
@@ -860,6 +878,53 @@ export const events =
         },
         redirect: 75,
         new_room: true
+    },
+    event57:
+    {
+        description: function()
+        {
+            let desc = "After you land, the bastard asks for all of your gold. ";
+
+            if(game_vars.getFlag("57_can_afford"))
+            {
+                desc += "You can tell him that you're only willing to pay the agreed amount, or that as punishment for his slyness you'll give him nothing.";
+            }
+            else
+            {
+                desc += "But you don't even have enough money to pay what you promised, so you just tell him he's not getting anything.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("57_can_afford"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 91;
+            }
+        },
+        new_room: false,
+        yes_no_choice: function()
+        {
+            if(game_vars.getFlag("57_can_afford"))
+            {
+                return {
+                    question: "Will you pay the money?",
+                    no: 91,
+                    no_new_room: false,
+                    yes: 335,
+                    yes_new_room: false
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event59:
     {
@@ -1246,11 +1311,19 @@ export const events =
                 }
             ];
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("Fireproof Rope"))
             {
                 loc.push({
                     command: "throw",
                     redirect: 269,
+                    new_room: false
+                });
+            }
+            else if(game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 358,
                     new_room: false
                 });
             }
@@ -1418,6 +1491,62 @@ export const events =
     {
         description: "You climb up a set of stairs. The corridor leads west first, and then turns [c]south[/c].",
         south: 212
+    },
+    event91:
+    {
+        description: function()
+        {
+            if(game_vars.getCounter("57_offer") == 20)
+            {
+                return "The [e]Bat[/e] is really not happy about this...";
+            }
+            else
+            {
+                return "To your surprise, the [e]Bat[/e] flies away without a word. But now you have to find another way to get across the rift. You can [l]pay[/l] the [e]Dragon[/e], [l]walk[/l] on the bridge or attempt a [l]jump[/l].";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("57_offer") === 20)
+            {
+                game_vars.setFlag("288_bat_angry", true);
+                return 288;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: false,
+        locals: function()
+        {
+            if(game_vars.getCounter("57_offer") === 20)
+            {
+                return undefined;
+            }
+            else
+            {
+                return [
+                    {
+                        command: "jump",
+                        redirect: 110,
+                        new_room: false,
+                        on_command: jumpCommandEvent110
+                    },
+                    {
+                        command: "pay",
+                        redirect: 35,
+                        new_room: false,
+                        on_command: payCommandEvent35
+                    },
+                    {
+                        command: "walk",
+                        redirect: 74,
+                        new_room: false
+                    }
+                ];
+            }
+        }
     },
     event92:
     {
@@ -2298,11 +2427,19 @@ export const events =
                 });
             }
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("Fireproof Rope"))
             {
                 loc.push({
                     command: "throw",
                     redirect: 269,
+                    new_room: false
+                });
+            }
+            else if(game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 358,
                     new_room: false
                 });
             }
@@ -2373,7 +2510,8 @@ export const events =
                             new_room: true,
                             on_option: function()
                             {
-                                game_vars.setFlag("57_offer_high", true);
+                                game_vars.setCounter("57_offer", 20);
+                                game_vars.setFlag("57_can_afford", player.getGold() >= 20);
                             }
                         },
                         {
@@ -2382,7 +2520,8 @@ export const events =
                             new_room: true,
                             on_option: function()
                             {
-                                game_vars.setFlag("57_offer_high", false);
+                                game_vars.setCounter("57_offer", 10);
+                                game_vars.setFlag("57_can_afford", player.getGold() >= 10);
                             }
                         }
                     ]
@@ -3048,7 +3187,7 @@ export const events =
             desc += "<br /><br />You look around the cave. You have to somehow overcome the hellish rift. This is the only path forward. On another end of the cavern you can see a bridge. So there is hope...<br /><br />You look through your equipment. ";
 
             let options = "three";
-            if(player.hasItem("Fireproof Rope"))
+            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
             {
                 options = "four";
                 desc += "You have a rope with a hook, which just happens to be fireproof. Your chances of crossing the chasm suddenly aren't looking too bad. This thought gives you courage. ";
@@ -3074,7 +3213,6 @@ export const events =
         locals: function()
         {
             let loc = [
-                
                 {
                     command: "jump",
                     redirect: 110,
@@ -3094,11 +3232,19 @@ export const events =
                 }
             ];
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("Fireproof Rope"))
             {
                 loc.push({
                     command: "throw",
                     redirect: 269,
+                    new_room: false
+                });
+            }
+            else if(game_vars.getFlag("269_rope_present"))
+            {
+                loc.push({
+                    command: "throw",
+                    redirect: 358,
                     new_room: false
                 });
             }
@@ -4029,7 +4175,17 @@ export const events =
     },
     event288:
     {
-        description: "Barely breathing, you lie on the smooth rocks. Out of nowhere, you're attacked by a [e]Bat[/e].",
+        description: function()
+        {
+            if(game_vars.getFlag("288_bat_angry"))
+            {
+                return "The [e]Bat[/e] rushes at you in fury.";
+            }
+            else
+            {
+                return "Barely breathing, you lie on the smooth rocks. Out of nowhere, you're attacked by a [e]Bat[/e].";
+            }
+        },
         redirect: 186,
         new_room: false,
         enemies:
@@ -4407,6 +4563,36 @@ export const events =
         redirect: 193,
         new_room: false
     },
+    event314:
+    {
+        description: function()
+        {
+            let desc = "You're falling down. You start thinking that the only way for you to survive would be if you suddenly learned how to fly... ";
+
+            if(player.hasItem("Emerald"))
+            {
+                desc += "As your thoughts focus strongly on the image of flight, your hand instinctively reaches out for the emerald you've been carrying this whole time.";
+            }
+            else
+            {
+                desc += "Alas, such miracles don't happen.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Emerald"))
+            {
+                return 12;
+            }
+            else
+            {
+                return 370;
+            }
+        },
+        new_room: false
+    },
     event317:
     {
         description: function()
@@ -4750,6 +4936,62 @@ export const events =
             yes_new_room: false
         }
     },
+    event335:
+    {
+        description: function()
+        {
+            player.modifyGold(-game_vars.getCounter("57_offer"));
+            let desc = "The [e]Bat[/e] takes you up on the offer. You pay " + game_vars.getCounter("57_offer") + " gold, then the [e]Bat[/e] leaves.";
+
+            if(game_vars.getCounter("57_offer") == 10)
+            {
+                desc += " Now you have to find another way to get across the rift. You can [l]pay[/l] the [e]Dragon[/e], [l]walk[/l] on the bridge or attempt a [l]jump[/l].";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("57_offer") === 20)
+            {
+                return 186;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: true,
+        locals: function()
+        {
+            if(game_vars.getCounter("57_offer") === 20)
+            {
+                return undefined;
+            }
+            else
+            {
+                return [
+                    {
+                        command: "jump",
+                        redirect: 110,
+                        new_room: false,
+                        on_command: jumpCommandEvent110
+                    },
+                    {
+                        command: "pay",
+                        redirect: 35,
+                        new_room: false,
+                        on_command: payCommandEvent35
+                    },
+                    {
+                        command: "walk",
+                        redirect: 74,
+                        new_room: false
+                    }
+                ];
+            }
+        }
+    },
     event336:
     {
         description: function()
@@ -4953,6 +5195,7 @@ export const events =
     {
         description: function()
         {
+            game_vars.setFlag("269_rope_present", false);
             let desc = "You attach the rope again and proceed to pull yourself forward. Out of nowhere, pillars of fire start shooting out of the fissure. ";
             if(game_vars.getFlag("358_elixir_present"))
             {
@@ -5112,6 +5355,14 @@ export const events =
         },
         redirect: 121,
         new_room: false
+    },
+    event370:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-player.getConstitution());
+            return "This is the end of your adventure. The red abyss engulfs you.";
+        }
     },
     event371:
     {

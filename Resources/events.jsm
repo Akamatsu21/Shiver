@@ -1700,6 +1700,82 @@ export const events =
             no_new_room: true
         }
     },
+    event106:
+    {
+        description: function()
+        {
+            let desc = "Behind the door, you see a set of chipped, wooden stairs leading downwards. In the centre of the cavern you notice a square-shaped recess. It resembles an empty pool. The stairs lead you to the bottom of that pool. The flooring is covered with fine sand. It's just sand everywhere, no objects, rocks or creatures... Hey, what's that bended rod doing in the corner? Probably a root. You can't help yourself: you give it a nice kick. What follows is beyond imagination... If you live to tell the tale, no one will believe it. The pool now resembles a pot, where someone's stirring pasta. You are but a grain being thrown around in all directions. Around you appeared [e]Worms[/e], the most disgusting creaures in the whole dungeon. They're trying to grind you to dust as they wriggle their slimy bodies. They keep throwing you towards the surface and then pushing you to the ground. You may use your sword to defend yourself. Or you could attempt to use another weapon, like... Some say that corrosive dust is effective against [e]Worms[/e], others that you should use All-Eaters (permanently hungry shellfish). ";
+
+            if(player.hasItem("Jar of Corrosive Dust") && player.hasItem("Jar of All-Eaters"))
+            {
+                desc += "Fortunately for you, you have both of them!";
+            }
+            else if(player.hasItem("Jar of Corrosive Dust"))
+            {
+                desc += "You happen to have a jar of corrosive dust on you.";
+            }
+            else if(player.hasItem("Jar of All-Eaters"))
+            {
+                desc += "You happen to have a jar of All-Eaters on you.";
+            }
+            else
+            {
+                desc += "Unfortunately, you have neither so your sword will have to suffice.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Jar of Corrosive Dust") || player.hasItem("Jar of All-Eaters"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 213;
+            }
+        },
+        new_room: false,
+        yes_no_choice: function()
+        {
+            if(player.hasItem("Jar of Corrosive Dust") || player.hasItem("Jar of All-Eaters"))
+            {
+                let yes_redirect = 0;
+                if(player.hasItem("Jar of Corrosive Dust") && player.hasItem("Jar of All-Eaters"))
+                {
+                    yes_redirect = 292;
+                }
+                else
+                {
+                    yes_redirect = 24;
+                }
+
+                let choice = {
+                    question: "Will you try to utilise this secret weapon?",
+                    no: 213,
+                    no_new_room: false,
+                    yes: yes_redirect,
+                    yes_new_room: false,
+                    on_yes: function()
+                    {
+                        if(player.hasItem("Jar of Corrosive Dust") && !player.hasItem("Jar of All-Eaters"))
+                        {
+                            game_vars.setFlag("24_using_dust", true);
+                        }
+                        else if(player.hasItem("Jar of All-Eaters") && !player.hasItem("Jar of Corrosive Dust"))
+                        {
+                            game_vars.setFlag("24_using_dust", false);
+                        }
+                    },
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
+    },
     event108:
     {
         description: function()
@@ -4137,6 +4213,12 @@ export const events =
         },
         new_room: false
     },
+    event282:
+    {
+        description: "The narrow tunnel runs north, only to turn east after a few steps, and finally end with a door.",
+        redirect: 135,
+        new_room: false
+    },
     event283:
     {
         description: "\"Such a dangerous lake, and yet it was so easy to cross? I shall look for adventures\" you decide. You venture into the rushes. In a close vicinity of the shore you see red balls floating on the surface. Intriguing, isn't it? You enter the water slowly. You swim closer. You reach under the water. It turns out to be a net hanging on some cork buoys.",
@@ -4788,6 +4870,12 @@ export const events =
             game_vars.setFlag("115_taken_first", true);
         }
     },
+    event325:
+    {
+        description: "A few steps forward, and once again, there's a door.",
+        redirect: 106,
+        new_room: true
+    },
     event326:
     {
         description: function()
@@ -5118,6 +5206,13 @@ export const events =
             return "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. You have no choice other than to [c]escape[/c].";
         },
         escape_redirect: 275
+    },
+    event348:
+    {
+        description: "The corridor ramifies. You can go [c]west[/c], [c]east[/c] or [c]south[/c].",
+        south: 239,
+        east: 79,
+        west: 221
     },
     event349:
     {

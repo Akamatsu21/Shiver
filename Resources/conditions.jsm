@@ -16,5 +16,11 @@ export const conditions =
         stat: PlayerStat.CombatScore,
         modifier: +1,
         clear_timing: CallbackTiming.None
+    },
+    goblin_follower:
+    {
+        stat: PlayerStat.Agility,
+        modifier: +3,
+        clear_timing: CallbackTiming.CombatEnd
     }
 };

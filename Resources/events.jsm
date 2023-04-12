@@ -140,6 +140,19 @@ export const events =
         redirect: 219,
         new_room: false
     },
+    event8:
+    {
+        description: "You peak inside the chamber. The door opens slightly. What do you see? Some strange creature is running around frantically, bouncing against the walls. It doesn't look dangerous. Under its belt, in its pockets and in its shoes it's carrying bones of various shapes and sizes. You walk inside. \"Why run around like this, you poor thing?\" you ask. \"Mister, what did I do to deserve this? Such a rumpus about some bones! My brothers hunted a few Slatterns. You probably know Slatterns are a sublime delicacy for us [e]Goblins[/e]. I just couldn't resist. I sneaked up and took a few bones. I sat here to eat in peace, but those beasts followed me and they'll be here any moment. Oh, I can hear their footsteps...\" And so, the [e]Goblin[/e] begins to circle around once again. You grab his arm and stand in the middle of the chamber. A swarm of [e]Goblins[/e] is about burst through the door. You can join the bullied creature in [l]defend[/l]ing against his own kin, or promptly [c]escape[/c].",
+        escape_redirect: 210,
+        locals:
+        [
+            {
+                command: "defend",
+                redirect: 98,
+                new_room: false
+            }
+        ]
+    },
     event9:
     {
         description: "You get ready to strike the [e]Gnome[/e] with a wooden stake. He notices this. \"Oh, what a beautiful stake\" he says. \"Sell it to me for 20 gold.\"",
@@ -839,6 +852,45 @@ export const events =
         north: 33,
         south: 134
     },
+    event52:
+    {
+        description: function()
+        {
+            let desc = "From a an opening in the wall, a stream of acrid gas shoots out...";
+
+            if(player.hasItem("Helmet"))
+            {
+                desc += " Fortunately, you were wearing your helmet and you avoid the damage. The helmet, however, gets destroyed.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Helmet"))
+            {
+                return 274;
+            }
+            else
+            {
+                return 315;
+            }
+        },
+        new_room: false,
+        on_exit: function()
+        {
+            if(player.hasItem("Helmet"))
+            {
+                player.removeItem("Helmet");
+            }
+            else
+            {
+                game_vars.setCounter("315_redirect", 274);
+                game_vars.setFlag("315_new_room", false);
+            }
+            game_vars.setFlag("274_luck_check", player.performLuckCheck());
+        }
+    },
     event53:
     {
         description: "You end up at a spacious footpath. It leads to the north, and then swerves heavily to the west. You take several dozen steps and stop in front of a heavy door.",
@@ -1403,6 +1455,23 @@ export const events =
         north: 170,
         south: 357
     },
+    event79:
+    {
+        description: "After some time the corridor turns north. You are standing in front of a door. You could [l]open[/l] it and see what secrets it hides. Alternatively, you may [l]leave[/l].",
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 161,
+                new_room: true
+            },
+            {
+                command: "open",
+                redirect: 8,
+                new_room: true
+            }
+        ]
+    },
     event81:
     {
         description: function()
@@ -1658,6 +1727,24 @@ export const events =
         redirect: 324,
         new_room: false
     },
+    event98:
+    {
+        description: function()
+        {
+            system.addCondition("goblin_follower");
+            return "The [e]Goblins[/e] realised they will have more than one opponent. They proceed to run away. The only one left is the [e]Goblin Chieftain[/e]. The [e]Goblin[/e] fighting on your side has the Agility of 3 and he will add it to your stats during this battle. Unfortunately, he won't take any damage for you.";
+        },
+        redirect: 250,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Goblin Chieftain",
+                agility: 9,
+                constitution: 8
+            }
+        ]
+    },
     event99:
     {
         description: function()
@@ -1810,13 +1897,13 @@ export const events =
                         if(player.hasItem("Jar of Corrosive Dust") && !player.hasItem("Jar of All-Eaters"))
                         {
                             game_vars.setFlag("24_using_dust", true);
-                            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+                            game_vars.setFlag("24_success", system.rollD6(1) < 4);
                             player.removeItem("Jar of Corrosive Dust");
                         }
                         else if(player.hasItem("Jar of All-Eaters") && !player.hasItem("Jar of Corrosive Dust"))
                         {
                             game_vars.setFlag("24_using_dust", false);
-                            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+                            game_vars.setFlag("24_success", system.rollD6(1) < 4);
                             player.removeItem("Jar of All-Eaters");
                         }
                     },
@@ -2347,6 +2434,17 @@ export const events =
             }
         ]
     },
+    event143:
+    {
+        description: "From a dark corner of the chamber, a barrage of blue arrows flies towards you...",
+        redirect: 315,
+        new_room: false,
+        on_exit: function()
+        {
+            game_vars.setCounter("315_redirect", 52);
+            game_vars.setFlag("315_new_room", false);
+        }
+    },
     event144:
     {
         description: function()
@@ -2604,6 +2702,12 @@ export const events =
         redirect: 10,
         new_room: false
     },
+    event161:
+    {
+        description: "You go back down the pavement, all the way to the intersection.",
+        redirect: 348,
+        new_room: true
+    },
     event162:
     {
         description: function()
@@ -2858,6 +2962,17 @@ export const events =
     {
         description: "After some time, the corridor turns [c]west[/c].",
         west: 134
+    },
+    event174:
+    {
+        description: "Everywhere you step, the ground burns your feet!",
+        redirect: 315,
+        new_room: false,
+        on_exit: function()
+        {
+            game_vars.setCounter("315_redirect", 210);
+            game_vars.setFlag("315_new_room", true);
+        }
     },
     event177:
     {
@@ -3415,6 +3530,11 @@ export const events =
         description: "A long corridor leads north, then turns west with a deep arc only to abruptly change back to [c]north[/c]. It ends at a small opening, through which you can see red light.",
         north: 207
     },
+    event210:
+    {
+        description: "The only way to leave t his chamber is the [c]north[/c]ern door.",
+        north: 248
+    },
     event212:
     {
         description: "You reach a large square, where the paths lead in four directions. Which one do you choose?",
@@ -3943,6 +4063,18 @@ export const events =
         redirect: 7,
         new_room: false
     },
+    event250:
+    {
+        description: "The [e]Goblins[/e] that ran away haven't actually given up yet. They are now attacking you, and only you, as your friend, barely breathing, is resting by the wall. They don't initiate combat, but rather try to get you with their elaborate traps.",
+        yes_no_choice:
+        {
+            question: "Will you face them on their own terms?",
+            no: 210,
+            no_new_room: true,
+            yes: 143,
+            yes_new_room: false
+        }
+    },
     event251:
     {
         description: "You leave the way you came in.",
@@ -4200,6 +4332,39 @@ export const events =
             ]
         },
     },
+    event274:
+    {
+        description: function()
+        {
+            let desc = "You suddenly feel waves in the air. You begin to lose your balance. The wind blows you away like a leaf.<br /><br />";
+
+            if(game_vars.getFlag("274_luck_check"))
+            {
+                desc += "Luck check successful!<br />You fly straight to the exit.";
+            }
+            else
+            {
+                desc += "Luck check failed!<br />You bounce around the room a few times...";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("274_luck_check"))
+            {
+                return 210;
+            }
+            else
+            {
+                return 174;
+            }
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("274_luck_check");
+        }
+    },
     event275:
     {
         description: "You run out of this chamber through the [c]east[/c]ern door.",
@@ -4278,6 +4443,12 @@ export const events =
         },
         redirect: 109,
         new_room: false
+    },
+    event279:
+    {
+        description: "The corridor leads east. You approach an intersection. You may turn [c]north[/c] or continue [c]east[/c].",
+        north: 191,
+        east: 47
     },
     event280:
     {
@@ -4401,7 +4572,7 @@ export const events =
         description: function()
         {
             const result = system.rollD6(1);
-            if(result <= 3)
+            if(result < 4)
             {
                 game_vars.setFlag("24_using_dust", true);
                 player.removeItem("Jar of Corrosive Dust");
@@ -4418,7 +4589,7 @@ export const events =
         new_room: false,
         on_exit: function()
         {
-            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+            game_vars.setFlag("24_success", system.rollD6(1) < 4);
         }
     },
     event293:
@@ -4795,6 +4966,31 @@ export const events =
             }
         },
         new_room: false
+    },
+    event315:
+    {
+        description: function()
+        {
+            const result = system.rollD6(1);
+            if(result < 4)
+            {
+                return "You got lucky and avoided the damage!";
+            }
+            else
+            {
+                player.modifyConstitution(-3);
+                player.modifyAgility(-1);
+                return "You've been hit! You lose 3 Constitution and 1 Agility.";
+            }
+        },
+        redirect: function()
+        {
+            return game_vars.getCounter("315_redirect");
+        },
+        new_room: function()
+        {
+            return game_vars.getFlag("315_new_room");
+        }
     },
     event317:
     {

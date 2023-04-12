@@ -348,6 +348,32 @@ export const events =
             return loc;
         }
     },
+    event24:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("24_success"))
+            {
+                return "Your weapon turns out to be effective against the [e]Worms[/e]!";
+            }
+            else
+            {
+                return "No can do - your weapon seems completely ineffective!";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("24_success"))
+            {
+                return 58;
+            }
+            else
+            {
+                return 168;
+            }
+        },
+        new_room: false
+    },
     event25:
     {
         description: "There is an elderly man sitting on a stone. He recommends you go to the [c]west[/c], and then turn right on the next few intersections.",
@@ -924,6 +950,28 @@ export const events =
             {
                 return undefined;
             }
+        }
+    },
+    event58:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("24_using_dust"))
+            {
+                return "You throw the jar into the swarm of [e]Worms[/e]. The dust quickly spreads around and one by one, the monsters stop moving, poisoned by the corrosive fumes.";
+            }
+            else
+            {
+                return "You throw the jar into the swarm of [e]Worms[/e]. A fierce battle begins, with the winners quickly becoming apparent. The All-Eaters get buried in the mountain of worm corpses they left behind.";
+            }
+        },
+        yes_no_choice:
+        {
+            question: "Would you like to dive back into the sea of bodies and search the pool once again?",
+            no: 320,
+            no_new_room: true,
+            yes: 142,
+            yes_new_room: false
         }
     },
     event59:
@@ -1762,10 +1810,14 @@ export const events =
                         if(player.hasItem("Jar of Corrosive Dust") && !player.hasItem("Jar of All-Eaters"))
                         {
                             game_vars.setFlag("24_using_dust", true);
+                            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+                            player.removeItem("Jar of Corrosive Dust");
                         }
                         else if(player.hasItem("Jar of All-Eaters") && !player.hasItem("Jar of Corrosive Dust"))
                         {
                             game_vars.setFlag("24_using_dust", false);
+                            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+                            player.removeItem("Jar of All-Eaters");
                         }
                     },
                 };
@@ -2278,6 +2330,23 @@ export const events =
         north: 357,
         eat: true
     },
+    event142:
+    {
+        description: "You reach the bottom of the pool. The sand has been spread al around. You squeeze between the meaty noodles. At some point you notice a tiny gold item - [i]Key#93[/i]. The number [k]93[/k] is visible on a small tag attached to the key. After taking it, it's time to [l]leave[/l].",
+        items:
+        [
+            "Key#93"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 320,
+                new_room: true
+            }
+        ]
+    },
     event144:
     {
         description: function()
@@ -2696,6 +2765,19 @@ export const events =
             }
         },
         new_room: true
+    },
+    event168:
+    {
+        description: "You can still [l]attack[/l] them with your sword. But if you don't want to fight, you'll have to [c]escape[/c].",
+        escape_redirect: 320,
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 213,
+                new_room: false
+            }
+        ]
     },
     event169:
     {
@@ -3340,6 +3422,20 @@ export const events =
         south: 336,
         east: 82,
         west: 287
+    },
+    event213:
+    {
+        description: "You will fight all the [e]Worms[/e] at once - it'd be impossible to count them anyway.",
+        redirect: 320,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Worms",
+                agility: 7,
+                constitution: 8
+            }
+        ]
     },
     event214:
     {
@@ -4300,6 +4396,31 @@ export const events =
         redirect: 330,
         new_room: false
     },
+    event292:
+    {
+        description: function()
+        {
+            const result = system.rollD6(1);
+            if(result <= 3)
+            {
+                game_vars.setFlag("24_using_dust", true);
+                player.removeItem("Jar of Corrosive Dust");
+                return "You decide to use corrosive dust.";
+            }
+            else
+            {
+                game_vars.setFlag("24_using_dust", false);
+                player.removeItem("Jar of All-Eaters");
+                return "You decide to use All-Eaters.";
+            }
+        },
+        redirect: 24,
+        new_room: false,
+        on_exit: function()
+        {
+            game_vars.setFlag("24_success", system.rollD6(1) <= 3);
+        }
+    },
     event293:
     {
         description: "You can barely squeeze through scattered rock fragments. The corridor takes a turn. At the curve, there is a small stone bench. You can rest here and [c]eat[/c]. Then, get up and go east. After some time, the tunnel changes directions and goes north. You reach the end of the corridor. There is a small opening in the rocks. You will have to [l]squeeze[/l] through it.",
@@ -4530,7 +4651,7 @@ export const events =
                         callback: function()
                         {
                             system.stopCombat();
-                            system.message("Your sword proves to be ineffective against the [e]Werewolf[/e]. You may either [c]escape[/c] or [l]search[/l] for another weapon.")
+                            system.message("Your sword proves to be ineffective against the [e]Werewolf[/e]. You may either [c]escape[/c] or [l]search[/l] for another weapon.");
                         }
                     }
                 ]
@@ -4736,6 +4857,11 @@ export const events =
             yes: 69,
             yes_new_room: true
         }
+    },
+    event320:
+    {
+        description: "You leave the chamber through the door in the [c]north[/c]ern wall.",
+        north: 137
     },
     event321:
     {

@@ -274,6 +274,56 @@ export const events =
             }
         ]
     },
+    event18:
+    {
+        description: function()
+        {
+            let desc = "You enter a tiny cavern adjacent to the chamber. The three [e]Evils[/e] follow you. The old man stays in the previous room. Within a gap between the rocks, you can see a [e]Gremlin[/e] bound in chains. The poor thing can barely breathe. One [e]Evil[/e] grabs your arm and counts a distance of 10 steps from the [e]Gremlin[/e]. You receive six darts. The [e]Evil[/e] also has six. It points at the chained [e]Gremlin[/e]. This is your target!";
+
+            if(player.getGold() < 5)
+            {
+                desc += " Unfortunately, you don't have enough gold to bet in the game. You will have to refuse the challenge.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getGold() < 5)
+            {
+                return 286;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: false,
+        yes_no_choice: function()
+        {
+            if(player.getGold() < 5)
+            {
+                return undefined;
+            }
+            else
+            {
+                return {
+                    question: "Do you want to play?",
+                    no: 286,
+                    no_new_room: false,
+                    yes: 211,
+                    yes_new_room: false,
+                    on_yes: function()
+                    {
+                        game_vars.setCounter("211_evil_gold", 10);
+                        game_vars.setCounter("211_ante", 0);
+                        game_vars.setCounter("189_evils_left", 3);
+                        game_vars.setCounter("156_evils_defeated", 0);
+                    }
+                };
+            }
+        }
+    },
     event19:
     {
         description: function()
@@ -822,6 +872,12 @@ export const events =
             }
         ]
     },
+    event47:
+    {
+        description: "You barely take a dozen steps before the corridor turns right and then reaches a dead end. You may sit down and [c]eat[/c] a ration. Then, go back to the intersection and turn [c]north[/c].",
+        north: 191,
+        eat: true
+    },
     event48:
     {
         description: "You open up your backpack and reach for one of the urns to pour the gold over. In that instant, the gold spills everywhere, and the urns transform into two powerful, winged demons, which fly upwards and sit down on the rock protrusion. You may [l]attack[/l] them, or attempt to [l]collect[/l] the spilled gold.",
@@ -835,6 +891,23 @@ export const events =
             {
                 command: "collect",
                 redirect: 133,
+                new_room: false
+            }
+        ]
+    },
+    event49:
+    {
+        description: "You may take the [i]Tome[/i] with you. Then you can [l]leave[/l].",
+        items:
+        [
+            "Tome"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 286,
                 new_room: false
             }
         ]
@@ -1311,6 +1384,18 @@ export const events =
         description: "You may leave through the [c]east[/c] exit.",
         east: 39
     },
+    event71:
+    {
+        description: "You peek into the room. Turns out that while you were bravely facing the [e]Evils[/e], the old man ran away. But he left a mysterious tome behind. As you grab it, the quiet wailing of the chained [e]Gremlin[/e] reaches your ears.",
+        yes_no_choice:
+        {
+            question: "Do you want to free him?",
+            no: 49,
+            no_new_room: false,
+            yes: 258,
+            yes_new_room: false
+        }
+    },
     event72:
     {
         description: "You decide to finish off the [e]Demon[/e].",
@@ -1680,7 +1765,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                             system.enableRoomEscape(193);
                             system.message("If you don't think you can keep going, you may [c]escape[/c]. Otherwise, you [l]remain[/l] on the battlefield.");
                         }
@@ -1725,6 +1810,39 @@ export const events =
             return desc;
         },
         redirect: 324,
+        new_room: false
+    },
+    event97:
+    {
+        description: function()
+        {
+            let desc = "You enterr the small cavern adjacent to the chamber. ";
+            if(game_vars.getCounter("156_evils_defeated") >= 3)
+            {
+                desc += "You've already killed all the [e]Evils[/e] - there is no one left to play against.";
+            }
+            else
+            {
+                const evils_left = 3 - game_vars.getCounter("156_evils_defeated");
+                game_vars.setCounter("189_evils_left", evils_left);
+                desc += `You remember that when you first entered this room, you met 3 [e]Evils[/e]. Currently there are ${evils_left} left and each of them will start the game with a total of 10 gold (you wonder where they have all that gold from).`;
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("156_evils_defeated") >= 3)
+            {
+                return 286;
+            }
+            else
+            {
+                game_vars.setCounter("211_ante", 0);
+                game_vars.setCounter("211_evil_gold", 10);
+                return 211;
+            }
+        },
         new_room: false
     },
     event98:
@@ -2247,6 +2365,27 @@ export const events =
         description: "You leave the chamber using the [c]east[/c]ern door.",
         east: 325
     },
+    event122:
+    {
+        description: function()
+        {
+            player.modifyAgility(+2);
+            game_vars.setFlag("122_spell_learned", true);
+            let desc = "You lift up the [e]Gremlin[/e]'s head. He drinks everything. He quickly comes to and opens the tome. \"Why, this is a spellbook! It used to belong to the gremlin tribe. It was craftily stolen by the [e]White Troll[/e] (back when trolls used to be enslaved by gremlins). Ever since then, everyone looks down on us, because we can't remember any of the spells.\" [e]Gremlin[/e] opens up the tome on a random page and reads out:<br /><br />\"If you see a door that won't budge, say:\"";
+            desc += system.getFileContents("spell.txt");
+            desc += "As soon as the [e]Gremlin[/e] read out those words, he closed the tome and ran away. You didn't manage to write down the spell and now you're not allowed to do so. Take one more quick look and make sure you remember it exactly, then quickly take your [l]leave[/l]. You gain 2 Agility.";
+
+            return desc;
+        },
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 286,
+                new_room: false
+            }
+        ]
+    },
     event123:
     {
         description: "The corridor continues west, and then turns [c]south[/c]. There is an intersection ahead.",
@@ -2268,6 +2407,35 @@ export const events =
                 new_room: true
             }
         ]
+    },
+    event125:
+    {
+        description: function()
+        {
+            let desc = "";
+            if(game_vars.getFlag("125_door_open"))
+            {
+                desc += "The door is open. You've already visited this place.";
+            }
+            else
+            {
+                desc += "You carefully to open the door.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("125_door_open"))
+            {
+                return 261;
+            }
+            else
+            {
+                return 231;
+            }
+        },
+        new_room: true
     },
     event126:
     {
@@ -2392,6 +2560,19 @@ export const events =
         },
         redirect: 186,
         new_room: false
+    },
+    event137:
+    {
+        description: "An extremely short corridor - where you can [c]eat[/c] a ration - leads to a T-shaped intersection, but you can only turn east. Then, the corridor turns south and east again... Until you reach a door. You may [l]open[/l] it.",
+        eat: true,
+        locals:
+        [
+            {
+                command: "open",
+                redirect: 13,
+                new_room: true
+            }
+        ]
     },
     event139:
     {
@@ -2575,6 +2756,25 @@ export const events =
     {
         description: "You observe the walls, move the lighter stones - nothing! All you can do now is go back [c]west[/c].",
         west: 212
+    },
+    event156:
+    {
+        description: function()
+        {
+            return `You managed to defeat ${game_vars.getCounter("156_evils_defeated")} [e]Evils[/e].`;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("156_evils_defeated") >= 2)
+            {
+                return 350;
+            }
+            else
+            {
+                return 286;
+            }
+        },
+        new_room: false
     },
     event157:
     {
@@ -3144,6 +3344,36 @@ export const events =
         description: "The corridor turns [c]south[/c].",
         south: 221
     },
+    event189:
+    {
+        description: function()
+        {
+            let desc = "";
+            let evils_left = game_vars.getCounter("189_evils_left");
+            if(evils_left < 1)
+            {
+                desc += "There are no [e]Evils[/e] left.";
+            }
+            else
+            {
+                desc += `There are ${evils_left} [e]Evils[/e] left in the room.`;
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("189_evils_left") < 1)
+            {
+                return 156;
+            }
+            else
+            {
+                return 303;
+            }
+        },
+        new_room: false
+    },
     event190:
     {
         description: "You may choose a [o]thin[/o], [o]stone[/o] or [o]short[/o] sword.",
@@ -3205,6 +3435,12 @@ export const events =
                 }
             ]
         },
+    },
+    event191:
+    {
+        description: "You march for a while, when suddenly you hear a hellish sound. Heavy metal bars fall down right behind you, cutting out your return route. A shiver runs down your back, but you keep going.",
+        redirect: 386,
+        new_room: true
     },
     event192:
     {
@@ -3532,8 +3768,142 @@ export const events =
     },
     event210:
     {
-        description: "The only way to leave t his chamber is the [c]north[/c]ern door.",
+        description: "The only way to leave to his chamber is the [c]north[/c]ern door.",
         north: 248
+    },
+    event211:
+    {
+        description: function()
+        {
+            let desc = "";
+            let ante = game_vars.getCounter("211_ante");
+            if(ante != 0)
+            {
+                let player_score = system.rollD6(1);
+                let evil_score = system.rollD6(1);
+                desc += `You scored ${player_score} hits and [e]Evil[/e] scored ${evil_score}.<br />`;
+
+                if(player_score > evil_score)
+                {
+                    player.modifyGold(+ante);
+                    game_vars.incrementCounter("211_evil_gold", -ante);
+                    desc += `You won ${ante} gold.`;
+
+                    if(game_vars.getCounter("211_evil_gold") < 1)
+                    {
+                        desc += "<br /><br />[e]Evil[/e] has no more gold, so it decides to end the game.";
+                    }
+
+                }
+                else if(player_score < evil_score)
+                {
+                    player.modifyGold(-ante);
+                    game_vars.incrementCounter("211_evil_gold", +ante);
+                    desc += `You lost ${ante} gold.`;
+                }
+                else
+                {
+                    desc += "Since it's a draw, no one wins the gold.";
+                }
+            }
+            else
+            {
+                let max_ante = 5;
+                if(max_ante > game_vars.getCounter("211_evil_gold"))
+                {
+                    max_ante = game_vars.getCounter("211_evil_gold");
+                }
+                if(max_ante > player.getGold())
+                {
+                    max_ante = player.getGold();
+                }
+
+                desc += `[e]Evil[/e] reaches out with its hand. You can see it currently has ${game_vars.getCounter("211_evil_gold")} gold. You can bet anywhere between 1 and ${max_ante} gold.`;
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("211_evil_gold") < 1)
+            {
+                game_vars.incrementCounter("189_evils_left", -1);
+                game_vars.incrementCounter("156_evils_defeated", +1);
+                return 189;
+            }
+            else if(player.getGold() < 1)
+            {
+                return 367;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        yes_no_choice: function()
+        {
+            if(game_vars.getCounter("211_ante") == 0 || game_vars.getCounter("211_evil_gold") < 1 || player.getGold() < 1)
+            {
+                return undefined;
+            }
+
+            return {
+                question: "Would you like to play again?",
+                no: 189,
+                no_new_room: false,
+                on_no: function()
+                {
+                    game_vars.incrementCounter("189_evils_left", -1);
+                },
+                yes: 211,
+                yes_new_room: false,
+                on_yes: function()
+                {
+                    game_vars.setCounter("211_ante", 0);
+                },
+            };
+        },
+        choice: function()
+        {
+            if(game_vars.getCounter("211_ante") != 0 || game_vars.getCounter("211_evil_gold") < 1 || player.getGold() < 1)
+            {
+                return undefined;
+            }
+
+            let max_ante = 5;
+            if(max_ante > game_vars.getCounter("211_evil_gold"))
+            {
+                max_ante = game_vars.getCounter("211_evil_gold");
+            }
+            if(max_ante > player.getGold())
+            {
+                max_ante = player.getGold();
+            }
+
+            let setAnteCallback = function(ante)
+            {
+                return function()
+                {
+                    game_vars.setCounter("211_ante", ante);
+                };
+            };
+
+            let opt = [];
+            for(let i = 1; i <= max_ante; ++i)
+            {
+                opt.push_back({
+                    answer: i,
+                    redirect: 211,
+                    new_room: false,
+                    on_option: setAnteCallback(i)
+                });
+            }
+
+            return {
+                question: "How much will you bet?",
+                options: opt
+            };
+        }
     },
     event212:
     {
@@ -3561,7 +3931,7 @@ export const events =
     {
         description: function()
         {
-            game_vars.incrementCounter("lake_crossed", 1);
+            game_vars.incrementCounter("lake_crossed", +1);
             return "You reach the shore.";
         },
         redirect: function()
@@ -3825,7 +4195,27 @@ export const events =
                 return 383;
             }
         },
-        new_room: false 
+        new_room: false
+    },
+    event231:
+    {
+        description: function()
+        {
+            game_vars.setFlag("125_door_open", true);
+            return "You enter quietly. Oil lamps light up the room. All the walls from top to bottom have bundles of various herbs hanging from them. There is a strange, sickly odour in the air. Only now your eyes focus on a few silhouettes sitting in the other corner of the room. They are sitting on a gigantic skin spread on the ground. You approach them slowly. An old humanoid with long hair resting upon his shoulders appears to be the most important figure in the room. The other three are monsters, commonly referred to as [e]Evils[/e]. Wrinkly, sallow skin and bulging, intimidating eyes. They are wearing short coats made out of smoked, fleshy Menalois leaves. The coats are strapped with flexible tree roots, occasionally found piercing through the dungeon roof. Tied up with the roots by their tails, the green [e]Lizards[/e] who live in the underground lake can be seen hanging upside down. [e]Evils[/e] probably have just visited the lake and now they're preparing their meal. You see a happy spark in their round eyes. Are they inviting you to eat with them? No, they consider you a partner. The [e]Evils[/e]' biggest weakness is a game. Not cards, not marbles, and not mice catching. They love darts. Without making a sound, they get up and politely point you towards the southern exit. It leads to the next room.";
+        },
+        yes_no_choice:
+        {
+            question: "Will you accompany them?",
+            no: 286,
+            no_new_room: false,
+            yes: 18,
+            yes_new_room: true,
+            on_yes: function()
+            {
+                game_vars.setFlag("313_played_darts", true);
+            }
+        }
     },
     event232:
     {
@@ -3916,6 +4306,12 @@ export const events =
     {
         description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
         redirect: 4,
+        new_room: false
+    },
+    event239:
+    {
+        description: "After only a dozen steps, the pavement turns left, then after another dozen you see a door ahead. You push your ear to it.",
+        redirect: 125,
         new_room: false
     },
     event240:
@@ -4098,10 +4494,52 @@ export const events =
         redirect: 318,
         new_room: false
     },
+    event258:
+    {
+        description: "You break the chains binding him to the rock with you sword. The poor thing can barely stand. You lead him into the room and lay down on top of the skin on the floor. You can finall open the tome. You can't make out even a single word. This book is written in the Gremlin language. You pull the unconscious creature's arm. He can't even lift his head. He whispers \"Water, water...\"",
+        redirect: function()
+        {
+            if(player.hasItem("Filled Flask"))
+            {
+                return 122;
+            }
+            else
+            {
+                return 337;
+            }
+        },
+        new_room: false
+    },
     event259:
     {
         description: "You go back down the corridor, until you reach the pranksters' chamber. You open the door confidently. No one is there. You promptly reach the other door and come out to another corridor, continuing [c]south[/c].",
         south: 50
+    },
+    event261:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("261_looking_for_water") && player.hasItem("Filled Flask"))
+            {
+                return "This is the chamber where you left the [e]Gremlin[/e] as you left to look for water.";
+            }
+            else
+            {
+                return "This is the chamber where [e]Evils[/e] dwell.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("261_looking_for_water") && player.hasItem("Filled Flask"))
+            {
+                return 122;
+            }
+            else
+            {
+                return 313;
+            }
+        },
+        new_room: false
     },
     event262:
     {
@@ -4392,7 +4830,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                         }
                     }
                 ]
@@ -4416,7 +4854,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                             system.enableRoomEscape(193);
                             system.message("If you don't think you can keep going, you may [c]escape[/c]. Otherwise, you [l]remain[/l] on the battlefield.");
                         }
@@ -4516,6 +4954,16 @@ export const events =
             return desc;
         },
         east: 50
+    },
+    event286:
+    {
+        description: function()
+        {
+            game_vars.setFlag("286_room_exited", true);
+            return "You leave the [e]Evils[/e]' nest. There are exits on the [c]west[/c] and [c]east[/c].";
+        },
+        east: 148,
+        west: 206
     },
     event287:
     {
@@ -4731,6 +5179,23 @@ export const events =
             }
         ]
     },
+    event303:
+    {
+        description: "You can continue the game with the next opponent.",
+        yes_no_choice:
+        {
+            question: "Do you want to play again?",
+            no: 286,
+            no_new_room: false,
+            yes: 211,
+            yes_new_room: false,
+            on_yes: function()
+            {
+                game_vars.setCounter("211_evil_gold", 10);
+                game_vars.setCounter("211_ante", 0);
+            },
+        }
+    },
     event305:
     {
         description: "This chamber hides something extremely valuable. You will have to put a lot of effort in looking for it, but you'll also need luck. If you think your Luck stat is high, you could perform a luck check in hopes of finding it. Otherwise, you might be better off just searching everywhere, hoping to get lucky the old-fashioned way.",
@@ -4880,7 +5345,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                         }
                     }
                 ]
@@ -4904,7 +5369,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                         }
                     }
                 ]
@@ -4928,13 +5393,39 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            game_vars.incrementCounter("193_enemies_defeated", 1);
+                            game_vars.incrementCounter("193_enemies_defeated", +1);
                         }
                     }
                 ]
             }
         ],
         redirect: 193,
+        new_room: false
+    },
+    event313:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("313_played_darts"))
+            {
+                return "You enter the darts room to challenge the [e]Evils[/e] once again.";
+            }
+            else
+            {
+                return "You've changed your mind, and decided to give the [e]Evil[/e]'s challenge a go.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("313_played_darts"))
+            {
+                return 97;
+            }
+            else
+            {
+                return 18;
+            }
+        },
         new_room: false
     },
     event314:
@@ -5458,6 +5949,16 @@ export const events =
             }
         }
     },
+    event337:
+    {
+        description: function()
+        {
+            game_vars.setFlag("261_looking_for_water", true);
+            return "You will have to go look for some water if you want him to help you.";
+        },
+        redirect: 286,
+        new_room: false
+    },
     event338:
     {
         description: "The [e]Gnome[/e] offers 30 gold and his toy dragon.",
@@ -5551,6 +6052,33 @@ export const events =
             yes: 48,
             yes_new_room: false
         }
+    },
+    event350:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("286_room_exited"))
+            {
+                return "There's nothing left for you to do here.";
+            }
+            else
+            {
+                player.modifyLuck(+2);
+                return "You gain 2 Luck as a reward.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("286_room_exited"))
+            {
+                return 286;
+            }
+            else
+            {
+                return 71;
+            }
+        },
+        new_room: true
     },
     event351:
     {
@@ -5749,6 +6277,31 @@ export const events =
             yes: 131,
             yes_new_room: false
         }
+    },
+    event367:
+    {
+        description: "The [e]Evil[/e] is taken over in a joyous frenzy at winning all of your money. You launch an assault.",
+        redirect: 189,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Evil",
+                agility: 6,
+                constitution: 6,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.CombatEnd,
+                        callback: function()
+                        {
+                            game_vars.incrementCounter("189_evils_left", -1);
+                            game_vars.incrementCounter("156_evils_defeated", +1);
+                        }
+                    }
+                ]
+            }
+        ]
     },
     event368:
     {
@@ -5988,5 +6541,11 @@ export const events =
             return 242;
         },
         west: 194
+    },
+    event386:
+    {
+        description: "You approach an intersection. You may go [c]west[/c] or [c]east[/c].",
+        east: 273,
+        west: 345
     }
 };

@@ -7,6 +7,7 @@
 
 #include "choice.h"
 #include "enemy.h"
+#include "quiz.h"
 #include "Enums/direction.h"
 
 class Event
@@ -28,6 +29,7 @@ class Event
     bool _eating_enabled;
     QJSValue _eating_callback;
     Choice _choice;
+    Quiz _quiz;
     std::map<std::string, UserOption> _local_commands;
     QJSValue _exit_callback;
 
@@ -58,6 +60,11 @@ public:
     std::string getChoiceQuestion() const;
     std::vector<std::string> getChoiceOptions() const;
     UserOption getChoiceOption(const std::string& option) const;
+    bool hasQuiz() const;
+    std::string getQuizQuestion() const;
+    std::vector<std::string> getQuizAnswers() const;
+    UserOption getQuizCorrectOption() const;
+    UserOption getQuizIncorrectOption() const;
     bool hasLocalCommands() const;
     std::vector<std::string> getLocalCommands() const;
     UserOption getLocalCommand(const std::string& command) const;
@@ -95,6 +102,13 @@ public:
     void setChoice(ChoiceType type, const std::string& question);
     void addChoiceOption(const std::string& answer, int redirect, bool new_room, QJSValue callback);
     void triggerChoiceOptionCallback(const std::string& option);
+
+    void setQuizQuestion(const std::string& question);
+    void addQuizAnswer(const std::string& answer);
+    void setQuizCorrectOption(int redirect, bool new_room, QJSValue callback);
+    void setQuizIncorrectOption(int redirect, bool new_room, QJSValue callback);
+    void triggerQuizCorrectCallback();
+    void triggerQuizIncorrectCallback();
 
     void addLocalCommand(const std::string& command, int redirect, bool new_room, QJSValue callback);
     void triggerLocalCommandCallback(const std::string& command);

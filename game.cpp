@@ -617,6 +617,12 @@ std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<
     return {valid, answer};
 }
 
+bool Game::resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input)
+{
+    std::string answer = utils::toLower(user_input);
+    return std::find(std::begin(answers), std::end(answers), answer) != std::end(answers);;
+}
+
 InputMode Game::updateCurrentEvent(int id, bool new_room)
 {
     _current_event.triggerExitCallback();
@@ -662,6 +668,12 @@ InputMode Game::updateRoomExit(InputMode default_mode)
         _console.writeText(_current_event.getChoiceQuestion());
         mode = InputMode::MULTI_CHOICE;
     }
+    else if(_current_event.hasQuiz())
+    {
+        _console.writeLine();
+        _console.writeText(_current_event.getQuizQuestion());
+        mode = InputMode::QUIZ;
+    }
 
     return mode;
 }
@@ -704,7 +716,7 @@ void Game::checkForEnemyDeath()
             std::string msg = utils::createString("You have defeated [e]",
                                                   _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
-            resolveCombatEndTriggers();
+            resolveCombatEndTriggers(false);
             _current_event.defeatCurrentEnemy();
 
             if(!_current_event.hasEnemies())
@@ -773,7 +785,7 @@ bool Game::performGameChecks()
     return false;
 }
 
-void Game::resolveCombatEndTriggers()
+void Game::resolveCombatEndTriggers(bool escape)
 {
     for(const auto& condition: _player->getConditions())
     {
@@ -783,11 +795,14 @@ void Game::resolveCombatEndTriggers()
         }
     }
 
-    for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
+    if(!escape)
     {
-        if(callback.isValid() && callback.getTiming() == CallbackTiming::COMBAT_END)
+        for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
         {
-            callback();
+            if(callback.isValid() && callback.getTiming() == CallbackTiming::COMBAT_END)
+            {
+                callback();
+            }
         }
     }
 }
@@ -798,7 +813,8 @@ void Game::resolveRoundActionTriggers(int round)
     {
         if(callback.isValid()
         && callback.getTiming() == CallbackTiming::ROUND_ACTION
-        && callback.getRound() == round)
+        && (callback.getRound() == round
+                || callback.getRound() == 0))
         {
             callback();
         }
@@ -811,7 +827,8 @@ void Game::resolveRoundEndTriggers(int round)
     {
         if(callback.isValid()
         && callback.getTiming() == CallbackTiming::ROUND_END
-        && callback.getRound() == round)
+        && (callback.getRound() == round
+                || callback.getRound() == 0))
         {
             callback();
         }
@@ -1086,6 +1103,7 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
         {
             _current_event.setRedirect(_current_event.getCurrentEnemy().getEscapeRedirect());
             resolveDamage(false, damage);
+            resolveCombatEndTriggers(true);
             _current_event.defeatAllEnemies();
             _combat_state.combat_in_progress = false;
         }
@@ -1254,6 +1272,34 @@ InputMode Game::resolveMultiChoice(const std::string& user_input)
         {
             mode = InputMode::KEY_DEATH;
         }
+    }
+
+    return mode;
+}
+
+InputMode Game::resolveQuiz(const std::string& user_input)
+{
+    InputMode mode = InputMode::QUIZ;
+    UserOption option;
+
+    if(resolveQuizQuestion(_current_event.getQuizAnswers(), user_input))
+    {
+        _current_event.triggerQuizCorrectCallback();
+        option = _current_event.getQuizCorrectOption();
+    }
+    else
+    {
+        _current_event.triggerQuizIncorrectCallback();
+        option = _current_event.getQuizIncorrectOption();
+    }
+
+    if(option.redirect != 0)
+    {
+        mode = updateCurrentEvent(option.redirect, option.new_room);
+    }
+    if(performGameChecks())
+    {
+        mode = InputMode::KEY_DEATH;
     }
 
     return mode;

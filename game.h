@@ -73,6 +73,7 @@ class Game: public QObject
     std::pair<bool, bool> resolveYesNoQuestion(const std::string& user_input);
     std::pair<bool, std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
                                                             const std::string& user_input);
+    bool resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input);
     InputMode updateCurrentEvent(int id, bool new_room);
     InputMode updateRoomExit(InputMode default_mode);
     void saveGame();
@@ -83,7 +84,7 @@ class Game: public QObject
     bool performGameChecks();   // true if player died
 
     // Resolve triggers
-    void resolveCombatEndTriggers();
+    void resolveCombatEndTriggers(bool escape);
     void resolveRoundActionTriggers(int round);
     void resolveRoundEndTriggers(int round);
 
@@ -103,6 +104,7 @@ public:
     InputMode resolveGameStartInput();
     InputMode resolveLoadInput(const std::string& user_input);
     InputMode resolveMultiChoice(const std::string& user_input);
+    InputMode resolveQuiz(const std::string& user_input);
     InputMode resolveRedirectInput();
     InputMode resolveSaveDelInput(const std::string& user_input);
     InputMode resolveSaveInput(const std::string& user_input);

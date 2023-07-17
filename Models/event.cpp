@@ -22,6 +22,7 @@ Event::Event(int id):
     _eating_enabled(false),
     _eating_callback(false),
     _choice(),
+    _quiz(),
     _local_commands{},
     _exit_callback(false)
 {
@@ -167,6 +168,31 @@ std::vector<std::string> Event::getChoiceOptions() const
 UserOption Event::getChoiceOption(const std::string& option) const
 {
     return _choice.options.at(option);
+}
+
+bool Event::hasQuiz() const
+{
+    return !_quiz.answers.empty();
+}
+
+std::string Event::getQuizQuestion() const
+{
+    return _quiz.question;
+}
+
+std::vector<std::string> Event::getQuizAnswers() const
+{
+    return _quiz.answers;
+}
+
+UserOption Event::getQuizCorrectOption() const
+{
+    return _quiz.correct;
+}
+
+UserOption Event::getQuizIncorrectOption() const
+{
+    return _quiz.incorrect;
 }
 
 bool Event::hasLocalCommands() const
@@ -317,6 +343,42 @@ void Event::triggerChoiceOptionCallback(const std::string& option)
     if(getChoiceOption(option).callback.isCallable())
     {
         getChoiceOption(option).callback.call();
+    }
+}
+
+void Event::setQuizQuestion(const std::string& question)
+{
+    _quiz.question = question;
+}
+
+void Event::addQuizAnswer(const std::string& answer)
+{
+    _quiz.answers.push_back(answer);
+}
+
+void Event::setQuizCorrectOption(int redirect, bool new_room, QJSValue callback)
+{
+    _quiz.correct = {redirect, new_room, callback};
+}
+
+void Event::setQuizIncorrectOption(int redirect, bool new_room, QJSValue callback)
+{
+    _quiz.incorrect = {redirect, new_room, callback};
+}
+
+void Event::triggerQuizCorrectCallback()
+{
+    if(getQuizCorrectOption().callback.isCallable())
+    {
+        getQuizCorrectOption().callback.call();
+    }
+}
+
+void Event::triggerQuizIncorrectCallback()
+{
+    if(getQuizIncorrectOption().callback.isCallable())
+    {
+        getQuizIncorrectOption().callback.call();
     }
 }
 

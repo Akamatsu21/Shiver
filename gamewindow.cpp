@@ -90,6 +90,7 @@ void GameWindow::updateInputState()
     case InputMode::GAME:
     case InputMode::YES_NO_CHOICE:
     case InputMode::MULTI_CHOICE:
+    case InputMode::QUIZ:
     case InputMode::ESCAPE_CHECK:
     case InputMode::SAVE_CONFIRMATION:
     case InputMode::LOAD_CONFIRMATION:
@@ -128,6 +129,9 @@ void GameWindow::onUserInputReceived(const QString& user_input)
         break;
     case InputMode::MULTI_CHOICE:
         _input_mode = _game->resolveMultiChoice(user_input.toStdString());
+        break;
+    case InputMode::QUIZ:
+        _input_mode = _game->resolveQuiz(user_input.toStdString());
         break;
     case InputMode::ESCAPE_CHECK:
         _input_mode = _game->resolveEscapeInput(user_input.toStdString());

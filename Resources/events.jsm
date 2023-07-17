@@ -29,6 +29,32 @@ export const events =
         redirect: 25,
         new_room: false
     },
+    event2:
+    {
+        description: function()
+        {
+            let desc = "Kick the door. It opens up and hits a rock. You enter with your sword ready to attack. The monster definitely won't be hiding. It's too sure of its own power. Yes, it stands right before you. It's spreading its legs wide. It has a sword as well. The sword's tip is lodged into sand. It wraps its hands around the handle. It's waiting. But you shouldn't wait.";
+
+            if(player.hasItem("Helmet"))
+            {
+                player.addCondition("helmet");
+                desc += " You put on your helmet. It will give you +3 Constitution until the end of this fight.";
+            }
+
+            return desc;
+        },
+        redirect: 380,
+        new_room: false,
+        enemies:
+        [
+            {
+                name: "Garazan",
+                agility: 10,
+                constitution: 10,
+                escape_redirect: 372
+            }
+        ]
+    },
     event3:
     {
         description: function()
@@ -254,6 +280,19 @@ export const events =
                 {
                     game_vars.setCounter("lake_return_point", 15);
                 }
+            }
+        ]
+    },
+    event16:
+    {
+        description: "You enter a corridor. After some time it turns south. You may [c]eat[/c] a ration here. You continue south until the tunnel turns west. About twenty steps ahead of you there is an entrance to a chamber. When you're ready, [l]enter[/l].",
+        eat: true,
+        locals:
+        [
+            {
+                command: "enter",
+                redirect: 80,
+                new_room: true
             }
         ]
     },
@@ -826,6 +865,47 @@ export const events =
         },
         new_room: true
     },
+    event42:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("42_incorrect_spell"))
+            {
+                player.modifyConstitution(-player.getConstitution());
+                return "You weren't able to recite the spell correctly. This is the end of your journey - continuing in this situation would not be acceptable for a true Adventurer.";
+            }
+
+            let desc = "They call him [e]Barbarian[/e]. And is he really? Who knows? While he's sitting on a bench with his legs up and his arms crossed, he doesn't look all that intimidating. He snores quietly. You hit the wall with your sword. \"What's up?\" he awakens. You enter the chamber and point to the door on the western end. \"Quickly, open this door\" you direct your sword towards him. \"You open them\" he laughs. \"The key is in the lock.\" Indeed. You walk up to the door. Afraid of a trap, you don't touch the key with your hand, and instead you try to twist it with the tip of your sword. Nothing. \"Nothing\" roars [e]Barbarian[/e]. \"Do you know the spell? If you don't, get the hell out of here!\" Do you remember a spell from an old gremlin tome? ";
+
+            if(game_vars.getFlag("122_spell_learned"))
+            {
+                desc += "You've seen the book - if you can't recall the spell, it's over for you. ";
+            }
+            else
+            {
+                desc += "You've never seen this book, so you'll have to guess... And if you don't, it's over for you. ";
+            }
+
+            desc += "You'll have to start over from the beginning.";
+            return desc;
+        },
+        quiz:
+        {
+            question: "What do you thing the answer is?",
+            answers:
+            [
+                "baroom baram baroten, may the gate stand open!"
+            ],
+            correct: 376,
+            correct_new_room: false,
+            incorrect: 42,
+            incorrect_new_room: false,
+            on_incorrect: function()
+            {
+                game_vars.setFlag("42_incorrect_spell", true);
+            }
+        }
+    },
     event44:
     {
         description: "You go east. You can see a bulky door in front of you. You try to open it, but it won't even budge. You may give up and go back [c]west[/c], or try to [l]break[/l] down the door.",
@@ -1130,6 +1210,19 @@ export const events =
                 game_vars.setCounter("262_offer", 20);
             }
         }
+    },
+    event61:
+    {
+        description: "You go through a corridor. On the way you may [c]eat[/c] a ration. After some time, the corridor branches out towards the north but you continue going west. A dozen steps after the branching, you see a door. You may [l]open[/l] it.",
+        eat: true,
+        locals:
+        [
+            {
+                command: "open",
+                redirect: 42,
+                new_room: true
+            }
+        ]
     },
     event62:
     {
@@ -1645,6 +1738,23 @@ export const events =
         redirect: 10,
         new_room: false
     },
+    event86:
+    {
+        description: "The battle continues. If you lose, this will be your tomb!",
+        redirect: 94,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Giant",
+                agility: 10,
+                constitution: function()
+                {
+                    return game_vars.getCounter("giant_constitution");
+                }
+            }
+        ]
+    },
     event87:
     {
         description: "Unfortunately, you can't find anything.",
@@ -1782,6 +1892,18 @@ export const events =
             }
         ]
     },
+    event93:
+    {
+        description: "You return to the [e]Evils[/e]' chamber.",
+        redirect: 313,
+        new_room: true
+    },
+    event94:
+    {
+        description: "You can't find any other exist, so you squeeze through the narrow opening that you came through.",
+        redirect: 129,
+        new_room: false
+    },
     event95:
     {
         description: function()
@@ -1812,11 +1934,32 @@ export const events =
         redirect: 324,
         new_room: false
     },
+    event96:
+    {
+        description: function()
+        {
+            player.modifyLuck(+2);
+            return "You find [i]Key#12[/i]. It has number [k]12[/k] engraved on it. You gain 2 Luck. You may now [l]leave[/l].";
+        },
+        items:
+        [
+            "Key#12"
+        ],
+        item_limit: 1,
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 253,
+                new_room: true
+            }
+        ]
+    },
     event97:
     {
         description: function()
         {
-            let desc = "You enterr the small cavern adjacent to the chamber. ";
+            let desc = "You enter the small cavern adjacent to the chamber. ";
             if(game_vars.getCounter("156_evils_defeated") >= 3)
             {
                 desc += "You've already killed all the [e]Evils[/e] - there is no one left to play against.";
@@ -1924,6 +2067,11 @@ export const events =
         south: 351,
         east: 374,
         west: 123
+    },
+    event103:
+    {
+        description: "You go back. You pass by an intersection. You turn [c]west[/c] and eventually approach another intersection.",
+        west: 345
     },
     event104:
     {
@@ -2331,6 +2479,12 @@ export const events =
         redirect: 280,
         new_room: true
     },
+    event118:
+    {
+        description: "You explore every corner, but you can't find anything of value.",
+        redirect: 372,
+        new_room: true
+    },
     event119:
     {
         description: "What was the beast trying to cover up so desperately? You touch the wall at the spot that the hairy [e]Ogre[/e] was pressing its back against. Suddenly, part of the wall moves. There is a secret stash here! Inside, there is a long [i]fireproof rope[/i] with a hook, an empty [i]decrepit flask[/i] and a [i]Werewolf's scalp[/i]. You may only take up to two of these items. You may also [l]loot[/l] the body or [l]leave[/l] the chamber.",
@@ -2369,6 +2523,7 @@ export const events =
     {
         description: function()
         {
+            player.removeItem("Filled Flask");
             player.modifyAgility(+2);
             game_vars.setFlag("122_spell_learned", true);
             let desc = "You lift up the [e]Gremlin[/e]'s head. He drinks everything. He quickly comes to and opens the tome. \"Why, this is a spellbook! It used to belong to the gremlin tribe. It was craftily stolen by the [e]White Troll[/e] (back when trolls used to be enslaved by gremlins). Ever since then, everyone looks down on us, because we can't remember any of the spells.\" [e]Gremlin[/e] opens up the tome on a random page and reads out:<br /><br />\"If you see a door that won't budge, say:\"";
@@ -2487,6 +2642,12 @@ export const events =
                 }
             }
         ]
+    },
+    event129:
+    {
+        description: "You can only go south from here. Suddenly, you realise you're out of breath. You collapse unconcious. When you come to, you're sitting at an intersection.",
+        redirect: 345,
+        new_room: true
     },
     event130:
     {
@@ -2697,10 +2858,22 @@ export const events =
                 player.addItem("Jar of Corrosive Dust");
             }
 
-            return "\"It was such a pleasure talking to you, good sir. Here, a wooden stake and a jar of corrosive dust, on the house.";
+            return "\"It was such a pleasure talking to you, good sir. Here, a wooden stake and a jar of corrosive dust, on the house.\"";
         },
         redirect: 196,
         new_room: false
+    },
+    event148:
+    {
+        description: "The corridor turns north and after some time, you reach a door.",
+        yes_no_choice:
+        {
+            question: "Do you want to open it?",
+            no: 93,
+            no_new_room: true,
+            yes: 80,
+            yes_new_room: true
+        }
     },
     event151:
     {
@@ -3027,6 +3200,59 @@ export const events =
             }
         ]
     },
+    event164:
+    {
+        description: function()
+        {
+            let desc = "The corridor leads to the west, then turns north and west again. After taking a dozen steps you see a staircase with a door at the end. The stairs lead down. You approach the door. ";
+
+            if(game_vars.getFlag("302_visited"))
+            {
+                desc += "You know this place. This is [e]Garazan[/e]'s cave.";
+            }
+            else
+            {
+                desc += "You could [l]open[/l] the door to see what hides behind, or you could just [l]leave[/l].";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("302_visited"))
+            {
+                return 290;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: true,
+        locals: function()
+        {
+            if(game_vars.getFlag("302_visited"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return [
+                    {
+                        command: "leave",
+                        redirect: 253,
+                        new_room: true
+                    },
+                    {
+                        command: "open",
+                        redirect: 302,
+                        new_room: true
+                    }
+                ];
+            }
+        }
+        
+    },
     event166:
     {
         description: function()
@@ -3173,6 +3399,12 @@ export const events =
             game_vars.setCounter("315_redirect", 210);
             game_vars.setFlag("315_new_room", true);
         }
+    },
+    event176:
+    {
+        description: "You approach an intersection. You may go [c]north[/c] or [c]east[/c].",
+        north: 27,
+        east: 230
     },
     event177:
     {
@@ -3673,11 +3905,22 @@ export const events =
         redirect: 81,
         new_room: false
     },
+    event203:
+    {
+        description: "You've been here already, give it up!",
+        redirect: 129,
+        new_room: false
+    },
     event205:
     {
         description: "You approach the altar. You take the stone container and open the lid with the tip of your sword. Inside lies a green gem. It's an emerald! You pick it up and inspect, with the help of the oil lamp's light. It's wonderful. But... You drop it and it shatters on the stone floor.",
         redirect: 254,
         new_room: false
+    },
+    event206:
+    {
+        description: "The corridor turns [c]north[/c].",
+        north: 348
     },
     event207:
     {
@@ -3996,6 +4239,12 @@ export const events =
         redirect: 26,
         new_room: false
     },
+    event218:
+    {
+        description: "You approach an intersection. You may go [c]west[/c] or [c]north[/c].",
+        north: 333,
+        west: 61
+    },
     event219:
     {
         description: "So: are you taking the wooden stake and a jar of corrosive dust? Maybe it's not a bad idea? Think about it.",
@@ -4308,6 +4557,103 @@ export const events =
         redirect: 4,
         new_room: false
     },
+    event238:
+    {
+        description: "You encounter a party of wandering monsters: [e]Gremlin[/e], [e]Lich[/e], [e]Brongo[/e], [e]Orcling[/e] and [e]Skinbones[/e]. You must fight them one by one.",
+        redirect: function()
+        {
+            return game_vars.getCounter("238_redirect");
+        },
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Gremlin",
+                agility: 5,
+                constitution: 3
+            },
+            {
+                name: "Lich",
+                agility: 6,
+                constitution: 5,
+                escape_redirect: function()
+                {
+                    return game_vars.getCounter("238_redirect");
+                },
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Brongo",
+                agility: 8,
+                constitution: 4,
+                escape_redirect: function()
+                {
+                    return game_vars.getCounter("238_redirect");
+                },
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Orcling",
+                agility: 6,
+                constitution: 4,
+                escape_redirect: function()
+                {
+                    return game_vars.getCounter("238_redirect");
+                },
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    }
+                ]
+            },
+            {
+                name: "Skinbones",
+                agility: 6,
+                constitution: 5,
+                escape_redirect: function()
+                {
+                    return game_vars.getCounter("238_redirect");
+                },
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 1,
+                        callback: function()
+                        {
+                            system.disableEnemyEscape();
+                        }
+                    }
+                ]
+            }
+        ]
+    },
     event239:
     {
         description: "After only a dozen steps, the pavement turns left, then after another dozen you see a door ahead. You push your ear to it.",
@@ -4367,6 +4713,18 @@ export const events =
             }
         },
         new_room: false
+    },
+    event243:
+    {
+        description: "You haven't explored this room before.",
+        yes_no_choice:
+        {
+            question: "Would you like to enter?",
+            no: 129,
+            no_new_room: false,
+            yes: 355,
+            yes_new_room: true
+        }
     },
     event244:
     {
@@ -4453,6 +4811,19 @@ export const events =
             return loc;
         }
     },
+    event248:
+    {
+        description: "You walk north, down the corridor. It turns to the left. You can sit down here and [c]eat[/c] a ration. After you're done, go west. The corridor turns north and eventually you reach an opening in the rocks. You may try to [l]squeeze[/l] through it.",
+        eat: true,
+        locals:
+        [
+            {
+                command: "squeeze",
+                redirect: 207,
+                new_room: true
+            }
+        ]
+    },
     event249:
     {
         description: "\"How about some magical remedy for treating wounds?\" you ask. \"I think I can get something like that. What do we have here? Ah, there it is. A wooden stake and a jar of corrosive dust.\"",
@@ -4475,6 +4846,12 @@ export const events =
     {
         description: "You leave the way you came in.",
         redirect: 39,
+        new_room: true
+    },
+    event253:
+    {
+        description: "You go back up the stairs, then walk through the corridor until you're back at the intersection.",
+        redirect: 267,
         new_room: true
     },
     event254:
@@ -4613,6 +4990,13 @@ export const events =
             yes: 83,
             yes_new_room: false
         }
+    },
+    event267:
+    {
+        description: "You approach an intersection. You may go [c]west[/c], [c]east[/c] or [c]south[/c].",
+        south: 345,
+        east: 164,
+        west: 333
     },
     event268:
     {
@@ -4769,6 +5153,23 @@ export const events =
                 }
             ]
         },
+    },
+    event273:
+    {
+        description: "The corridor runs straight, only to eventually stretch out into an extensive hall. You may sit down and [c]eat[/c] a ration. Suddenly, you hear footsteps. It must be monsters. Get ready to [l]attack[/l].",
+        eat: true,
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 238,
+                new_room: true,
+                on_command: function()
+                {
+                    game_vars.setCounter("238_redirect", 103);
+                }
+            }
+        ]
     },
     event274:
     {
@@ -5005,6 +5406,32 @@ export const events =
         redirect: 121,
         new_room: false
     },
+    event290:
+    {
+        description: function()
+        {
+            if(game_vars.getFlag("347_key_clue"))
+            {
+                return "You realise this is the door that [e]Giant[/e] told you about.";
+            }
+            else
+            {
+                return "You've already had your chance to beat [e]Garazan[/e]. There is nothing else for you to do here.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("347_key_clue"))
+            {
+                return 96;
+            }
+            else
+            {
+                return 253;
+            }
+        },
+        new_room: true
+    },
     event291:
     {
         description: function()
@@ -5179,6 +5606,22 @@ export const events =
             }
         ]
     },
+    event302:
+    {
+        description: function()
+        {
+            game_vars.setFlag("302_visited", true);
+            return "Have you ever seen a monster scarier than the [e]Garazan[/e]? Probably not, or at least not yet. It's no one else than [e]Garazan[/e] that lives in this cave. Grab your equipment, ready the sword. Forget about everything else. But maybe you don't want to do this?";
+        },
+        yes_no_choice:
+        {
+            question: "Will you fight [e]Garazan[/e]?",
+            no: 372,
+            no_new_room: false,
+            yes: 2,
+            yes_new_room: false
+        }
+    },
     event303:
     {
         description: "You can continue the game with the next opponent.",
@@ -5195,6 +5638,22 @@ export const events =
                 game_vars.setCounter("211_ante", 0);
             },
         }
+    },
+    event304:
+    {
+        description: "After some time, the tunnel turns south. A few more steps, and you notice a narrow passage in the eastern wall. It's probably the entrance to a cavern.",
+        redirect: function()
+        {
+            if(game_vars.getFlag("355_visited"))
+            {
+                return 203;
+            }
+            else
+            {
+                return 243;
+            }
+        },
+        new_room: true
     },
     event305:
     {
@@ -5798,6 +6257,14 @@ export const events =
             }
         ]
     },
+    event333:
+    {
+        description: "You approach an intersection. You may go in any of the four directions.",
+        north: 176,
+        south: 218,
+        east: 267,
+        west: 304
+    },
     event334:
     {
         description: function()
@@ -6020,6 +6487,12 @@ export const events =
         redirect: 288,
         new_room: true
     },
+    event345:
+    {
+        description: "You approach an intersection. You can go [c]west[/c] or [c]north[/c].",
+        north: 267,
+        west: 218
+    },
     event346:
     {
         description: function()
@@ -6029,6 +6502,16 @@ export const events =
             return "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. You have no choice other than to [c]escape[/c].";
         },
         escape_redirect: 275
+    },
+    event347:
+    {
+        description: function()
+        {
+            game_vars.setFlag("347_key_clue", true);
+            return "The monster walks through the narrow passage effectively widening it. It points south and advises you to turn left twice, then right once, and then... It can't remember anymore. It knows for sure that there is a chamber nearby that hides a key. It's hidden on a stone shelf above the door. Listening to the monster's advice, you turn left at the nearest intersection. But after thinking about a bit, you decide to not turn at the following one. You march forward.";
+        },
+        redirect: 345,
+        new_room: true
     },
     event348:
     {
@@ -6111,6 +6594,38 @@ export const events =
                 command: "search",
                 redirect: 256,
                 new_room: false
+            }
+        ]
+    },
+    event355:
+    {
+        description: function()
+        {
+            game_vars.setFlag("355_visited", true);
+            return "You barely manage to squeeze through the narrow opening. You stand up straight. Look up! In front of you there is a [e]Giant[/e]. Its head is touching the ceiling. Oh brother, there is no way out of this one. This will be a battle to the death.";
+        },
+        enemies:
+        [
+            {
+                name: "Giant",
+                agility: 10,
+                constitution: 12,
+                callbacks:
+                [
+                    {
+                        timing: CallbackTiming.RoundEnd,
+                        round: 0,
+                        callback: function()
+                        {
+                            if(system.getCurrentPlayerScore() > system.getCurrentEnemyScore())
+                            {
+                                game_vars.setFlag("379_giant_persuaded", system.rollD6(1) < 4);
+                                game_vars.setCounter("giant_constitution", system.getCurrentEnemyConstitution());
+                                redirect(379, false);
+                            }
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -6383,6 +6898,12 @@ export const events =
             }
         }
     },
+    event372:
+    {
+        description: "You leave the room through the only door here - the one you came through.",
+        redirect: 253,
+        new_room: false
+    },
     event374:
     {
         description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
@@ -6414,6 +6935,17 @@ export const events =
                 }
             ]
         }
+    },
+    event376:
+    {
+        description: function()
+        {
+            player.modifyAgility(+1);
+            player.modifyLuck(+2);
+            return "The door opens on its own. You gain 1 Agility and 2 Luck.";
+        },
+        redirect: 16,
+        new_room: true
     },
     event377:
     {
@@ -6483,6 +7015,56 @@ export const events =
                 command: "open",
                 redirect: 13,
                 new_room: true
+            }
+        ]
+    },
+    event379:
+    {
+        description: function()
+        {
+            let desc = "\"Death or information\" you threaten the [e]Giant[/e]. ";
+            if(game_vars.getFlag("379_giant_persuaded"))
+            {
+                desc += "It agrees to help you out.";
+            }
+            else
+            {
+                desc += "It's not listening, you have to keep fighting.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("379_giant_persuaded"))
+            {
+                return 347;
+            }
+            else
+            {
+                return 86;
+            }
+        },
+        new_room: false
+    },
+    event380:
+    {
+        description: function()
+        {
+            player.modifyAgility(+1);
+            return "You can now [l]search[/l] the room or [l]leave[/l]. You receive 1 Agility to reward your bravery.";
+        },
+        locals:
+        [
+            {
+                command: "leave",
+                redirect: 372,
+                new_room: true
+            },
+            {
+                command: "search",
+                redirect: 118,
+                new_room: false
             }
         ]
     },

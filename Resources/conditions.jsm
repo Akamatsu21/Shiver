@@ -22,5 +22,19 @@ export const conditions =
         stat: PlayerStat.Agility,
         modifier: +3,
         clear_timing: CallbackTiming.CombatEnd
+    },
+    helmet:
+    {
+        stat: PlayerStat.Constitution,
+        modifier: +3,
+        clear_timing: CallbackTiming.CombatEnd,
+        on_clear: function()
+        {
+            player.removeItem("Helmet");
+            if(player.getConstitution() <= 0)
+            {
+                system.message("You take of your helmet, and that is when you realise the extent of your injuries. You collapse from all the bloodloss...");
+            }
+        }
     }
 };

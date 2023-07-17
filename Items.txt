@@ -11,7 +11,7 @@ Filled Flask - found in 83, can be turned into Magical Water in 192, used for a 
 Fireball - found in 177
 Fireproof Rope - found in 119, can be used in 207, 74, 158, 3 to cross the chasm or in 181 to recover the lost keys
 Heavy Hammer - found in 115, can be used to fight the Werewolf in 63
-Helmet - found in 298, usde in 52 to protect from the gas
+Helmet - found in 298, usde in 52 to protect from the gas or in 2 to increase Constitution against Garazan
 Jar of All-Eaters - found in 192, can be used in 106 to defeat the Worms
 Jar of Corrosive Dust - found in 147 or 55, can be used in 106 to defeat the Worms
 Key#45 - found 180

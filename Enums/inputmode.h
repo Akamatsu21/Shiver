@@ -9,6 +9,7 @@ enum class InputMode
     GAME,
     YES_NO_CHOICE,
     MULTI_CHOICE,
+    QUIZ,
     ESCAPE_CHECK,
     SAVE_CONFIRMATION,
     LOAD_CONFIRMATION,

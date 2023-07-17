@@ -3,20 +3,14 @@
 
 #include <string>
 #include <map>
-#include <QJSValue>
+
+#include "useroption.h"
 
 enum class ChoiceType
 {
     NONE,
     YES_NO,
     MULTI
-};
-
-struct UserOption
-{
-    int redirect;
-    bool new_room;
-    QJSValue callback;
 };
 
 struct Choice

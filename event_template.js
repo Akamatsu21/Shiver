@@ -24,7 +24,7 @@ eventX:
             [
                 {
                     timing: CallbackTiming.RoundEnd,
-                    round: 1,
+                    round: 1,   // 0 means every round
                     callback: function()
                     {
                         // Trigger to execute on end of round 1.
@@ -32,7 +32,7 @@ eventX:
                 },
                 {
                     timing: CallbackTiming.RoundStart,
-                    round: 3,
+                    round: 3,   // 0 means every round
                     callback: function()
                     {
                         // Trigger to execute on start of round 3.
@@ -114,5 +114,26 @@ eventX:
     on_exit: function()
     {
         // Trigger to execute on room exit.
+    },
+    quiz:
+    {
+        question: "What do you thing the answer is?",
+        answers:
+        [
+            "correct1",
+            "correct2"
+        ],
+        correct: 10,
+        correct_new_room: true,
+        on_correct: function()
+        {
+            // Trigger to execute if user gave one of the accepted answers.
+        },
+        incorrect: 13,
+        incorrect_new_room: true,
+        on_incorrect: function()
+        {
+            // Trigger to execute if user gave a wrong answer.
+        }
     }
 }

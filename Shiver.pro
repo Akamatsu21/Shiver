@@ -43,7 +43,9 @@ HEADERS += \
     Models/gamestate.h \
     Models/gamevariables.h \
     Models/player.h \
+    Models/quiz.h \
     Models/scriptapi.h \
+    Models/useroption.h \
     System/commandparser.h \
     System/console.h \
     System/savestatemanager.h \

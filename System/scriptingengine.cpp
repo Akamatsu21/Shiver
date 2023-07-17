@@ -343,6 +343,36 @@ Event ScriptingEngine::parseEvent(int id)
             }
         }
     }
+    else if(event_object.hasProperty("quiz"))
+    {
+        QJSValue quiz = getObjectProperty(event_object, "quiz");
+        if(!quiz.isUndefined())
+        {
+            event.setQuizQuestion(getObjectProperty(quiz, "question").toString().toStdString());
+
+            QJSValue answers = getObjectProperty(quiz, "answers");
+            assert(answers.isArray());
+            int length = answers.property("length").toInt();
+            for(int i = 0; i < length; ++i)
+            {
+                event.addQuizAnswer(answers.property("i").toString().toStdString());
+            }
+
+            QJSValue on_correct_callback = quiz.hasProperty("on_correct")
+                                           ? quiz.property("on_correct")
+                                           : QJSValue::UndefinedValue;
+            QJSValue on_incorrect_callback = quiz.hasProperty("on_incorrect")
+                                             ? quiz.property("on_incorrect")
+                                             : QJSValue::UndefinedValue;
+
+            event.setQuizCorrectOption(getObjectProperty(quiz, "correct").toInt(),
+                                       getObjectProperty(quiz, "correct_new_room").toBool(),
+                                       on_correct_callback);
+            event.setQuizIncorrectOption(getObjectProperty(quiz, "incorrect").toInt(),
+                                         getObjectProperty(quiz, "incorrect_new_room").toBool(),
+                                         on_incorrect_callback);
+        }
+    }
 
     if(event_object.hasProperty("locals"))
     {

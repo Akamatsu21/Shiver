@@ -380,6 +380,22 @@ export const events =
             }
         ]
     },
+    event20:
+    {
+        description: "After a long march you reach a gigantic cave. No, it's more like an endless field. Perhaps the infamous Mad Land. You hear a noise. You run west as fast as you can, but the monsters catch up to you in the end. You have no choice but to [l]attack[/l] them.",
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 238,
+                new_room: true,
+                on_command: function()
+                {
+                    game_vars.setCounter("238_redirect", 316);
+                }
+            }
+        ]
+    },
     event21:
     {
         description: "If you want to see what's behind the door, you may [l]open[/l] it. If not, you may turn back [c]north[/c].",
@@ -504,6 +520,23 @@ export const events =
         },
         redirect: 171,
         new_room: true
+    },
+    event27:
+    {
+        description: "The corridor leads directly to the north. You may [c]eat[/c] a ration on the way. The space around you begins to expand, widen, until you reach an endless field. This is the Mad Land. You'd better not get lost here. But... Can you hear the sound? That must be monsters. You have no choice but to [l]attack[/l] them.",
+        eat: true,
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 238,
+                new_room: true,
+                on_command: function()
+                {
+                    game_vars.setCounter("238_redirect", 316);
+                }
+            }
+        ]
     },
     event28:
     {
@@ -720,6 +753,38 @@ export const events =
         new_room: function()
         {
             return player.getGold() < 10;
+        }
+    },
+    event36:
+    {
+        description: function()
+        {
+            let desc = "You search the walls for secret passages.<br />";
+            if(game_vars.getFlag("36_luck_check"))
+            {
+                desc += "Luck check successful!<br />You find a switch in the wall and hear a loud click.";
+            }
+            else
+            {
+                desc += "Luck check failed!<br />You find nothing and decide to turn back.";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getFlag("36_luck_check"))
+            {
+                return 152;
+            }
+            else
+            {
+                return 176;
+            }
+        },
+        new_room: function()
+        {
+            return !game_vars.getFlag("36_luck_check");
         }
     },
     event37:
@@ -1515,6 +1580,12 @@ export const events =
                 ]
             }
         ],
+    },
+    event73:
+    {
+        description: "You find yourself at a dead end. You angrily hit a rock with your sword. The shockwave causes some stone shards to fall from the ceiling. Some of them hit you and you lose conciousness. When you open your eyes, you're at an intersection.",
+        redirect: 386,
+        new_room: true
     },
     event74:
     {
@@ -2900,6 +2971,12 @@ export const events =
                 new_room: false
             }
         ]
+    },
+    event152:
+    {
+        description: "The wall opens up. You follow down the corridor in the west direction, later on it turns north. After some time, you encounter a crossing. You may go [c]west[/c] or [c]north[/c].",
+        north: 20,
+        west: 73
     },
     event153:
     {
@@ -4446,6 +4523,23 @@ export const events =
         },
         new_room: false
     },
+    event230:
+    {
+        description: "After only a few steps, the corridor ends. Do you want to [l]search[/l] for secret passages or turn back [c]west[/c]?",
+        west: 176,
+        locals:
+        [
+            {
+                command: "search",
+                redirect: 36,
+                new_room: false,
+                on_command: function()
+                {
+                    game_vars.setFlag("36_luck_check", player.performLuckCheck());
+                }
+            }
+        ]
+    },
     event231:
     {
         description: function()
@@ -5941,6 +6035,11 @@ export const events =
         {
             return game_vars.getFlag("315_new_room");
         }
+    },
+    event316:
+    {
+        description: "You return [c]south[/c] through the corridor.",
+        south: 176
     },
     event317:
     {

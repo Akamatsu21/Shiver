@@ -124,7 +124,7 @@ PlayerStat CommandParser::parseElixirType(const std::string& input)
     return elixir;
 }
 
-std::pair<bool, bool> CommandParser::parseYesNo(const std::string &input)
+std::pair<bool, bool> CommandParser::parseYesNo(const std::string& input)
 {
     std::string answer = utils::toLower(input);
 

@@ -954,22 +954,35 @@ export const events =
             desc += "You'll have to start over from the beginning.";
             return desc;
         },
-        quiz:
+        quiz: function()
         {
-            question: "What do you thing the answer is?",
-            answers:
-            [
-                "baroom baram baroten, may the gate stand open!"
-            ],
-            correct: 376,
-            correct_new_room: false,
-            incorrect: 42,
-            incorrect_new_room: false,
-            on_incorrect: function()
+            if(game_vars.getFlag("42_incorrect_spell"))
             {
-                game_vars.setFlag("42_incorrect_spell", true);
+                return undefined;
+            }
+            else
+            {
+                return {
+                    question: "What do you think the answer is?",
+                    answers:
+                    [
+                        "baroom baram baroten, may the gate stand open!",
+                        "baroom baram baroten, may the gate stand open",
+                        "baroom baram baroten may the gate stand open!",
+                        "baroom baram baroten may the gate stand open"
+                    ],
+                    correct: 376,
+                    correct_new_room: false,
+                    incorrect: 42,
+                    incorrect_new_room: false,
+                    on_incorrect: function()
+                    {
+                        game_vars.setFlag("42_incorrect_spell", true);
+                    }
+                };
             }
         }
+        
     },
     event44:
     {
@@ -2891,14 +2904,15 @@ export const events =
             let desc = `You lost ${result} gold playing the game.`;
             if(result > player.getGold())
             {
+                player.modifyGold(-player.getGold());
                 desc += " Looks like you don't even have that much, so you just pay up all your gold.";
             }
             else
             {
+                player.modifyGold(-result);
                 desc += ` You currently have ${player.getGold()} gold.`;
             }
 
-            player.modifyGold(-result);
             return desc;
         },
         yes_no_choice:
@@ -6376,14 +6390,14 @@ export const events =
                 desc += `You lost ${result} gold playing the game.`;
                 if(result > player.getGold())
                 {
+                    player.modifyGold(-player.getGold());
                     desc += " Looks like you don't even have that much, so you just pay up all your gold.";
                 }
                 else
                 {
+                    player.modifyGold(-result);
                     desc += ` You currently have ${player.getGold()} gold.`;
                 }
-
-                player.modifyGold(-result);
             }
             else
             {

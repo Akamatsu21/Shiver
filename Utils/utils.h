@@ -54,6 +54,6 @@ int rollD6(int count);
 
 std::string toLower(const std::string& s);
 
-}
+} // utils
 
 #endif // UTILS_H

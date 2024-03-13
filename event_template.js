@@ -1,16 +1,17 @@
-eventX:
+export const eventX =
 {
     description: "Description of the event, and also a place to put the function that executes on entry.",
-    redirect: 20, // Automatically moves to that event - movement commands redundant
+    redirect: 20,   // Automatically moves to that event - movement commands redundant
     new_room: true, // if false, won't clear screen
-    escape_redirect: 10,
-    north: 1,
-    south: 2,
-    east: 3,
-    west: 4,
+    escape_redirect: 10,    // Destination of the escape command
+    north: 1,   // destination of the north command
+    south: 2,   // destination of the south command
+    east: 3,    // destination of the east command
+    west: 4,    // destination of the west command
     on_direction: function(direction)
     {
         // Trigger when choosing one of the direction commands
+        // Use the provided argument to check which direction was selected
     },
     enemies:
     [
@@ -19,7 +20,7 @@ eventX:
             agility: 10,
             constitution: 10,
             escape_redirect: 50,
-            invincible: true,
+            invincible: true,   // Won't lose any constitution
             callbacks:
             [
                 {
@@ -49,15 +50,15 @@ eventX:
             ]
         }
     ],
-    gold: 100,
-    rations: 1,
-    items:
+    gold: 100,  // collected with the "take gold" command
+    rations: 1, // collected with the "take ration" command
+    items:      // collected with the take command
     [
         "Item1",
         "Item2"
     ],
-    item_limit: 1,
-    eat: true,
+    item_limit: 1,  // only one of the items from the list can be taken
+    eat: true,  // can use the eat command
     on_eat: function()
     {
         // Trigger to execute instead of the normal eat command.
@@ -136,4 +137,4 @@ eventX:
             // Trigger to execute if user gave a wrong answer.
         }
     }
-}
+};

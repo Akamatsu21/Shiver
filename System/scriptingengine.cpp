@@ -355,7 +355,7 @@ Event ScriptingEngine::parseEvent(int id)
             int length = answers.property("length").toInt();
             for(int i = 0; i < length; ++i)
             {
-                event.addQuizAnswer(answers.property("i").toString().toStdString());
+                event.addQuizAnswer(answers.property(i).toString().toStdString());
             }
 
             QJSValue on_correct_callback = quiz.hasProperty("on_correct")

@@ -133,8 +133,8 @@ void Game::handleEatCommand()
     }
     else if(_player->eatRation())
     {
-        _current_event.setEatingEnabled(false);
         _console.writeText("You consume a ration and recover 4 Constitution.");
+        _current_event.setEatingEnabled(false);
     }
     else
     {

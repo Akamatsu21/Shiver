@@ -10,7 +10,7 @@
 static std::string replaceTag(const std::string& text,
                               const std::string& open_tag,
                               const std::string& close_tag,
-                              const std::string& colour_code)
+                              const std::string& colour)
 {
     std::ostringstream ss;
     std::string buffer = text;
@@ -21,7 +21,7 @@ static std::string replaceTag(const std::string& text,
         std::string::iterator close_tag_pos = std::search(open_tag_pos, std::end(buffer),
                                                           std::begin(close_tag), std::end(close_tag));
         ss << std::string(std::begin(buffer), open_tag_pos)
-           << colour_code
+           << "<font color=\"" << colour << "\">"
            << std::string(open_tag_pos + open_tag.length(), close_tag_pos)
            << "</font>"
            << std::string(close_tag_pos + close_tag.length(), std::end(buffer));
@@ -38,13 +38,13 @@ static std::string replaceTag(const std::string& text,
 static std::string parseMarkup(const std::string& text)
 {
     std::string buffer = text;
-    buffer = replaceTag(buffer, "[c]", "[/c]", "<font color=\"green\">"); // command
-    buffer = replaceTag(buffer, "[e]", "[/e]", "<font color=\"red\">"); // enemy name
-    buffer = replaceTag(buffer, "[i]", "[/i]", "<font color=\"dodgerblue\">"); // item
-    buffer = replaceTag(buffer, "[k]", "[/k]", "<font color=\"lightpink\">"); // key number
-    buffer = replaceTag(buffer, "[l]", "[/l]", "<font color=\"yellow\">"); // local command
-    buffer = replaceTag(buffer, "[o]", "[/o]", "<font color=\"darkviolet\">"); // option
-    buffer = replaceTag(buffer, "[p]", "[/p]", "<font color=\"cyan\">"); // player name
+    buffer = replaceTag(buffer, "[c]", "[/c]", "green"); // command
+    buffer = replaceTag(buffer, "[e]", "[/e]", "red"); // enemy name
+    buffer = replaceTag(buffer, "[i]", "[/i]", "dodgerblue"); // item
+    buffer = replaceTag(buffer, "[k]", "[/k]", "lightpink"); // key number
+    buffer = replaceTag(buffer, "[l]", "[/l]", "yellow"); // local command
+    buffer = replaceTag(buffer, "[o]", "[/o]", "darkviolet"); // option
+    buffer = replaceTag(buffer, "[p]", "[/p]", "cyan"); // player name
     return buffer;
 }
 

@@ -3,7 +3,8 @@
 #include <random>
 #include <QFile>
 
-namespace utils {
+namespace utils
+{
 
 std::string accessStaticResource(const std::string filename)
 {
@@ -137,4 +138,4 @@ std::string toLower(const std::string& s)
     return result;
 }
 
-}
+} // utils

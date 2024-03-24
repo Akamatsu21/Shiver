@@ -7,7 +7,8 @@ enum class PlayerStat
     AGILITY,
     CONSTITUTION,
     LUCK,
-    COMBAT_STRENGTH
+    COMBAT_STRENGTH,
+    DAMAGE
 };
 
 #endif // PLAYERSTAT_H

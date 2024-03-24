@@ -65,10 +65,12 @@ std::map<std::string, Direction> getAllDirectionsWithLabels()
 
 std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels()
 {
-    return std::map<std::string, PlayerStat> {{"Agility", PlayerStat::AGILITY},
+    return std::map<std::string, PlayerStat> {{"Invalid", PlayerStat::INVALID},
+                                              {"Agility", PlayerStat::AGILITY},
                                               {"Constitution", PlayerStat::CONSTITUTION},
                                               {"Luck", PlayerStat::LUCK},
-                                              {"CombatStrength", PlayerStat::COMBAT_STRENGTH}};
+                                              {"CombatStrength", PlayerStat::COMBAT_STRENGTH},
+                                              {"Damage", PlayerStat::DAMAGE}};
 }
 
 Direction commandToDirection(Command command)

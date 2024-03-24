@@ -11,6 +11,7 @@ struct GameState
     int player_start_agility;
     int player_start_constitution;
     int player_start_luck;
+    int player_temp_constitution;
     int player_gold;
     int player_rations;
     int player_elixir_count;

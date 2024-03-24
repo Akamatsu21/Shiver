@@ -3,26 +3,27 @@
 
 #include <QJSValue>
 
-#include "Enums/playerstat.h"
 #include "Models/callback.h"
+#include "Models/statmodifier.h"
 
 class Condition
 {
     std::string _name;
-    PlayerStat _modified_stat = PlayerStat::INVALID;
-    int _modifier;
-    Callback _callback;
+    std::vector<StatModifier> _stat_modifiers;
+    Callback _clear_callback;
+    Callback _damage_callback;
 
 public:
-    Condition(const std::string& name, PlayerStat modified_stat, int modifier,
-              CallbackTiming clear_timing, QJSValue on_clear_callback);
+    Condition(const std::string& name, const std::vector<StatModifier>& stat_modifier,
+              CallbackTiming clear_timing, QJSValue on_clear_callback,
+              QJSValue on_damage_callback);
 
     std::string getName() const;
-    PlayerStat getModifiedStat() const;
-    int getModifierValue() const;
+    std::vector<StatModifier> getStatModifiers() const;
     CallbackTiming getClearTiming() const;
 
-    void triggerCallback();
+    void triggerClearCallback();
+    int triggerDamageCallback(int damage);
 };
 
 #endif // CONDITION_H

@@ -11,10 +11,9 @@ Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerS
     _starting_agility(agility),
     _starting_constitution(constitution),
     _starting_luck(luck),
-    _agility_mod(0),
-    _constitution_mod(0),
-    _luck_mod(0),
+    _temp_constitution(0),
     _combat_mod(0),
+    _damage_mod(0),
     _gold(0),
     _rations(8),
     _elixir_count(2),
@@ -27,52 +26,32 @@ Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerS
 
 int Player::getAgility() const
 {
-    return (_agility + _agility_mod >= 0 ? _agility + _agility_mod : 0);
+    return _agility;
 }
 
 int Player::getConstitution() const
 {
-    return (_constitution + _constitution_mod >= 0 ? _constitution + _constitution_mod : 0);
+    return _constitution;
 }
 
 int Player::getLuck() const
 {
-    return (_luck + _luck_mod >= 0 ? _luck + _luck_mod : 0);
-}
-
-int Player::getAgilityWithoutModifiers() const
-{
-    return _agility;
-}
-
-int Player::getConstitutionWithoutModifiers() const
-{
-    return _constitution;
-}
-
-int Player::getLuckWithoutModifiers() const
-{
     return _luck;
 }
 
-int Player::getAgilityModifier() const
+int Player::getTempConstitution() const
 {
-    return _agility_mod;
-}
-
-int Player::getConstitutionModifier() const
-{
-    return _constitution_mod;
-}
-
-int Player::getLuckModifier() const
-{
-    return _luck_mod;
+    return _temp_constitution;
 }
 
 int Player::getCombatModifier() const
 {
     return _combat_mod;
+}
+
+int Player::getDamageModifier() const
+{
+    return _damage_mod;
 }
 
 int Player::getStartingAgility() const
@@ -212,6 +191,16 @@ void Player::setLuck(int value)
     _luck = value;
 }
 
+void Player::setTempConstitution(int value)
+{
+    if(value < 0)
+    {
+        throw std::out_of_range("Temporary constitution value out of range.");
+    }
+
+    _temp_constitution = value;
+}
+
 void Player::setGold(int value)
 {
     if(value < 0)
@@ -257,7 +246,21 @@ void Player::modifyAgility(int value)
 
 void Player::modifyConstitution(int value)
 {
-    _constitution += value;
+    if(value < 0 && _temp_constitution > 0)
+    {
+        // Damage goes to temporary hit points first.
+        _temp_constitution += value;
+        if(_temp_constitution < 0)
+        {
+            _constitution += _temp_constitution;
+            _temp_constitution = 0;
+        }
+    }
+    else
+    {
+        _constitution += value;
+    }
+
     if(_constitution < 0)
     {
         _constitution = 0;
@@ -372,26 +375,44 @@ void Player::removeItem(const QVariant& item)
     removeItem(item.toString().toStdString());
 }
 
-void Player::addCondition(const Condition& cond)
+void Player::addConditionToList(const Condition& cond)
 {
-    switch(cond.getModifiedStat())
+    _conditions.push_back(cond);
+}
+
+void Player::applyCondition(const Condition& cond)
+{
+    for(const StatModifier& mod: cond.getStatModifiers())
     {
-    case PlayerStat::AGILITY:
-        _agility_mod += cond.getModifierValue();
-        break;
-    case PlayerStat::CONSTITUTION:
-        _constitution_mod += cond.getModifierValue();
-        break;
-    case PlayerStat::LUCK:
-        _luck_mod += cond.getModifierValue();
-        break;
-    case PlayerStat::COMBAT_STRENGTH:
-        _combat_mod += cond.getModifierValue();
-    default:
-        break;
+        switch(mod.stat)
+        {
+        case PlayerStat::AGILITY:
+            _starting_agility += mod.value;
+            modifyAgility(mod.value);
+            break;
+        case PlayerStat::CONSTITUTION:
+            // The code makes an assumption that there will only
+            // be one temp constitution source at a time.
+            // If this becomes false in the game, this logic will need to be altered.
+            // It also assumes constitution conditions will always give positive bonus.
+            setTempConstitution(mod.value);
+            break;
+        case PlayerStat::LUCK:
+            _starting_luck += mod.value;
+            modifyLuck(mod.value);
+            break;
+        case PlayerStat::COMBAT_STRENGTH:
+            _combat_mod += mod.value;
+            break;
+        case PlayerStat::DAMAGE:
+            _damage_mod += mod.value;
+            break;
+        default:
+            break;
+        }
     }
 
-    _conditions.push_back(cond);
+    addConditionToList(cond);
 }
 
 void Player::removeCondition(const std::string& name)
@@ -402,32 +423,40 @@ void Player::removeCondition(const std::string& name)
 
     if(found_cond != std::end(_conditions))
     {
-        switch(found_cond->getModifiedStat())
+        for(const StatModifier& mod: found_cond->getStatModifiers())
         {
-        case PlayerStat::AGILITY:
-            _agility_mod -= found_cond->getModifierValue();
-            break;
-        case PlayerStat::CONSTITUTION:
-            _constitution_mod -= found_cond->getModifierValue();
-            break;
-        case PlayerStat::LUCK:
-            _luck_mod -= found_cond->getModifierValue();
-            break;
-        case PlayerStat::COMBAT_STRENGTH:
-            _combat_mod -= found_cond->getModifierValue();
-            break;
-        default:
-            break;
+            switch(mod.stat)
+            {
+            case PlayerStat::AGILITY:
+                _starting_agility -= mod.value;
+                modifyAgility(-mod.value);
+                break;
+            case PlayerStat::CONSTITUTION:
+                setTempConstitution(0);
+                break;
+            case PlayerStat::LUCK:
+                _starting_luck -= mod.value;
+                modifyLuck(-mod.value);
+                break;
+            case PlayerStat::COMBAT_STRENGTH:
+                _combat_mod -= mod.value;
+                break;
+            case PlayerStat::DAMAGE:
+                _damage_mod -= mod.value;
+                break;
+            default:
+                break;
+            }
         }
 
-        found_cond->triggerCallback();
+        found_cond->triggerClearCallback();
         _conditions.erase(found_cond);
     }
 }
 
 bool Player::performLuckCheck()
 {
-    if(getLuck() == 0)
+    if(getLuck() <= 0)
     {
         return false;
     }

@@ -332,34 +332,22 @@ void Game::handleStatsCommand()
 {
     std::string player_name = _conan ? "Conan The Barbarian King"
                                      : "Adventurer";
-    auto createModString = [](int val)
-    {
-        if(val == 0)
-        {
-            return std::string();
-        }
-        else
-        {
-            return utils::createString(" (",
-                                       (val > 0 ? "+" : ""),
-                                       val,
-                                       ")");
-        }
-    };
+
+    std::string temp_constitution = _player->getTempConstitution() > 0
+                                        ? " (+" + std::to_string(_player->getTempConstitution()) + ")"
+                                        : "";
 
     std::string msg = utils::createString("[p]", player_name, "[/p]",
                                           "<br />Agility: ",
-                                            _player->getAgilityWithoutModifiers(),
+                                            _player->getAgility(),
                                             "/", _player->getStartingAgility(),
-                                            createModString(_player->getAgilityModifier()),
                                           "<br />Constitution: ",
-                                            _player->getConstitutionWithoutModifiers(),
+                                            _player->getConstitution(),
                                             "/", _player->getStartingConstitution(),
-                                            createModString(_player->getConstitutionModifier()),
+                                          temp_constitution,
                                           "<br />Luck: ",
-                                            _player->getLuckWithoutModifiers(),
+                                            _player->getLuck(),
                                             "/", _player->getStartingLuck(),
-                                            createModString(_player->getLuckModifier()),
                                           "<br />Gold: ",
                                             _player->getGold(),
                                           "<br />Rations: ",
@@ -568,6 +556,8 @@ void Game::resolveDamage(bool player_win, int damage)
     std::string msg;
     if(player_win)
     {
+        damage += _player->getDamageModifier();
+
         if(_current_event.getCurrentEnemy().isInvincible())
         {
             msg += utils::createString("Your attack is ineffective. [e]",
@@ -584,6 +574,7 @@ void Game::resolveDamage(bool player_win, int damage)
     }
     else
     {
+        resolveDamageTriggers(damage);
         _player->modifyConstitution(-damage);
 
         msg += utils::createString("[e]", _current_event.getCurrentEnemy().getName(),
@@ -739,8 +730,10 @@ void Game::handleCombatRound()
     bool tie = false;
     do
     {
-        _combat_state.enemy_score = utils::rollD6(2) + _current_event.getCurrentEnemy().getAgility();
-        _combat_state.player_score = utils::rollD6(2) + _player->getAgility() + _player->getCombatModifier();
+        int enemy_dbg = utils::rollD6(2);
+        int player_dbg = utils::rollD6(2);
+        _combat_state.enemy_score = enemy_dbg + _current_event.getCurrentEnemy().getAgility();
+        _combat_state.player_score = player_dbg + _player->getAgility() + _player->getCombatModifier();
 
         std::string msg = utils::createString("Combat round ",
                                               _combat_state.combat_round,
@@ -807,6 +800,14 @@ void Game::resolveCombatEndTriggers(bool escape)
     }
 }
 
+void Game::resolveDamageTriggers(int& damage)
+{
+    for(auto condition: _player->getConditions())
+    {
+        damage = condition.triggerDamageCallback(damage);
+    }
+}
+
 void Game::resolveRoundActionTriggers(int round)
 {
     for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
@@ -838,12 +839,13 @@ void Game::resolveRoundEndTriggers(int round)
 GameState Game::createGameState()
 {
     GameState game_state = {};
-    game_state.player_agility = _player->getAgilityWithoutModifiers();
-    game_state.player_constitution = _player->getConstitutionWithoutModifiers();
-    game_state.player_luck = _player->getLuckWithoutModifiers();
+    game_state.player_agility = _player->getAgility();
+    game_state.player_constitution = _player->getConstitution();
+    game_state.player_luck = _player->getLuck();
     game_state.player_start_agility = _player->getStartingAgility();
     game_state.player_start_constitution = _player->getStartingConstitution();
     game_state.player_start_luck = _player->getStartingLuck();
+    game_state.player_temp_constitution = _player->getTempConstitution();
     game_state.player_gold = _player->getGold();
     game_state.player_rations = _player->getRations();
     game_state.player_elixir_count = _player->getElixirCount();
@@ -909,6 +911,7 @@ void Game::restoreGameState(const GameState& game_state)
         _player->setAgility(game_state.player_agility);
         _player->setConstitution(game_state.player_constitution);
         _player->setLuck(game_state.player_luck);
+        _player->setTempConstitution(game_state.player_temp_constitution);
         _player->setGold(game_state.player_gold);
         _player->setRations(game_state.player_rations);
         _player->setElixirCount(game_state.player_elixir_count);
@@ -941,7 +944,7 @@ void Game::restoreGameState(const GameState& game_state)
         {
             std::string cond;
             std::getline(ss, cond);
-            onAddCondition(QString::fromStdString(cond));
+            _player->addConditionToList(_scripting_engine->parseCondition(QString::fromStdString(cond)));
         }
     }
 
@@ -1478,7 +1481,7 @@ void Game::updateEventRedirect(int id, bool new_room)
 
 void Game::onAddCondition(const QVariant& name)
 {
-    _player->addCondition(_scripting_engine->parseCondition(name.toString()));
+    _player->applyCondition(_scripting_engine->parseCondition(name.toString()));
 }
 
 void Game::onDisableEnemyEscape()

@@ -121,7 +121,7 @@ export const events =
             }
             else
             {
-                desc += "You die."
+                desc += "You die.";
                 player.modifyConstitution(-100);
             }
             return desc;
@@ -211,7 +211,7 @@ export const events =
         description: function()
         {
             player.modifyGold(+100);
-            return "The fairy hands you a pot full of gold coins. It then bows and disappears."
+            return "The fairy hands you a pot full of gold coins. It then bows and disappears.";
         },
         redirect: 11,
         new_room: true
@@ -221,7 +221,7 @@ export const events =
         description: function()
         {
             player.modifyConstitution(+100);
-            return "The fairy performs a few mysterious gestures. You feel like you're in a trance. Your body feels lighter than air, and when you reconnect with reality you realise all your wounds have been healed, but the fairy is nowhere to be found."
+            return "The fairy performs a few mysterious gestures. You feel like you're in a trance. Your body feels lighter than air, and when you reconnect with reality you realise all your wounds have been healed, but the fairy is nowhere to be found.";
         },
         redirect: 11,
         new_room: true
@@ -231,7 +231,7 @@ export const events =
         description: function()
         {
             player.addItem("Magical Sword");
-            return "The fairy hands you a huge sword covered in runes. You thank her and she bids you farewell."
+            return "The fairy hands you a huge sword covered in runes. You thank her and she bids you farewell.";
         },
         redirect: 11,
         new_room: true
@@ -294,12 +294,120 @@ export const events =
     },
     event20:
     {
+        description: "Choose status: [o]gloves[/o], [o]sword[/o], [o]fireball[/o], [o]goblin[/o], [o]helmet[/o].",
+        choice:
+        {
+            question: "What do you choose?",
+            options:
+            [
+                {
+                    answer: "gloves",
+                    redirect: 21,
+                    new_room: false
+                },
+                {
+                    answer: "goblin",
+                    redirect: 22,
+                    new_room: false
+                },
+                {
+                    answer: "sword",
+                    redirect: 23,
+                    new_room: false
+                },
+                {
+                    answer: "helmet",
+                    redirect: 24,
+                    new_room: false
+                },
+                {
+                    answer: "fireball",
+                    redirect: 25,
+                    new_room: false
+                }
+            ]
+        },
+    },
+    event21:
+    {
         description: function()
         {
             player.addItem("Cursed Gloves (-1 Agility)");
             system.addCondition("cursed_gloves");
-            return "The evil gloves imprison you! You will lose agility in your next battle."
+            return "The evil gloves imprison you! You will lose agility in your next battle.";
         },
-        north: 1
+        north: 26,
+        south: 27
+    },
+    event22:
+    {
+        description: function()
+        {
+            system.addCondition("goblin_follower");
+            return "A Goblin wants to help you in the next fight! He has 3 Agility.";
+        },
+        north: 26,
+        south: 27
+    },
+    event23:
+    {
+        description: function()
+        {
+            player.addItem("Enchanted Sword (+1 Combat Score)");
+            system.addCondition("enchanted_sword");
+            return "This sword is better than your old one! It will improve your combat rolls.";
+        },
+        north: 26,
+        south: 27
+    },
+    event24:
+    {
+        description: function()
+        {
+            player.addItem("Helmet (+3 Constitution)");
+            system.addCondition("helmet");
+            return "This is a tough helmet! It will give you more defense in your next fight.";
+        },
+        north: 26,
+        south: 27
+    },
+    event25:
+    {
+        description: function()
+        {
+            player.addItem("Fireball");
+            system.addCondition("fireball");
+            return "You wield the power of the mighty fireball for one fight.";
+        },
+        north: 26,
+        south: 27
+    },
+    event26:
+    {
+        description: "Time to fight!",
+        north: 1,
+        enemies:
+        [
+            {
+                name: "Gorgonzola",
+                agility: 100,
+                constitution: 100,
+                escape: 1
+            }
+        ]
+    },
+    event27:
+    {
+        description: "Time to fight!",
+        north: 1,
+        enemies:
+        [
+            {
+                name: "Mozarella",
+                agility: 1,
+                constitution: 1,
+                escape: 1
+            }
+        ]
     }
 };

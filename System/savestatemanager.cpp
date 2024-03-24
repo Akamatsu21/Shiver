@@ -47,6 +47,7 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
        << game_state.player_start_agility << "\n"
        << game_state.player_start_constitution << "\n"
        << game_state.player_start_luck << "\n"
+       << game_state.player_temp_constitution << "\n"
        << game_state.player_gold << "\n"
        << game_state.player_rations << "\n"
        << game_state.player_elixir_count << "\n"
@@ -118,6 +119,7 @@ GameState SaveStateManager::parseSaveFileContents()
        >> game_state.player_start_agility
        >> game_state.player_start_constitution
        >> game_state.player_start_luck
+       >> game_state.player_temp_constitution
        >> game_state.player_gold
        >> game_state.player_rations
        >> game_state.player_elixir_count

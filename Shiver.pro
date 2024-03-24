@@ -45,6 +45,7 @@ HEADERS += \
     Models/player.h \
     Models/quiz.h \
     Models/scriptapi.h \
+    Models/statmodifier.h \
     Models/useroption.h \
     System/commandparser.h \
     System/console.h \

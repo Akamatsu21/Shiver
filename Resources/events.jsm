@@ -1138,6 +1138,16 @@ export const events =
         },
         new_room: false
     },
+    event54:
+    {
+        description: function()
+        {
+            player.removeItem("Heavy Hammer");
+            return "You throw the hammer. Your aim was good. [e]Guardian[/e] takes 2 damage, but he's still standing still.";
+        },
+        redirect: 107,
+        new_room: false
+    },
     event55:
     {
         description: function()
@@ -1734,6 +1744,28 @@ export const events =
             }
         ]
     },
+    event80:
+    {
+        description: "You already know the end of your journey is upon you. Without fear, you confidently enter the chamber. Here you are. And so is he: [e]Guardian of Secrets[/e]. Young, tall, donning a crimson cloak, slant-eyed, his black hair with an undercut tucked under a leather cap. You can attempt to [l]talk[/l] to him, [l]wait[/l] for his reaction or [l]attack[/l] him.",
+        locals:
+        [
+            {
+                command: "attack",
+                redirect: 165,
+                new_room: false
+            },
+            {
+                command: "talk",
+                redirect: 222,
+                new_room: false
+            },
+            {
+                command: "wait",
+                redirect: 311,
+                new_room: false
+            }
+        ]
+    },
     event81:
     {
         description: function()
@@ -2264,6 +2296,20 @@ export const events =
                 return undefined;
             }
         }
+    },
+    event107:
+    {
+        description: "You will finish this with your sword.",
+        redirect: 23,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Guardian of Secrets",
+                agility: 10,
+                constitution: 14
+            }
+        ]
     },
     event108:
     {
@@ -2819,6 +2865,38 @@ export const events =
             }
         ]
     },
+    event138:
+    {
+        description: function()
+        {
+            player.removeItem("Toy Dragon");
+            let desc = "Your attack turned out to be rather pathetic. ";
+            if(game_vars.getFlag("138_threw_dragon"))
+            {
+                desc += "You attempt to throw the dragon again, this time making sure to aim it at the [e]Guardian[/e].";
+            }
+            else
+            {
+                desc += "You look through your backpack and take out the toy dragon. You throw it at the [e]Guardian[/e].";
+            }
+
+            return des;
+            
+        },
+        redirect: function()
+        {
+            if(player.performLuckCheck())
+            {
+                return 361;
+            }
+            else
+            {
+                game_vars.setFlag("255_print_luck_result", true);
+                return 255;
+            }
+        },
+        new_room: false
+    },
     event139:
     {
         description: "You safely return to the northern shore of the lake.",
@@ -3343,6 +3421,112 @@ export const events =
             }
         }
         
+    },
+    event165:
+    {
+        description: function()
+        {
+            let desc = "You choose to attack. But with what? Your sword? ";
+            const items_present = player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
+                                  player.hasItem("Fireball") || player.hasItem("Spear");
+
+            if(items_present)
+            {
+                desc += "You'd better look for another weapon. You can choose one of these:";
+            }
+            else
+            {
+                desc += "Alas, that won't do, and you have no items that could serve as a weapon here...";
+            }
+
+            if(player.hasItem("Heavy Hammer"))
+            {
+                desc += "<br />* A [o]hammer[/o] made by the goblins";
+            }
+
+            if(player.hasItem("Toy Dragon"))
+            {
+                desc += "<br />* A hefty toy [o]dragon[/o].";
+            }
+
+            if(player.hasItem("Fireball"))
+            {
+                desc += "<br />* A [o]fireball[/o].";
+            }
+
+            if(player.hasItem("Spear"))
+            {
+                desc += "<br />* A [o]spear[/o]";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
+               player.hasItem("Fireball") || player.hasItem("Spear"))
+            {
+                return undefined;
+            }
+            else
+            {
+                return 255;
+            }
+        },
+        new_room: false,
+        choice: function()
+        {
+            if(player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
+               player.hasItem("Fireball") || player.hasItem("Spear"))
+            {
+                let opt = [];
+
+                if(player.hasItem("Heavy Hammer"))
+                {
+                    opt.push({
+                        answer: "hammer",
+                        redirect: 54,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Toy Dragon"))
+                {
+                    opt.push({
+                        answer: "dragon",
+                        redirect: 198,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Fireball"))
+                {
+                    opt.push({
+                        answer: "fireball",
+                        redirect: 344,
+                        new_room: false
+                    });
+                }
+
+                if(player.hasItem("Spear"))
+                {
+                    opt.push({
+                        answer: "spear",
+                        redirect: 281,
+                        new_room: false
+                    });
+                }
+
+                return {
+                    question: "Which one do you use?",
+                    options: opt
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event166:
     {
@@ -3924,6 +4108,17 @@ export const events =
     {
         description: "A long pavement leads straight [c]north[/c].",
         north: 276
+    },
+    event198:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-1);
+            game_vars.setFlag("138_threw_dragon", true);
+            return "You throw the dragon. It bounces off a rock and instead of hitting the [e]Guardian[/e], it hits you. You take 1 damage.";
+        },
+        redirect: 138,
+        new_room: false
     },
     event199:
     {
@@ -4967,6 +5162,30 @@ export const events =
         description: "Suddenly, from the other side of the chamber you hear a powerful roar. You have time to grab some [i]gold[/i] and then you must [c]escape[/c].",
         escape_redirect: 385
     },
+    event255:
+    {
+        description: function()
+        {
+            let desc = "";
+            if(game_vars.getFlag("255_print_luck_result"))
+            {
+                desc += "Luck check failed!<br />";
+            }
+
+            desc += "All you have left is your sword. You grab it and charge at the enemy.";
+            return desc;
+        },
+        redirect: 23,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Guardian of Secrets",
+                agility: 10,
+                constitution: 16
+            }
+        ]
+    },
     event256:
     {
         description: "Once again, you find nothing.",
@@ -5227,14 +5446,23 @@ export const events =
             player.removeItem("Sword");
             return "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. Is that a good or bad sign?";
         },
-        yes_no_choice:
+        choice:
         {
-            question: "Would you like to exchange this new sword for a different one?",
-            no: 153,
-            no_new_room: false,
-            yes: 190,
-            yes_new_room: false,
-        }
+            question: "Would you like to [o]keep[/o] this new sword or [o]exchange[/o] it for a different one?",
+            options:
+            [
+                {
+                    answer: "exchange",
+                    redirect: 190,
+                    new_room: false
+                },
+                {
+                    answer: "keep",
+                    redirect: 153,
+                    new_room: false
+                }
+            ]
+        },
     },
     event272:
     {
@@ -5423,6 +5651,26 @@ export const events =
             else
             {
                 return 100;
+            }
+        },
+        new_room: false
+    },
+    event281:
+    {
+        description: function()
+        {
+            player.removeItem("Spear");
+            return "The spear hits the [e]Guardian[/e] right in the chest, but it bounces off like a stick. Underneath the cloak, the [e]Guardian[/e] must be wearing some tough armour.";
+        },
+        redirect: function()
+        {
+            if(player.hasItem("Toy Dragon"))
+            {
+                return 138;
+            }
+            else
+            {
+                return 255;
             }
         },
         new_room: false
@@ -6600,6 +6848,24 @@ export const events =
         redirect: 288,
         new_room: true
     },
+    event344:
+    {
+        description: function()
+        {
+            system.addCondition("fireball");
+            return "The fireball is a fantastic weapon against the [e]Guardian of Secrets[/e]. It's quite effective and fast. It returns to your hand everytime you use it. You gain the following perks during combat:<br />* You gain +2 to all your attack rolls.<br />* You deal an extra point of damage with each successful attack.<br />* When hit by the [e]Guardian[/e] you have a moderate chance to reduce the damage by 1 and a small chance to completely avoid damage.";
+        },
+        redirect: 23,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Guardian of Secrets",
+                agility: 10,
+                constitution: 16
+            }
+        ]
+    },
     event345:
     {
         description: "You approach an intersection. You can go [c]west[/c] or [c]north[/c].",
@@ -6829,6 +7095,20 @@ export const events =
         description: "A short corridor leads to a door.",
         redirect: 135,
         new_room: false
+    },
+    event361:
+    {
+        description: "Luck check successful!<br />The attack is quite formidable. It turns out that this dragon was the source of the [e]Guardian[e/]'s endurance and dexterity, but hitting him with the dragon caused the magic to return back into the toy that it came from. [e]Guardian[/e] loses some of his strength. You take out your sword and charge.",
+        redirect: 23,
+        new_room: true,
+        enemies:
+        [
+            {
+                name: "Guardian of Secrets",
+                agility: 8,
+                constitution: 12
+            }
+        ]
     },
     event362:
     {

@@ -97,21 +97,33 @@ Condition ScriptingEngine::parseCondition(const QString& name)
     assert(_condition_list.hasProperty(name));
     QJSValue condition_object = _condition_list.property(name);
 
-    assert(condition_object.hasProperty("stat"));
-    PlayerStat stat = static_cast<PlayerStat>(getObjectProperty(condition_object, "stat").toInt());
+    assert(condition_object.hasProperty("modifiers"));
+    QJSValue modifiers_object = getObjectProperty(condition_object, "modifiers");
+    assert(modifiers_object.isArray());
+    int length = modifiers_object.property("length").toInt();
+    std::vector<StatModifier> modifiers{};
 
-    assert(condition_object.hasProperty("modifier"));
-    int mod = getObjectProperty(condition_object, "modifier").toInt();
+    for(int i = 0; i < length; ++i)
+    {
+        QJSValue modifier = modifiers_object.property(i);
+        PlayerStat stat = static_cast<PlayerStat>(getObjectProperty(modifier, "stat").toInt());
+        int value = getObjectProperty(modifier, "value").toInt();
+        modifiers.push_back(StatModifier{stat, value});
+    }
 
     assert(condition_object.hasProperty("clear_timing"));
     CallbackTiming timing = static_cast<CallbackTiming>(
                 getObjectProperty(condition_object, "clear_timing").toInt());
 
-    QJSValue callback = condition_object.hasProperty("on_clear")
-                      ? condition_object.property("on_clear")
-                      : QJSValue(false);
+    QJSValue clear_callback = condition_object.hasProperty("on_clear")
+                                  ? condition_object.property("on_clear")
+                                  : QJSValue(false);
 
-    return Condition(name.toStdString(), stat, mod, timing, callback);
+    QJSValue damage_callback = condition_object.hasProperty("on_damage")
+                                  ? condition_object.property("on_damage")
+                                  : QJSValue(false);
+
+    return Condition(name.toStdString(), modifiers, timing, clear_callback, damage_callback);
 }
 
 Event ScriptingEngine::parseEvent(int id)

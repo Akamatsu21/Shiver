@@ -85,6 +85,7 @@ class Game: public QObject
 
     // Resolve triggers
     void resolveCombatEndTriggers(bool escape);
+    void resolveDamageTriggers(int& damage);
     void resolveRoundActionTriggers(int round);
     void resolveRoundEndTriggers(int round);
 

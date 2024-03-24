@@ -19,7 +19,7 @@ public:
     int getRound() const;
     bool isValid() const;
 
-    void operator()();
+    QJSValue operator()(const QJSValueList& params = {});
 };
 
 #endif // CALLBACK_H

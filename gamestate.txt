@@ -5,6 +5,7 @@ Luck
 Starting Agility
 Starting Constitution
 Starting Luck
+Temporary Constitution
 Gold
 Rations
 Elixir Count

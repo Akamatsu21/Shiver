@@ -1,12 +1,13 @@
 #include "condition.h"
 
 
-Condition::Condition(const std::string& name, PlayerStat modified_stat, int modifier,
-                     CallbackTiming clear_timing, QJSValue on_clear_callback):
+Condition::Condition(const std::string& name, const std::vector<StatModifier>& stat_modifier,
+                     CallbackTiming clear_timing, QJSValue on_clear_callback,
+                     QJSValue on_damage_callback):
     _name(name),
-    _modified_stat(modified_stat),
-    _modifier(modifier),
-    _callback(clear_timing, on_clear_callback)
+    _stat_modifiers(stat_modifier),
+    _clear_callback(clear_timing, on_clear_callback),
+    _damage_callback(CallbackTiming::NONE, on_damage_callback)
 {
 
 }
@@ -16,25 +17,32 @@ std::string Condition::getName() const
     return _name;
 }
 
-PlayerStat Condition::getModifiedStat() const
+std::vector<StatModifier> Condition::getStatModifiers() const
 {
-    return _modified_stat;
-}
-
-int Condition::getModifierValue() const
-{
-    return _modifier;
+    return _stat_modifiers;
 }
 
 CallbackTiming Condition::getClearTiming() const
 {
-    return _callback.getTiming();
+    return _clear_callback.getTiming();
 }
 
-void Condition::triggerCallback()
+void Condition::triggerClearCallback()
 {
-    if(_callback.isValid())
+    if(_clear_callback.isValid())
     {
-        _callback();
+        _clear_callback();
     }
+}
+
+int Condition::triggerDamageCallback(int damage)
+{
+    if(_damage_callback.isValid())
+    {
+        QJSValueList params = {damage};
+        QJSValue ret = _damage_callback(params);
+        return ret.toInt();
+    }
+
+    return damage;
 }

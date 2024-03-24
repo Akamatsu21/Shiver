@@ -2,8 +2,13 @@ export const conditions =
 {
     cursed_gloves:
     {
-        stat: PlayerStat.Agility,
-        modifier: -1,
+        modifiers:
+        [
+            {
+                stat: PlayerStat.Agility,
+                value: -1
+            }
+        ],
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
@@ -13,28 +18,76 @@ export const conditions =
     },
     enchanted_sword:
     {
-        stat: PlayerStat.CombatScore,
-        modifier: +1,
+        modifiers:
+        [
+            {
+                stat: PlayerStat.CombatStrength,
+                value: +1
+            }
+        ],
         clear_timing: CallbackTiming.None
+    },
+    fireball:
+    {
+        modifiers:
+        [
+            {
+                stat: PlayerStat.CombatStrength,
+                value: +2
+            },
+            {
+                stat: PlayerStat.Damage,
+                value: +1
+            }
+        ],
+        clear_timing: CallbackTiming.CombatEnd,
+        on_clear: function()
+        {
+            player.removeItem("Fireball");
+        },
+        on_damage: function(damage)
+        {
+            const score = system.rollD6(1);
+            if(score == 6)
+            {
+                system.message("You were protected by the power of the fireball! Damage nullified.");
+                return 0;
+            }
+            else if(score == 2 || score == 4)
+            {
+                system.message("You were protected by the power of the fireball! Damage reduced by 1.");
+                return damage - 1;
+            }
+            else
+            {
+                return damage;
+            }
+        }
     },
     goblin_follower:
     {
-        stat: PlayerStat.Agility,
-        modifier: +3,
+        modifiers:
+        [
+            {
+                stat: PlayerStat.Agility,
+                value: +3
+            }
+        ],
         clear_timing: CallbackTiming.CombatEnd
     },
     helmet:
     {
-        stat: PlayerStat.Constitution,
-        modifier: +3,
+        modifiers:
+        [
+            {
+                stat: PlayerStat.Constitution,
+                value: +3
+            }
+        ],
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
             player.removeItem("Helmet");
-            if(player.getConstitution() <= 0)
-            {
-                system.message("You take of your helmet, and that is when you realise the extent of your injuries. You collapse from all the bloodloss...");
-            }
         }
     }
 };

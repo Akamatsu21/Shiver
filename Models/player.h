@@ -15,14 +15,13 @@ class Player: public QObject
     int _constitution;
     int _luck;
 
-    const int _starting_agility;
+    int _starting_agility;
     const int _starting_constitution;
     int _starting_luck;
 
-    int _agility_mod;
-    int _constitution_mod;
-    int _luck_mod;
+    int _temp_constitution;
     int _combat_mod;
+    int _damage_mod;
 
     int _gold;
     int _rations;
@@ -38,13 +37,9 @@ public:
     Q_INVOKABLE int getAgility() const;
     Q_INVOKABLE int getConstitution() const;
     Q_INVOKABLE int getLuck() const;
-    int getAgilityWithoutModifiers() const;
-    int getConstitutionWithoutModifiers() const;
-    int getLuckWithoutModifiers() const;
-    int getAgilityModifier() const;
-    int getConstitutionModifier() const;
-    int getLuckModifier() const;
+    int getTempConstitution() const;
     int getCombatModifier() const;
+    int getDamageModifier() const;
     Q_INVOKABLE int getStartingAgility() const;
     Q_INVOKABLE int getStartingConstitution() const;
     Q_INVOKABLE int getStartingLuck() const;
@@ -64,6 +59,7 @@ public:
     void setAgility(int value);
     void setConstitution(int value);
     void setLuck(int value);
+    void setTempConstitution(int value);
     void setGold(int value);
     void setRations(int value);
     void setElixirCount(int value);
@@ -80,7 +76,8 @@ public:
     Q_INVOKABLE void addItem(const QVariant& item);
     void removeItem(const std::string& item);
     Q_INVOKABLE void removeItem(const QVariant& item);
-    void addCondition(const Condition& cond);
+    void addConditionToList(const Condition& cond);
+    void applyCondition(const Condition& cond);
     void removeCondition(const std::string& name);
     Q_INVOKABLE bool performLuckCheck();
 };

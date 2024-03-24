@@ -29,7 +29,7 @@ bool Callback::isValid() const
     return _effect.isCallable();
 }
 
-void Callback::operator()()
+QJSValue Callback::operator()(const QJSValueList& params)
 {
-    _effect.call();
+    return _effect.call(params);
 }

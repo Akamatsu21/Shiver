@@ -57,7 +57,7 @@ class Game: public QObject
     bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();
     void handleStatsCommand();
-    void handleTakeCommand(const std::string& item);
+    void handleTakeCommand(const std::string& item_name);
 
     // Text display
     void displayCombatStatus();

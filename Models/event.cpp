@@ -89,47 +89,6 @@ int Event::getRations() const
     return _rations;
 }
 
-bool Event::hasItems() const
-{
-    return !_items.empty();
-}
-
-bool Event::hasItem(const std::string& item) const
-{
-    return std::find(std::begin(_items), std::end(_items), item) != std::end(_items);
-}
-
-std::string Event::getItemList() const
-{
-    if(_items.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "\n" + element;
-        });
-}
-
-std::string Event::findItem(const std::string& item) const
-{
-    std::string itemLower = utils::toLower(item);
-    std::vector<std::string> itemsLower;
-    std::transform(std::begin(_items), std::end(_items), std::back_inserter(itemsLower),
-                   [](const std::string& s){ return utils::toLower(s); });
-    auto result = std::find(std::begin(itemsLower), std::end(itemsLower), itemLower);
-    if(result == std::end(itemsLower))
-    {
-        return "";
-    }
-    else
-    {
-        return _items.at(result - std::begin(itemsLower));
-    }
-}
-
 int Event::getItemLimit() const
 {
     return _item_limit;
@@ -208,6 +167,11 @@ std::vector<std::string> Event::getLocalCommands() const
 UserOption Event::getLocalCommand(const std::string& command) const
 {
     return _local_commands.at(command);
+}
+
+Inventory& Event::getItemList()
+{
+    return _items;
 }
 
 void Event::setRedirect(int value)
@@ -312,11 +276,6 @@ void Event::defeatAllEnemies()
     {
         _enemies.pop();
     }
-}
-
-void Event::addItem(const std::string& item)
-{
-    _items.push_back(item);
 }
 
 void Event::takeItem()

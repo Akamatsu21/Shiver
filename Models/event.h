@@ -7,6 +7,7 @@
 
 #include "choice.h"
 #include "enemy.h"
+#include "inventory.h"
 #include "quiz.h"
 #include "Enums/direction.h"
 
@@ -24,7 +25,7 @@ class Event
     bool _has_gold;
     int _rations;
     bool _has_rations;
-    std::vector<std::string> _items;
+    Inventory _items;
     int _item_limit;
     bool _eating_enabled;
     QJSValue _eating_callback;
@@ -48,10 +49,6 @@ public:
     int getGold() const;
     bool hasRations() const;
     int getRations() const;
-    bool hasItems() const;
-    bool hasItem(const std::string& item) const;
-    std::string getItemList() const;
-    std::string findItem(const std::string& item) const;
     int getItemLimit() const;
     bool isEatingEnabled() const;
     bool hasEatingCallback() const;
@@ -68,6 +65,8 @@ public:
     bool hasLocalCommands() const;
     std::vector<std::string> getLocalCommands() const;
     UserOption getLocalCommand(const std::string& command) const;
+
+    Inventory& getItemList();
 
     void setRedirect(int value);
     void setNewRoom(bool value);
@@ -96,7 +95,6 @@ public:
     void defeatCurrentEnemy();
     void defeatAllEnemies();
 
-    void addItem(const std::string& item);
     void takeItem();
 
     void setChoice(ChoiceType type, const std::string& question);

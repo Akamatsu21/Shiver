@@ -4,6 +4,7 @@
 #include <QObject>
 #include <vector>
 
+#include "inventory.h"
 #include "Enums/playerstat.h"
 #include "Models/condition.h"
 
@@ -28,7 +29,7 @@ class Player: public QObject
     int _elixir_count;
     const PlayerStat _elixir_type;
 
-    std::vector<std::string> _inventory;
+    Inventory _inventory;
     std::vector<Condition> _conditions;
 
 public:
@@ -49,12 +50,11 @@ public:
     int getElixirCount() const;
     PlayerStat getElixirType() const;
     std::string getElixirTypeAsString() const;
-    bool hasItem(const std::string& item) const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
-    std::string getInventory() const;
-    std::string getInventoryHtml() const;
     std::vector<Condition> getConditions() const;
     std::string getConditionsString() const;
+
+    Inventory& getInventory();
 
     void setAgility(int value);
     void setConstitution(int value);
@@ -72,10 +72,6 @@ public:
 
     Q_INVOKABLE bool eatRation();
     bool drinkElixir();
-    void addItem(const std::string& item);
-    Q_INVOKABLE void addItem(const QVariant& item);
-    void removeItem(const std::string& item);
-    Q_INVOKABLE void removeItem(const QVariant& item);
     void addConditionToList(const Condition& cond);
     void applyCondition(const Condition& cond);
     void removeCondition(const std::string& name);

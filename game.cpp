@@ -355,24 +355,26 @@ void Game::handleStatsCommand()
                                           "<br />", _player->getElixirTypeAsString(), ": ",
                                             _player->getElixirCount(),
                                           "<br /><br />Inventory:<br />",
-                                            _player->getInventoryHtml());
+                                            _player->getInventory().toHTML());
     _console.writeText(msg);
 }
 
-void Game::handleTakeCommand(const std::string& item)
+void Game::handleTakeCommand(const std::string& item_name)
 {
+    std::string item_lowercase = utils::toLower(item_name);
+
     if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can pick up items.");
         return;
     }
-    else if(item.empty())
+    else if(item_name.empty())
     {
         _console.writeText("Specify which item to take.");
         return;
     }
 
-    if(utils::toLower(item) == "gold")
+    if(item_lowercase == "gold")
     {
         if(_current_event.hasGold())
         {
@@ -390,7 +392,7 @@ void Game::handleTakeCommand(const std::string& item)
         }
         return;
     }
-    else if(utils::toLower(item) == "ration" || utils::toLower(item) == "rations")
+    else if(item_lowercase == "ration" || item_lowercase == "rations")
     {
         if(_current_event.hasRations())
         {
@@ -419,14 +421,11 @@ void Game::handleTakeCommand(const std::string& item)
         return;
     }
 
-    std::string found_item = _current_event.findItem(item);
-    if(found_item.empty())
+    std::optional<Item> result = _current_event.getItemList().findItemByName(item_name);
+    if(result.has_value())
     {
-        _console.writeText("Item not found in this room.");
-    }
-    else
-    {
-        if(_player->hasItem(found_item))
+        Item found_item = result.value();
+        if(_player->getInventory().hasItemID(found_item.getID()))
         {
             _console.writeText("You've already picked up this item.");
         }
@@ -437,13 +436,17 @@ void Game::handleTakeCommand(const std::string& item)
         else
         {
             _current_event.takeItem();
-            _player->addItem(found_item);
-            _console.writeText(utils::createString("[i]", found_item, "[/i] added to your inventory."));
+            _player->getInventory().addItem(found_item);
+            _console.writeText(utils::createString("[i]", found_item.getName(), "[/i] added to your inventory."));
 
             QVariant counter = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                           "_items_taken"));
             _game_vars->incrementCounter(counter, +1);
         }
+    }
+    else
+    {
+        _console.writeText("Item not found in this room.");
     }
 }
 
@@ -850,7 +853,7 @@ GameState Game::createGameState()
     game_state.player_rations = _player->getRations();
     game_state.player_elixir_count = _player->getElixirCount();
     game_state.player_elixir_type = static_cast<int>(_player->getElixirType());
-    game_state.player_inventory = _player->getInventory();
+    game_state.player_inventory = _player->getInventory().toString();
     game_state.player_conditions = _player->getConditionsString();
 
     game_state.event_id = _current_event.getId();
@@ -867,8 +870,8 @@ GameState Game::createGameState()
     }
     game_state.event_gold_present = _current_event.hasGold();
     game_state.event_rations_present = _current_event.hasRations();
-    game_state.event_items_present = _current_event.hasItems();
-    if(_current_event.hasItems())
+    game_state.event_items_present = !_current_event.getItemList().empty();
+    if(game_state.event_items_present)
     {
         game_state.event_item_limit = _current_event.getItemLimit();
     }
@@ -932,7 +935,7 @@ void Game::restoreGameState(const GameState& game_state)
         {
             std::string item;
             std::getline(ss, item);
-            _player->addItem(item);
+            _player->getInventory().addItem(_scripting_engine->parseItem(QString::fromStdString(item)));
         }
     }
 
@@ -1028,7 +1031,7 @@ void Game::restoreGameState(const GameState& game_state)
 
     if(game_state.event_items_present)
     {
-        if(!_current_event.hasItems())
+        if(_current_event.getItemList().empty())
         {
             reportError("Incorrect game state loaded. Error code: 9254");
             return;
@@ -1070,10 +1073,10 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
         _player = new Player(this, agility, constitution, luck, elixir);
         _scripting_engine->registerPlayer(_player);
 
-        _player->addItem(std::string("Sword"));
-        _player->addItem(std::string("Shield"));
-        _player->addItem(std::string("Backpack"));
-        _player->addItem(std::string("Lantern"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("sword"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("shield"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("backpack"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("lantern"));
 
         _console.writeText("<br />This is your character. Type [c]stats[/c] at any point to see this list.");
         handleStatsCommand();

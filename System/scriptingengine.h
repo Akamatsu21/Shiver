@@ -6,6 +6,7 @@
 
 #include "Models/condition.h"
 #include "Models/event.h"
+#include "Models/item.h"
 
 class GameVariables;
 class Player;
@@ -35,6 +36,7 @@ class ScriptingEngine : public QObject
     QJSValue _condition_list;
     QJSValue _event_list;
     QJSValue _help_pages;
+    QJSValue _item_list;
 
 public:
     explicit ScriptingEngine(QObject* parent);
@@ -49,6 +51,7 @@ public:
     Condition parseCondition(const QString& name);
     Event parseEvent(int id);
     std::vector<std::string> parseHelpPages();
+    Item parseItem(const QString& id);
 };
 
 #endif // SCRIPTINGENGINE_H

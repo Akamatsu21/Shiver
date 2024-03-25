@@ -14,7 +14,8 @@ Heavy Hammer - found in 115, can be used to fight the Werewolf in 63 or the Guar
 Helmet - found in 298, use in 52 to protect from the gas or in 2 to increase Constitution against Garazan
 Jar of All-Eaters - found in 192, can be used in 106 to defeat the Worms
 Jar of Corrosive Dust - found in 147 or 55, can be used in 106 to defeat the Worms
-Key#45 - found 180
+Key#12 - found in 96
+Key#45 - found in 180
 Key#70 - found in 329
 Key#93 - found in 142
 Key#122 - found in 278

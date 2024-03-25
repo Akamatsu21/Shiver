@@ -4,6 +4,7 @@
         <file>help.jsm</file>
         <file>test.jsm</file>
         <file>conditions.jsm</file>
+        <file>items.jsm</file>
     </qresource>
     <qresource prefix="/static">
         <file>title.txt</file>

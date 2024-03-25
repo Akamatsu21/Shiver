@@ -104,42 +104,9 @@ std::string Player::getElixirTypeAsString() const
     }
 }
 
-bool Player::hasItem(const std::string& item) const
-{
-    return std::find(std::begin(_inventory), std::end(_inventory), item) != std::end(_inventory);
-}
-
 bool Player::hasItem(const QVariant& item) const
 {
-    return hasItem(item.toString().toStdString());
-}
-
-std::string Player::getInventory() const
-{
-    if(_inventory.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "\n" + element;
-        });
-}
-
-std::string Player::getInventoryHtml() const
-{
-    if(_inventory.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "<br />" + element;
-    });
+    return _inventory.hasItemID(item.toString().toStdString());
 }
 
 std::vector<Condition> Player::getConditions() const
@@ -159,6 +126,11 @@ std::string Player::getConditionsString() const
         {
             return acc + "<br />" + element.getName();
     });
+}
+
+Inventory& Player::getInventory()
+{
+    return _inventory;
 }
 
 void Player::setAgility(int value)
@@ -345,34 +317,6 @@ bool Player::drinkElixir()
 
     --_elixir_count;
     return true;
-}
-
-void Player::addItem(const std::string& item)
-{
-    if(!hasItem(item))
-    {
-        _inventory.push_back(item);
-    }
-}
-
-void Player::addItem(const QVariant& item)
-{
-    addItem(item.toString().toStdString());
-}
-
-void Player::removeItem(const std::string& item)
-{
-    std::vector<std::string>::iterator found_item =
-            std::find(std::begin(_inventory), std::end(_inventory), item);
-    if(found_item != std::end(_inventory))
-    {
-        _inventory.erase(found_item);
-    }
-}
-
-void Player::removeItem(const QVariant& item)
-{
-    removeItem(item.toString().toStdString());
 }
 
 void Player::addConditionToList(const Condition& cond)

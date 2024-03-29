@@ -54,6 +54,11 @@ void Game::setup()
     }
 }
 
+Player* Game::getPlayer()
+{
+    return _player;
+}
+
 ScriptApi* Game::getScriptApi()
 {
     return _script_api;
@@ -442,6 +447,11 @@ void Game::handleTakeCommand(const std::string& item_name)
             QVariant counter = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                           "_items_taken"));
             _game_vars->incrementCounter(counter, +1);
+
+            if(!found_item.getCondition().empty())
+            {
+                onAddCondition(QString::fromStdString(found_item.getCondition()));
+            }
         }
     }
     else
@@ -787,7 +797,7 @@ void Game::resolveCombatEndTriggers(bool escape)
     {
         if(condition.getClearTiming() == CallbackTiming::COMBAT_END)
         {
-            _player->removeCondition(condition.getName());
+            _player->clearCondition(condition.getName());
         }
     }
 
@@ -1487,6 +1497,16 @@ void Game::onAddCondition(const QVariant& name)
     _player->applyCondition(_scripting_engine->parseCondition(name.toString()));
 }
 
+void Game::onAddItem(const QVariant& id)
+{
+    Item item = _scripting_engine->parseItem(id.toString());
+    _player->getInventory().addItem(item);
+    if(!item.getCondition().empty())
+    {
+        onAddCondition(QString::fromStdString(item.getCondition()));
+    }
+}
+
 void Game::onDisableEnemyEscape()
 {
     _current_event.getCurrentEnemy().setEscapeEnabled(false);
@@ -1510,7 +1530,12 @@ void Game::onEnableRoomEscape(int redirect)
 
 void Game::onRemoveCondition(const QVariant& name)
 {
-    _player->removeCondition(name.toString().toStdString());
+    _player->clearCondition(name.toString().toStdString());
+}
+
+void Game::onRemoveItem(const QVariant& id)
+{
+    _player->getInventory().removeItem(id.toString().toStdString());
 }
 
 void Game::onStopCombat()

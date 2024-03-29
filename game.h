@@ -97,6 +97,7 @@ public:
     Game(QObject* parent, Console& console);
     void setup();
 
+    Player* getPlayer();
     ScriptApi* getScriptApi();
 
     InputMode resolveCharacterCreationInput(const std::string& user_input);
@@ -122,11 +123,13 @@ public:
 
 public slots:
     void onAddCondition(const QVariant& name);
+    void onAddItem(const QVariant& id);
     void onDisableEnemyEscape();
     void onDisableRoomEscape();
     void onEnableEnemyEscape(int redirect);
     void onEnableRoomEscape(int redirect);
     void onRemoveCondition(const QVariant& name);
+    void onRemoveItem(const QVariant& id);
     void onStopCombat();
 
 signals:

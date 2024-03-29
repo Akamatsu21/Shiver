@@ -51,6 +51,7 @@ public:
     PlayerStat getElixirType() const;
     std::string getElixirTypeAsString() const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
+    Q_INVOKABLE int countItemsWithTag(const QVariant& tag) const;
     std::vector<Condition> getConditions() const;
     std::string getConditionsString() const;
 
@@ -74,8 +75,14 @@ public:
     bool drinkElixir();
     void addConditionToList(const Condition& cond);
     void applyCondition(const Condition& cond);
-    void removeCondition(const std::string& name);
+    void clearCondition(const std::string& name);
     Q_INVOKABLE bool performLuckCheck();
+
+signals:
+    void addCondition(const QVariant& name);
+    void addItem(const QVariant& name);
+    void removeCondition(const QVariant& name);
+    void removeItem(const QVariant& name);
 };
 
 #endif // PLAYER_H

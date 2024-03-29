@@ -24,14 +24,12 @@ public:
     Q_INVOKABLE int rollD6(int count) const;
 
 signals:
-    void addCondition(const QVariant& name);
     void disableEnemyEscape();
     void disableRoomEscape();
     void enableEnemyEscape(int redirect);
     void enableRoomEscape(int redirect);
     void message(const QVariant& text);
     void redirect(int id, bool new_room);
-    void removeCondition(const QVariant& name);
     void stopCombat();
 };
 

@@ -445,6 +445,12 @@ Item ScriptingEngine::parseItem(const QString& id)
         status = getObjectProperty(item_object, "status").toString().toStdString();
     }
 
+    std::string condition;
+    if(item_object.hasProperty("condition"))
+    {
+        condition = getObjectProperty(item_object, "condition").toString().toStdString();
+    }
+
     std::vector<std::string> tags{};
     if(item_object.hasProperty("tags"))
     {
@@ -460,5 +466,5 @@ Item ScriptingEngine::parseItem(const QString& id)
     assert(item_object.hasProperty("description"));
     std::string description = getObjectProperty(item_object, "description").toString().toStdString();
 
-    return Item(id.toStdString(), name, status, tags, description);
+    return Item(id.toStdString(), name, status, condition, tags, description);
 }

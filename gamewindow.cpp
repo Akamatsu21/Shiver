@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
+#include "Models/player.h"
 #include "Models/scriptapi.h"
 #include "System/console.h"
 
@@ -54,10 +55,6 @@ void GameWindow::setupGameConnections()
             &_console, &Console::onMessage);
     connect(_game->getScriptApi(), &ScriptApi::stopCombat,
             _game, &Game::onStopCombat);
-    connect(_game->getScriptApi(), &ScriptApi::addCondition,
-            _game, &Game::onAddCondition);
-    connect(_game->getScriptApi(), &ScriptApi::removeCondition,
-            _game, &Game::onRemoveCondition);
     connect(_game->getScriptApi(), &ScriptApi::disableEnemyEscape,
             _game, &Game::onDisableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::disableRoomEscape,
@@ -66,6 +63,14 @@ void GameWindow::setupGameConnections()
             _game, &Game::onEnableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::enableRoomEscape,
             _game, &Game::onEnableRoomEscape);
+    connect(_game->getPlayer(), &Player::addItem,
+            _game, &Game::onAddItem);
+    connect(_game->getPlayer(), &Player::removeItem,
+            _game, &Game::onRemoveItem);
+    connect(_game->getPlayer(), &Player::addCondition,
+            _game, &Game::onAddCondition);
+    connect(_game->getPlayer(), &Player::removeCondition,
+            _game, &Game::onRemoveCondition);
 }
 
 void GameWindow::updateInputState()

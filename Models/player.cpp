@@ -109,6 +109,11 @@ bool Player::hasItem(const QVariant& item) const
     return _inventory.hasItemID(item.toString().toStdString());
 }
 
+int Player::countItemsWithTag(const QVariant& tag) const
+{
+    return _inventory.countByTag(tag.toString().toStdString());
+}
+
 std::vector<Condition> Player::getConditions() const
 {
     return _conditions;
@@ -359,7 +364,7 @@ void Player::applyCondition(const Condition& cond)
     addConditionToList(cond);
 }
 
-void Player::removeCondition(const std::string& name)
+void Player::clearCondition(const std::string& name)
 {
     std::vector<Condition>::iterator found_cond =
             std::find_if(std::begin(_conditions), std::end(_conditions),

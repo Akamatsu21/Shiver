@@ -57,6 +57,16 @@ std::optional<Item> Inventory::findItemByName(const std::string& item_name) cons
     return {};
 }
 
+int Inventory::countByTag(const std::string& tag) const
+{
+    return std::count_if(std::begin(_items), std::end(_items),
+                         [tag](const Item& item)
+                         {
+                             const auto& tags = item.getTags();
+                             return std::find(std::begin(tags), std::end(tags), tag) != std::end(tags);
+                         });
+}
+
 std::string Inventory::toString() const
 {
     if(empty())
@@ -82,7 +92,7 @@ std::string Inventory::toHTML() const
                            [](const std::string& acc, const Item& element)
                            {
                                return acc + "<br />" + element.getName();
-    });
+                           });
 }
 
 void Inventory::addItem(const Item& item)
@@ -90,9 +100,8 @@ void Inventory::addItem(const Item& item)
     _items.push_back(item);
 }
 
-void Inventory::removeItem(const Item& item)
+void Inventory::removeItem(const std::string& item_id)
 {
-    std::string item_id = item.getID();
     auto result = std::find_if(std::begin(_items), std::end(_items),
                                [item_id](const Item& item)
                                {

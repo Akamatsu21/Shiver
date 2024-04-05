@@ -36,4 +36,4 @@ Toy Dragon - found in 369, can be used to fight the Guardian in 165 or 281
 Werewolf's Scalp - found in 119
 Wooden Stake - found in 147 or 55, allows entering the room in 135, can be used to attack the Gnome in 22, which may lead to it being sold in 289 or 369, also can be used to kill the Werewolf in 377
 
-Progress: 63
+Progress: 146

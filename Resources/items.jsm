@@ -1,5 +1,10 @@
 export const items =
 {
+	all_eaters:
+	{
+		name: "Jar of All-Eaters",
+		description: "A glass jar filled with All-Eaters, an omnivorous type of a shellfish, characterised by their never satiated appetite and their ability to bite and digest basically anything. They are natural predators of many other beings, such as worms, snakes or scorpions."
+	},
 	backpack:
 	{
 		name: "Backpack",
@@ -16,10 +21,15 @@ export const items =
 		tags: ["werewolf"],
 		description: "A dagger used by monster hunters. A swift and deadly weapon, great for hitting a nimble opponent. It was created out of an ancient monster's bone."
 	},
+	dragon:
+	{
+		name: "Toy Dragon",
+		description: "A wind-up toy that resembles a chubby silver dragon. It has some weight to it, more than you would expect from a toy like this. You're not sure if it really has a mechanism inside, or if it's actually just a statuette moved by magic."
+	},
 	dust:
 	{
 		name: "Jar of Corrosive Dust",
-		description: "A huge jar filled with special dust that deteriorates surfaces that come into contact with it. It is said to be particularly poisonous to creatures that bury themselves in the desert, as they cannot tell it apart from normal sand."
+		description: "A huge jar filled with special dust that deteriorates surfaces which come into contact with it. It is said to be particularly poisonous to creatures that bury themselves in the desert, as they cannot tell it apart from normal sand."
 	},
 	emerald:
 	{
@@ -67,7 +77,13 @@ export const items =
 	{
 		name: "Key#12",
 		tags: ["key"],
-		description: "Key with the number [k]12[/k] engraved on it. You're curious what the number could mean..."
+		description: "Key with the number [k]12[/k] engraved on it. It was hidden in a secret shelf in a maze. You're curious what the number could mean..."
+	},
+	key93:
+	{
+		name: "Key#93",
+		tags: ["key"],
+		description: "Key with the number [k]93[/k] engraved on it. It was hidden at the bottom of a pool filled with sand. You're curious what the number could mean..."
 	},
 	key_bunch:
 	{
@@ -75,10 +91,20 @@ export const items =
 		tags: ["werewolf"],
 		description: "A set of keys stolen from a dwarven prison. You have no clue where any of them even fits... But at least you can use them to hit someone on the head."
 	},
+	key_small:
+	{
+		name: "Small Shiny Key",
+		description: "A tiny key. You're not sure where it fits, but once you put it inside a lock, it'll be hard to take it back out. So choose wisely!"
+	},
 	lantern:
 	{
 		name: "Lantern",
 		description: "A sturdy oil lantern that lights up the murky dungeon corridors. Thankfully, this is a video game, so you won't have to worry about it ever going out."
+	},
+	lettuce:
+	{
+		name: "Crushed Lettuce",
+		description: "A lettuce from the Dwarven garden. It's the best snack available in this dungeon, unfortunately this one has been stepped on... Your probably don't want to eat that."
 	},
 	magic_water:
 	{

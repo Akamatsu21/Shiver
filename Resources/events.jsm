@@ -2176,8 +2176,8 @@ export const events =
         description: function()
         {
             player.modifyGold(+30);
-            player.addItem("Toy Dragon");
-            player.removeItem("Tin Butterfly");
+            player.addItem("dragon");
+            player.removeItem("butterfly");
             return "You give him the butterfly and take his gold and toy.";
         },
         redirect: 121,
@@ -2205,15 +2205,15 @@ export const events =
         {
             let desc = "Behind the door, you see a set of chipped, wooden stairs leading downwards. In the centre of the cavern you notice a square-shaped recess. It resembles an empty pool. The stairs lead you to the bottom of that pool. The flooring is covered with fine sand. It's just sand everywhere, no objects, rocks or creatures... Hey, what's that bended rod doing in the corner? Probably a root. You can't help yourself: you give it a nice kick. What follows is beyond imagination... If you live to tell the tale, no one will believe it. The pool now resembles a pot, where someone's stirring pasta. You are but a grain being thrown around in all directions. Around you appeared [e]Worms[/e], the most disgusting creaures in the whole dungeon. They're trying to grind you to dust as they wriggle their slimy bodies. They keep throwing you towards the surface and then pushing you to the ground. You may use your sword to defend yourself. Or you could attempt to use another weapon, like... Some say that corrosive dust is effective against [e]Worms[/e], others that you should use All-Eaters (permanently hungry shellfish). ";
 
-            if(player.hasItem("Jar of Corrosive Dust") && player.hasItem("Jar of All-Eaters"))
+            if(player.hasItem("dust") && player.hasItem("all_eaters"))
             {
                 desc += "Fortunately for you, you have both of them!";
             }
-            else if(player.hasItem("Jar of Corrosive Dust"))
+            else if(player.hasItem("dust"))
             {
                 desc += "You happen to have a jar of corrosive dust on you.";
             }
-            else if(player.hasItem("Jar of All-Eaters"))
+            else if(player.hasItem("all_eaters"))
             {
                 desc += "You happen to have a jar of All-Eaters on you.";
             }
@@ -2226,7 +2226,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Jar of Corrosive Dust") || player.hasItem("Jar of All-Eaters"))
+            if(player.hasItem("dust") || player.hasItem("all_eaters"))
             {
                 return undefined;
             }
@@ -2238,10 +2238,10 @@ export const events =
         new_room: false,
         yes_no_choice: function()
         {
-            if(player.hasItem("Jar of Corrosive Dust") || player.hasItem("Jar of All-Eaters"))
+            if(player.hasItem("dust") || player.hasItem("all_eaters"))
             {
                 let yes_redirect = 0;
-                if(player.hasItem("Jar of Corrosive Dust") && player.hasItem("Jar of All-Eaters"))
+                if(player.hasItem("dust") && player.hasItem("all_eaters"))
                 {
                     yes_redirect = 292;
                 }
@@ -2250,7 +2250,7 @@ export const events =
                     yes_redirect = 24;
                 }
 
-                let choice = {
+                return {
                     question: "Will you try to utilise this secret weapon?",
                     no: 213,
                     no_new_room: false,
@@ -2258,17 +2258,17 @@ export const events =
                     yes_new_room: false,
                     on_yes: function()
                     {
-                        if(player.hasItem("Jar of Corrosive Dust") && !player.hasItem("Jar of All-Eaters"))
+                        if(player.hasItem("dust") && !player.hasItem("all_eaters"))
                         {
                             game_vars.setFlag("24_using_dust", true);
                             game_vars.setFlag("24_success", system.rollD6(1) < 4);
-                            player.removeItem("Jar of Corrosive Dust");
+                            player.removeItem("dust");
                         }
-                        else if(player.hasItem("Jar of All-Eaters") && !player.hasItem("Jar of Corrosive Dust"))
+                        else if(player.hasItem("all_eaters") && !player.hasItem("dust"))
                         {
                             game_vars.setFlag("24_using_dust", false);
                             game_vars.setFlag("24_success", system.rollD6(1) < 4);
-                            player.removeItem("Jar of All-Eaters");
+                            player.removeItem("all_eaters");
                         }
                     },
                 };
@@ -2499,13 +2499,13 @@ export const events =
                     new_room: false,
                     on_option: function()
                     {
-                        if(player.hasItem("Bone Hunting Dagger"))
+                        if(player.hasItem("dagger"))
                         {
                             system.message("[i]Bone Hunting Dagger[/i] is already in your inventory!");
                         }
                         else
                         {
-                            player.addItem("Bone Hunting Dagger");
+                            player.addItem("dagger");
                             system.message("[i]Bone Hunting Dagger[/i] added to your inventory.");
                         }
                     }
@@ -2521,13 +2521,13 @@ export const events =
                     new_room: false,
                     on_option: function()
                     {
-                        if(player.hasItem("Heavy Hammer"))
+                        if(player.hasItem("hammer"))
                         {
                             system.message("[i]Heavy Hammer[/i] is already in your inventory!");
                         }
                         else
                         {
-                            player.addItem("Heavy Hammer");
+                            player.addItem("hammer");
                             system.message("[i]Heavy Hammer[/i] added to your inventory.");
                         }
                     }
@@ -2600,12 +2600,7 @@ export const events =
     event119:
     {
         description: "What was the beast trying to cover up so desperately? You touch the wall at the spot that the hairy [e]Ogre[/e] was pressing its back against. Suddenly, part of the wall moves. There is a secret stash here! Inside, there is a long [i]fireproof rope[/i] with a hook, an empty [i]decrepit flask[/i] and a [i]Werewolf's scalp[/i]. You may only take up to two of these items. You may also [l]loot[/l] the body or [l]leave[/l] the chamber.",
-        items:
-        [
-            "Fireproof Rope",
-            "Decrepit Flask",
-            "Werewolf's Scalp"
-        ],
+        items: ["rope", "flask_empty", "werewolf_scalp"],
         item_limit: 2,
         locals:
         [
@@ -2635,7 +2630,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Filled Flask");
+            player.removeItem("flask_full");
             player.modifyAgility(+2);
             game_vars.setFlag("122_spell_learned", true);
             let desc = "You lift up the [e]Gremlin[/e]'s head. He drinks everything. He quickly comes to and opens the tome. \"Why, this is a spellbook! It used to belong to the gremlin tribe. It was craftily stolen by the [e]White Troll[/e] (back when trolls used to be enslaved by gremlins). Ever since then, everyone looks down on us, because we can't remember any of the spells.\" [e]Gremlin[/e] opens up the tome on a random page and reads out:<br /><br />\"If you see a door that won't budge, say:\"";
@@ -2737,10 +2732,7 @@ export const events =
     event128:
     {
         description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]bunch of keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
-        items:
-        [
-            "Bunch of Keys"
-        ],
+        items: ["key_bunch"],
         item_limit: 1,
         locals:
         [
@@ -2770,7 +2762,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Small Shiny Key");
+            player.removeItem("key_small");
             return "Indeed, the metal bars are lifted up, but you can't get the key out. You will have to leave it here.";
         },
         redirect: 251,
@@ -2800,7 +2792,7 @@ export const events =
         {
             let desc = "This room requires one of three special items to enter: a tin butterfly, a wooden stake, or an emerald that grants the Gift of Wings.<br /><br />";
 
-            if(player.hasItem("Tin Butterfly") || player.hasItem("Wooden Stake") || player.hasItem("Emerald"))
+            if(player.hasItem("butterfly") || player.hasItem("stake") || player.hasItem("emerald"))
             {
                 desc += "Since you have at least one of the items in question, you may proceed.";
             }
@@ -2813,7 +2805,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Tin Butterfly") || player.hasItem("Wooden Stake") || player.hasItem("Emerald"))
+            if(player.hasItem("butterfly") || player.hasItem("stake") || player.hasItem("emerald"))
             {
                 return 22;
             }
@@ -2851,7 +2843,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Toy Dragon");
+            player.removeItem("dragon");
             let desc = "Your attack turned out to be rather pathetic. ";
             if(game_vars.getFlag("138_threw_dragon"))
             {
@@ -2905,11 +2897,8 @@ export const events =
     },
     event142:
     {
-        description: "You reach the bottom of the pool. The sand has been spread al around. You squeeze between the meaty noodles. At some point you notice a tiny gold item - [i]Key#93[/i]. The number [k]93[/k] is visible on a small tag attached to the key. After taking it, it's time to [l]leave[/l].",
-        items:
-        [
-            "Key#93"
-        ],
+        description: "You reach the bottom of the pool. The sand has been spread all around. You squeeze between the meaty noodles. At some point you notice a tiny gold item - [i]Key#93[/i]. The number [k]93[/k] is visible on a small tag attached to the key. After taking it, it's time to [l]leave[/l].",
+        items: ["key93"],
         item_limit: 1,
         locals:
         [
@@ -2936,10 +2925,10 @@ export const events =
         description: function()
         {
             let desc = "You enter a short corridor. It's barely just begun, but it's already over: a smooth wall blocks the way. You sit down on a stone doorstep. You may [c]eat[/c] one of your rations. ";
-            if(player.hasItem("Crushed Lettuce"))
+            if(player.hasItem("lettuce"))
             {
                 player.modifyRations(-1);
-                player.removeItem("Crushed Lettuce");
+                player.removeItem("lettuce");
                 desc += "You find out the crushed lettuce in your backpack got spoiled and contaminated one of your rations. You throw it away. ";
             }
             desc += "Suddenly, you hear rumbling. You hide in a gap between rocks. A herd of monsters run through the main corridor. You got lucky this time. You gain 1 Luck. It's time to [l]leave[/l].";

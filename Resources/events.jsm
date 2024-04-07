@@ -602,12 +602,12 @@ export const events =
     },
     event31:
     {
-        description: "Lower your lantern. Move the corpse with your sword. See - you found 5 [i]gold[/i]! If that's not enough, you can still [l]inspect[/l] the chamber. Otherwise, just [l]leave[/l].",
+        description: "Lower your lantern. Move the corpse with your sword. See - you found 5 [i]gold[/i]! If that's not enough, you can still [l]investigate[/l] the chamber. Otherwise, just [l]leave[/l].",
         gold: 5,
         locals:
         [
             {
-                command: "inspect",
+                command: "investigate",
                 redirect: 119,
                 new_room: false
             },
@@ -1005,7 +1005,7 @@ export const events =
             player.modifyLuck(+2);
             return "You approach the fountain. You take some [i]magical water[/i] into a flask given to you by the creature. You may put it into your backpack. You notice the fountain's now completely empty. You gain 2 Luck. You may now [l]leave[/l].";
         },
-        items: ["magic_water"],
+        items: ["water_magic"],
         item_limit: 1,
         locals:
         [
@@ -2630,7 +2630,14 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("flask_full");
+            if(player.hasItem("water_lake"))
+            {
+                player.removeItem("water_lake");
+            }
+            else
+            {
+                player.removeItem("flask_full");
+            }
             player.modifyAgility(+2);
             game_vars.setFlag("122_spell_learned", true);
             let desc = "You lift up the [e]Gremlin[/e]'s head. He drinks everything. He quickly comes to and opens the tome. \"Why, this is a spellbook! It used to belong to the gremlin tribe. It was craftily stolen by the [e]White Troll[/e] (back when trolls used to be enslaved by gremlins). Ever since then, everyone looks down on us, because we can't remember any of the spells.\" [e]Gremlin[/e] opens up the tome on a random page and reads out:<br /><br />\"If you see a door that won't budge, say:\"";
@@ -2982,14 +2989,14 @@ export const events =
     {
         description: function()
         {
-            if(!player.hasItem("Wooden Stake"))
+            if(!player.hasItem("stake"))
             {
-                player.addItem("Wooden Stake");
+                player.addItem("stake");
             }
 
-            if(!player.hasItem("Jar of Corrosive Dust"))
+            if(!player.hasItem("dust"))
             {
-                player.addItem("Jar of Corrosive Dust");
+                player.addItem("dust");
             }
 
             return "\"It was such a pleasure talking to you, good sir. Here, a wooden stake and a jar of corrosive dust, on the house.\"";
@@ -3046,8 +3053,7 @@ export const events =
         description: function()
         {
             player.modifyLuck(+1);
-            player.addItem("Enchanted Sword (+1 Combat Score)");
-            system.addCondition("enchanted_sword");
+            player.addItem("sword_enchanted");
             return "The rat is a good sign. This sword is enchanted. It will add 1 to your combat score in all future fights. You also gain 1 Luck.<br />[i]Enchanted Sword[/i] added to your inventory.";
         },
         redirect: 324
@@ -3126,7 +3132,7 @@ export const events =
         ],
         on_exit: function()
         {
-            player.removeItem("Bone Hunting Dagger");
+            player.removeItem("dagger");
         }
     },
     event158:
@@ -3143,7 +3149,7 @@ export const events =
                 desc += "You don't have enough money to try this again, so you'll have to come up with something else. You could try ";
             }
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("rope") || game_vars.getFlag("269_rope_present"))
             {
                 desc += "[l]throw[/l]ing the rope, ";
             }
@@ -3183,7 +3189,7 @@ export const events =
                 });
             }
 
-            if(player.hasItem("Fireproof Rope"))
+            if(player.hasItem("rope"))
             {
                 loc.push({
                     command: "throw",
@@ -3398,10 +3404,8 @@ export const events =
         description: function()
         {
             let desc = "You choose to attack. But with what? Your sword? ";
-            const items_present = player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
-                                  player.hasItem("Fireball") || player.hasItem("Spear");
 
-            if(items_present)
+            if(player.countItemsWithTag("guardian") > 0)
             {
                 desc += "You'd better look for another weapon. You can choose one of these:";
             }
@@ -3410,22 +3414,22 @@ export const events =
                 desc += "Alas, that won't do, and you have no items that could serve as a weapon here...";
             }
 
-            if(player.hasItem("Heavy Hammer"))
+            if(player.hasItem("hammer"))
             {
                 desc += "<br />* A [o]hammer[/o] made by the goblins";
             }
 
-            if(player.hasItem("Toy Dragon"))
+            if(player.hasItem("dragon"))
             {
                 desc += "<br />* A hefty toy [o]dragon[/o].";
             }
 
-            if(player.hasItem("Fireball"))
+            if(player.hasItem("fireball"))
             {
                 desc += "<br />* A [o]fireball[/o].";
             }
 
-            if(player.hasItem("Spear"))
+            if(player.hasItem("spear"))
             {
                 desc += "<br />* A [o]spear[/o]";
             }
@@ -3434,8 +3438,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
-               player.hasItem("Fireball") || player.hasItem("Spear"))
+            if(player.countItemsWithTag("guardian") > 0)
             {
                 return undefined;
             }
@@ -3447,12 +3450,11 @@ export const events =
         new_room: false,
         choice: function()
         {
-            if(player.hasItem("Heavy Hammer") || player.hasItem("Toy Dragon") ||
-               player.hasItem("Fireball") || player.hasItem("Spear"))
+            if(player.countItemsWithTag("guardian") > 0)
             {
                 let opt = [];
 
-                if(player.hasItem("Heavy Hammer"))
+                if(player.hasItem("hammer"))
                 {
                     opt.push({
                         answer: "hammer",
@@ -3461,7 +3463,7 @@ export const events =
                     });
                 }
 
-                if(player.hasItem("Toy Dragon"))
+                if(player.hasItem("dragon"))
                 {
                     opt.push({
                         answer: "dragon",
@@ -3470,7 +3472,7 @@ export const events =
                     });
                 }
 
-                if(player.hasItem("Fireball"))
+                if(player.hasItem("fireball"))
                 {
                     opt.push({
                         answer: "fireball",
@@ -3479,7 +3481,7 @@ export const events =
                     });
                 }
 
-                if(player.hasItem("Spear"))
+                if(player.hasItem("spear"))
                 {
                     opt.push({
                         answer: "spear",
@@ -3520,7 +3522,7 @@ export const events =
     {
         description: function()
         {
-            if(player.hasItem("Filled Flask"))
+            if(player.countItemsWithTag("water") > 0)
             {
                 return "Looks like you've found some non-magical water. You can now enter the chamber.";
             }
@@ -3531,7 +3533,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Filled Flask"))
+            if(player.countItemsWithTag("water") > 0)
             {
                 return 236;
             }
@@ -3659,10 +3661,7 @@ export const events =
             player.modifyLuck(+3);
             return "A [i]fireball[/i] is hidden under the stone. You gain 3 Luck. You can now [l]leave[/l].";
         },
-        items:
-        [
-            "Fireball"
-        ],
+        items: ["fireball"],
         item_limit: 1,
         locals:
         [
@@ -3682,10 +3681,7 @@ export const events =
     event180:
     {
         description: "You search the room once again. In the [e]Orc[/e]'s bag, which you didn't have time to search, you find [i]Key#45[/i]. The number [k]45[/k] is engraved on the key. You may take it with you. You may now [l]leave[/l] the chamber, leaving the door wide open.",
-        items:
-        [
-            "Key#45"
-        ],
+        items: ["key45"],
         item_limit: 1,
         locals:
         [
@@ -3702,20 +3698,20 @@ export const events =
         {
             let desc = "You throw a bunch of keys found in one of the chambers at the monster. You hit him, but it does no damage. The [e]Werewolf[/e] grabs the keys and runs away. You chase after it. The [e]Werewolf[/e] falls into a narrow but deep rift in the corner of the cavern. It falls to the bottom and dies.<br /><br />You light the chasm up with your lantern. At the bottom you can see the monster's bulky corpse, the keys shining next to it. ";
             
-            if(player.hasItem("Fireproof Rope"))
+            if(player.hasItem("rope"))
             {
-                desc += "You decide to use your rope to retrieve it.";
+                desc += "You decide to use your rope to retrieve them.";
             }
             else
             {
-                desc += "You could retrieve it if only you had a rope.";
+                desc += "You could retrieve them if only you had a rope.";
             }
 
             return desc;
         },
         redirect: function()
         {
-            if(player.hasItem("Fireproof Rope"))
+            if(player.hasItem("rope"))
             {
                 return 329;
             }
@@ -3866,13 +3862,13 @@ export const events =
                     new_room: false,
                     on_option: function()
                     {
-                        if(player.hasItem("Thin Sword"))
+                        if(player.hasItem("sword_thin"))
                         {
                             system.message("[i]Thin Sword[/i] is already in your inventory!");
                         }
                         else
                         {
-                            player.addItem("Thin Sword");
+                            player.addItem("sword_thin");
                             system.message("[i]Thin Sword[/i] added to your inventory.");
                         }
                     }
@@ -3883,13 +3879,13 @@ export const events =
                     new_room: false,
                     on_option: function()
                     {
-                        if(player.hasItem("Stone Sword"))
+                        if(player.hasItem("sword_stone"))
                         {
                             system.message("[i]Stone Sword[/i] is already in your inventory!");
                         }
                         else
                         {
-                            player.addItem("Stone Sword");
+                            player.addItem("sword_stone");
                             system.message("[i]Stone Sword[/i] added to your inventory.");
                         }
                     }
@@ -3900,13 +3896,13 @@ export const events =
                     new_room: false,
                     on_option: function()
                     {
-                        if(player.hasItem("Short Sword"))
+                        if(player.hasItem("sword_short"))
                         {
                             system.message("[i]Short Sword[/i] is already in your inventory!");
                         }
                         else
                         {
-                            player.addItem("Short Sword");
+                            player.addItem("sword_short");
                             system.message("[i]Short Sword[/i] added to your inventory.");
                         }
                     }
@@ -3926,17 +3922,18 @@ export const events =
         {
             let desc = "\"What if I try to get something out of this clown?\" you think. You reach for your sword. Eh, what need is there for the sword? Your fists will be more than enough. You approach the creature and take a swing. It's suddenly gone. On top of that, metal bars fall in front of the entrance through which you got into this room. You look around, but you can't find another exit. You approach the fountain. Indeed, you can see some mysterious items: a monster's [o]bone[/o], a [o]jar[/o] of All-Eaters (a constantly hungry species of a shellfish), a tin [o]butterfly[/o], a [o]spear[/o] and a small shiny [o]key[/o].";
 
-            if(player.hasItem("Decrepit Flask"))
+            if(player.countItemsWithTag("container") > 0)
             {
-                desc += " Since you happen to have a flask, you may also take the [o]water[/o].";
+                let container = player.hasItem("flask_empty") ? "flask" : "helmet";
+                desc += " Since you happen to have a container (your " + container + "), you may also take the [o]water[/o].";
             }
-            else if(player.hasItem("Filled Flask")) // TODO: Update with actual name of the item
+            if(player.countItemsWithTag("water") > 0)
             {
-                desc += " Since you happen to have a flask, you may also take the [o]water[/o]. However, your flask is currently full. If you choose this option, you must empty it.";
+                desc += " Since you happen to have a vessel, you may also take the [o]water[/o]. However, your vessel is currently full. If you choose this option, you must empty it.";
             }
             else
             {
-                desc += " If you had a flask, you might also have been able to take some of the water...";
+                desc += " If you had a container, you might also have been able to take some of the water...";
             }
 
             return desc;
@@ -3945,7 +3942,7 @@ export const events =
         {
             question: function()
             {
-                if(player.hasItem("Decrepit Flask") || player.hasItem("Filled Flask"))
+                if(player.countItemsWithTag("container") > 0 || player.countItemsWithTag("water") > 0)
                 {
                     return "So: do you want the [o]water[/o] or one of the items? Remember that you can only take one thing.";
                 }
@@ -3963,7 +3960,7 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            player.addItem("Monster's Bone");
+                            player.addItem("bone");
                         }
                     },
                     {
@@ -3972,7 +3969,7 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            player.addItem("Tin Butterfly");
+                            player.addItem("butterfly");
                         }
                     },
                     {
@@ -3981,7 +3978,7 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            player.addItem("Jar of All-Eaters");
+                            player.addItem("all_eaters");
                         }
                     },
                     {
@@ -3990,7 +3987,7 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            player.addItem("Small Shiny Key");
+                            player.addItem("key_small");
                         }
                     },
                     {
@@ -3999,12 +3996,12 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            player.addItem("Spear");
+                            player.addItem("spear");
                         }
                     }
                 ];
 
-                if(player.hasItem("Decrepit Flask") || player.hasItem("Filled Flask"))
+                if(player.countItemsWithTag("container") > 0 || player.countItemsWithTag("water") > 0)
                 {
                     opt.push({
                         answer: "water",
@@ -4012,16 +4009,32 @@ export const events =
                         new_room: false,
                         on_option: function()
                         {
-                            if(player.hasItem("Filled Flask"))
+
+                            if(player.countItemsWithTag("container") > 0)
                             {
-                                player.removeItem("Filled Flask");
-                                system.message("You empty your flask onto the floor.");
+                                if(player.hasItem("flask_empty"))
+                                {
+                                    player.removeItem("flask_empty");
+                                }
+                                else
+                                {
+                                    player.removeItem("helmet");
+                                }
                             }
-                            else
+                            else if(player.countItemsWithTag("water") > 0)
                             {
-                                player.removeItem("Decrepit Flask");
+                                if(player.hasItem("water_lake"))
+                                {
+                                    player.removeItem("water_lake");
+                                    system.message("You pour the lake water onto the floor and fill the bottle with magical water.");
+                                }
+                                else
+                                {
+                                    player.removeItem("flask_full");
+                                    system.message("You empty your vessel onto the floor and fill it with magical water.");
+                                }
                             }
-                            player.addItem("Magical Water");
+                            player.addItem("water_magic");
                         }
                     });
                 }
@@ -4156,7 +4169,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Tin Butterfly");
+            player.removeItem("butterfly");
             return "The [e]Gnome[/e] grants you a smile in exchange, but nothing else.";
         },
         redirect: 81,
@@ -4185,18 +4198,18 @@ export const events =
         {
             let desc = "One leg, both legs, then a deep breath, push your head through and finally you fall out of the narrow rock crevice onto a flat, stone floor, with all your equipment now scattered around you. Great Almanhagor, if only you could see this! Your entire palace would fit inside this cave. Including the towers! Everything around is purple and shiny. Steep rocky cliffs hang from the ceiling. Their shadows are reflected in the sparkly stone parquetry. You feel like an ant that's being squished by a hedgehog warming up its belly.<br /><br />\"I can see all of this... Why can I see? My lantern is only strong enough to light up a small cavern. Dear Zargaana, my goddess, this is hellfire!\" In the middle of the reflective floor, a deep chasm is open. That's where the bright red light is coming from. You crawl quietly, pulling yourself with hands that are now sweaty from fear. You cover your eyes with your hand, then peek into the abyss. The ground is on fire. \"Haruum, my dear father, I was so naive, thinking it is enough to tie a sword to your belt, pack the rations and dive deep into the corridors to tear out the mystery from the Dungeon.\" You return next to the wall.";
 
-            if(player.hasItem("Magical Water"))
+            if(player.hasItem("water_magic"))
             {
                 player.modifyAgility(+3);
                 player.modifyConstitution(+3);
-                player.removeItem("Magical Water");
+                player.removeItem("water_magic");
                 desc += " You decide this is a good time to drink the magical water. You gain 3 Constitution and 3 Agility.";
             }
 
             desc += "<br /><br />You look around the cave. You have to somehow overcome the hellish rift. This is the only path forward. On another end of the cavern you can see a bridge. So there is hope...<br /><br />You look through your equipment. ";
 
             let options = "three";
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("rope") || game_vars.getFlag("269_rope_present"))
             {
                 options = "four";
                 desc += "You have a rope with a hook, which just happens to be fireproof. Your chances of crossing the chasm suddenly aren't looking too bad. This thought gives you courage. ";
@@ -4210,7 +4223,7 @@ export const events =
             desc += system.getFileContents("dragonwagon.txt");
             desc += "He's looking at you as if you came here everyday. You must make a decision. You have " + options + " options:<br />* [l]Pay[/l] for the dragon transport.<br />";
 
-            if(player.hasItem("Fireproof Rope") || game_vars.getFlag("269_rope_present"))
+            if(player.hasItem("rope") || game_vars.getFlag("269_rope_present"))
             {
                 desc += "* Attempt to [l]throw[/l] a rope to the other side and pull yourself on it.<br />";
             }
@@ -4241,7 +4254,7 @@ export const events =
                 }
             ];
 
-            if(player.hasItem("Fireproof Rope"))
+            if(player.hasItem("rope"))
             {
                 loc.push({
                     command: "throw",
@@ -4519,23 +4532,23 @@ export const events =
         description: function()
         {
             let desc = "[i]";
-            if(player.hasItem("Monster's Bone"))
+            if(player.hasItem("bone"))
             {
                 desc += "Monster's Bone";
             }
-            else if(player.hasItem("Jar of All-Eaters"))
+            else if(player.hasItem("all_eaters"))
             {
                 desc += "Jar of All-Eaters";
             }
-            else if(player.hasItem("Tin Butterfly"))
+            else if(player.hasItem("butterfly"))
             {
                 desc += "Tin Butterfly";
             }
-            else if(player.hasItem("Spear"))
+            else if(player.hasItem("spear"))
             {
                 desc += "Spear";
             }
-            else if(player.hasItem("Small Shiny Key"))
+            else if(player.hasItem("key_small"))
             {
                 desc += "Small Shiny Key";
             }
@@ -4545,7 +4558,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Small Shiny Key"))
+            if(player.hasItem("key_small"))
             {
                 return 366;
             }
@@ -4574,7 +4587,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Wooden Stake");
+            player.removeItem("stake");
             return "You've blown through all your chances. The [e]Gnome[/e] disappears, taking your stake with it. You're left alone in the room.";
         },
         redirect: 121,
@@ -4793,7 +4806,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            system.message("You may now [l]inspect[/l] the stone box on the altar or [l]collect[/l] the gold from the floor.");
+                            system.message("You may now [l]investigate[/l] the stone box on the altar or [l]collect[/l] the gold from the floor.");
                         }
                     }
                 ]
@@ -4807,7 +4820,7 @@ export const events =
                 new_room: false
             },
             {
-                command: "inspect",
+                command: "investigate",
                 redirect: 205,
                 new_room: false
             }
@@ -4938,7 +4951,7 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Net");
+            player.removeItem("net");
             let desc = "You tread carefully. You can feel the strain on the net and hear its sinister crunches. Only one step left. You throw your body onto the rotten planks. The net catches onto your leg. It falls down and immediately catches on fire. You're almost on the other side. You're out of strength and grasping for air. You lean against the handrail, which breaks and falls into the abyss. You barely manage to regain your balance.";
 
             let damage = system.rollD6(1);
@@ -4958,10 +4971,7 @@ export const events =
     event241:
     {
         description: "You may take some [i]lake water[/i] with you, if you wish. It's now time to [l]leave[/l].",
-        items:
-        [
-            "Lake Water"
-        ],
+        items: ["water_lake"],
         item_limit: 1,
         locals:
         [
@@ -5174,7 +5184,7 @@ export const events =
         description: "You break the chains binding him to the rock with you sword. The poor thing can barely stand. You lead him into the room and lay down on top of the skin on the floor. You can finally open the tome. You can't make out even a single word. This book is written in the Gremlin language. You pull the unconscious creature's arm. He can't even lift his head. He whispers \"Water, water...\"",
         redirect: function()
         {
-            if(player.hasItem("Filled Flask"))
+            if(player.countItemsWithTag("water") > 0)
             {
                 return 122;
             }
@@ -5194,7 +5204,7 @@ export const events =
     {
         description: function()
         {
-            if(game_vars.getFlag("261_looking_for_water") && player.hasItem("Filled Flask"))
+            if(game_vars.getFlag("261_looking_for_water") && player.countItemsWithTag("water") > 0)
             {
                 return "This is the chamber where you left the [e]Gremlin[/e] as you left to look for water.";
             }
@@ -5205,7 +5215,7 @@ export const events =
         },
         redirect: function()
         {
-            if(game_vars.getFlag("261_looking_for_water") && player.hasItem("Filled Flask"))
+            if(game_vars.getFlag("261_looking_for_water") && player.countItemsWithTag("water") > 0)
             {
                 return 122;
             }
@@ -5221,7 +5231,7 @@ export const events =
         description: function()
         {
             player.modifyGold(+game_vars.getCounter("262_offer"));
-            player.removeItem("Tin Butterfly");
+            player.removeItem("butterfly");
             return "You give him the butterfly and take his gold.";
         },
         redirect: 121,
@@ -5234,10 +5244,7 @@ export const events =
             player.modifyConstitution(-2);
             return "You leave the barely breathing monster and approach the altar. Doing as the [e]Demon[/e] said, you may take the [i]emerald[/i]. As you grab your backpack, you hear a terrifying scream behind you. The wounded [e]Demon[/e] charges at you with all its remaining strength. It pierces your back with its talons: you take 2 damage. You jump away and deal what turns out to be the final blow. You may now [l]collect[/l] the gold.";
         },
-        items:
-        [
-            "Emerald"
-        ],
+        items: ["emerald"],
         item_limit: 1,
         locals:
         [
@@ -5316,7 +5323,7 @@ export const events =
         {
             if(game_vars.getFlag("268_door_open"))
             {
-                return [];
+                return undefined;
             }
             else
             {
@@ -5335,7 +5342,7 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            player.removeItem("Fireproof Rope");
+            player.removeItem("rope");
             game_vars.setFlag("269_rope_present", true);
             return "You take the rope out of your backpack. It's fireproof and has a hook attached. You approach the edge. With a wide swing, you throw the hook in between the rocks on the other side. It's secured. You tie the other end to a rock next to you. You will attempt to go through the chasm, holding onto the rope with your hands. You grab the rope. Suddenly... Bang! The hook falls off. You climb back up. You take 2 damage. You can choose another way to cross the gap: [l]pay[/l] the dragon, [l]walk[/l] on the bridge or [l]jump[/l] over the chasm. The rope will remain here, so you could attempt to [l]throw[/l] it again. But first, you can [c]eat[/c] a ration.";
         },
@@ -5360,7 +5367,7 @@ export const events =
                 new_room: false,
                 on_command: function()
                 {
-                    game_vars.setFlag("358_elixir_present", player.hasItem("Elixir of Inviolability"));
+                    game_vars.setFlag("358_elixir_present", player.hasItem("elixir"));
                 }
             },
             {
@@ -5414,12 +5421,12 @@ export const events =
         {
             game_vars.setFlag("sword_upgraded", true);
             player.modifyConstitution(-1);
-            player.removeItem("Sword");
+            player.removeItem("sword");
             return "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. Is that a good or bad sign?";
         },
         choice:
         {
-            question: "Would you like to [o]keep[/o] this new sword or [o]exchange[/o] it for a different one?",
+            question: "Would you like to [o]keep[/o] this mysterious sword or [o]exchange[/o] it for a different one?",
             options:
             [
                 {
@@ -5583,9 +5590,9 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Small Shiny Key");
-            player.addItem("Key#122");
-            return "You inspect the key. It has the number [k]122[/k] engraved into it.<br />Item updated in inventory.";
+            player.removeItem("key_small");
+            player.addItem("key122");
+            return "You look closely at the key. It has the number [k]122[/k] engraved into it.<br />Item updated in inventory.";
         },
         redirect: 109,
         new_room: false
@@ -5630,12 +5637,12 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Spear");
+            player.removeItem("spear");
             return "The spear hits the [e]Guardian[/e] right in the chest, but it bounces off like a stick. Underneath the cloak, the [e]Guardian[/e] must be wearing some tough armour.";
         },
         redirect: function()
         {
-            if(player.hasItem("Toy Dragon"))
+            if(player.hasItem("dragon"))
             {
                 return 138;
             }
@@ -5727,7 +5734,7 @@ export const events =
         description: function()
         {
             player.modifyGold(+20);
-            player.removeItem("Wooden Stake");
+            player.removeItem("stake");
             return "You give him the stake and take his gold.";
         },
         redirect: 121,
@@ -5777,13 +5784,13 @@ export const events =
             if(result < 4)
             {
                 game_vars.setFlag("24_using_dust", true);
-                player.removeItem("Jar of Corrosive Dust");
+                player.removeItem("dust");
                 return "You decide to use corrosive dust.";
             }
             else
             {
                 game_vars.setFlag("24_using_dust", false);
-                player.removeItem("Jar of All-Eaters");
+                player.removeItem("all_eaters");
                 return "You decide to use All-Eaters.";
             }
         },
@@ -5814,10 +5821,7 @@ export const events =
             player.modifyLuck(+2);
             return "In a crevice in the wall you find the [i]Elixir of Inviolability[/i]. You gain 2 Luck. The only thing left is to [l]leave[/l] the room.";
         },
-        items:
-        [
-            "Elixir of Inviolability"
-        ],
+        items: ["elixir"],
         item_limit: 1,
         locals:
         [
@@ -5865,7 +5869,7 @@ export const events =
     },
     event297:
     {
-        description: "You can now [l]collect[/l] the gold from the floor. Or maybe you'd like to [l]inspect[/l] the stone container on the altar? Or, if you have enough strength and courage, you can [l]attack[/l] the other [e]Demon[/e].",
+        description: "You can now [l]collect[/l] the gold from the floor. Or maybe you'd like to [l]investigate[/l] the stone container on the altar? Or, if you have enough strength and courage, you can [l]attack[/l] the other [e]Demon[/e].",
         locals:
         [
             {
@@ -5879,7 +5883,7 @@ export const events =
                 new_room: false
             },
             {
-                command: "inspect",
+                command: "investigate",
                 redirect: 205,
                 new_room: false
             }
@@ -5889,13 +5893,13 @@ export const events =
     {
         description: function()
         {
-            if(player.hasItem("Helmet"))
+            if(player.hasItem("helmet"))
             {
                 return "You already have a helmet! Since you only have one head, you shouldn't need another one.";
             }
             else
             {
-                player.addItem("Helmet");
+                player.addItem("helmet");
                 return "This helmet might really come in handy.<br />[i]Helmet[/i] added to your inventory.";
             }
         },
@@ -6220,9 +6224,9 @@ export const events =
         {
             let desc = "You're falling down. You start thinking that the only way for you to survive would be if you suddenly learned how to fly... ";
 
-            if(player.hasItem("Emerald"))
+            if(player.hasItem("emerald"))
             {
-                desc += "You remember about the magical stone you have that was sad to grant the Gift of Wings...";
+                desc += "You remember about the magical stone you have that was said to grant the Gift of Wings!";
             }
             else
             {
@@ -6233,7 +6237,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("Emerald"))
+            if(player.hasItem("emerald"))
             {
                 return 12;
             }
@@ -6293,7 +6297,7 @@ export const events =
                         timing: CallbackTiming.CombatEnd,
                         callback: function()
                         {
-                            system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]inspect[/l] the walls. If not, [l]loot[/l] the corpse.");
+                            system.message("[e]Ogre[/e] lies at your feet. Are you still disgusted? If so, at least [l]investigate[/l] the walls. If not, [l]loot[/l] the corpse.");
                         }
                     }
                 ]
@@ -6302,7 +6306,7 @@ export const events =
         locals:
         [
             {
-                command: "inspect",
+                command: "investigate",
                 redirect: 119,
                 new_room: false
             },
@@ -6518,8 +6522,8 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Key#70");
-            player.removeItem("Fireproof Rope");
+            player.addItem("key70");
+            player.removeItem("rope");
             return "You drop down to the bottom of the gap. You pick up the keys, and notice one of them has the number [k]70[/k] engraved on it.<br />[i]Key#70[/i] added to your inventory.<br />You pull yourself back up, but the rope slides into the chasm.";
         },
         redirect: 32,
@@ -6823,7 +6827,8 @@ export const events =
     {
         description: function()
         {
-            system.addCondition("fireball");
+            player.removeItem("fireball");
+            player.addItem("fireball_effect");
             return "The fireball is a fantastic weapon against the [e]Guardian of Secrets[/e]. It's quite effective and fast. It returns to your hand everytime you use it. You gain the following perks during combat:<br />* You gain +2 to all your attack rolls.<br />* You deal an extra point of damage with each successful attack.<br />* When hit by the [e]Guardian[/e] you have a moderate chance to reduce the damage by 1 and a small chance to completely avoid damage.";
         },
         redirect: 23,
@@ -6848,7 +6853,7 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            player.removeItem("Heavy Hammer");
+            player.removeItem("hammer");
             return "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. You have no choice other than to [c]escape[/c].";
         },
         escape_redirect: 275
@@ -6983,7 +6988,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Crushed Lettuce");
+            player.addItem("lettuce");
             return "You go without much care for what you step on. And, of course, you end up stepping on the lettuce. Twice. This time you definitely did not manage to win them over. They say good-bye in a cold tone and lead you to the eastern door. Oh, and on top of that they give you two lettuces. The ones you stepped on. With a bang, they close the door behind you.<br /><br />[i]Crushed Lettuce[/i] added to your inventory.";
         },
         redirect: 141,
@@ -7009,7 +7014,7 @@ export const events =
             let desc = "You attach the rope again and proceed to pull yourself forward. Out of nowhere, pillars of fire start shooting out of the fissure. ";
             if(game_vars.getFlag("358_elixir_present"))
             {
-                player.removeItem("Elixir of Inviolability");
+                player.removeItem("elixir");
                 desc += "You drink the elixir of inviolability. The fire can't hurt you. The magical effects of this potion only last until you reach the other edge.";
             }
             else
@@ -7198,8 +7203,8 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Wooden Stake");
-            player.addItem("Toy Dragon");
+            player.removeItem("stake");
+            player.addItem("dragon");
             return "You give him the stake and take his toy dragon.";
         },
         redirect: 121,
@@ -7219,9 +7224,9 @@ export const events =
         {
             let desc = "[e]Dwarves[/e] have a friendly nature. They love company and guests. Although admittedly, usually it's some hairy creatures that come here, eat lots of lettuce, take a bit more with them and disappear.<br /><br />Two [e]Dwarves[/e] run over to you. You are still standing at the door, they invite you inside. But... Well, one of them starts scratching his shaggy head. \"We'd like to give you some of our lettuce, but we have nothing to drink. Maybe you have something? Just no magical water, it's poisonous to us.\"<br /><br />";
 
-            if(player.hasItem("Filled Flask"))
+            if(player.countItemsWithTag("water") > 0)
             {
-                desc += "You happen to have a flask filled with water. It's time to [l]feast[/l]!";
+                desc += "You happen to have a vessel filled with water. It's time to [l]feast[/l]!";
             }
             else
             {
@@ -7231,7 +7236,7 @@ export const events =
         },
         locals: function()
         {
-            if(player.hasItem("Filled Flask"))
+            if(player.countItemsWithTag("water") > 0)
             {
                 return [
                     {
@@ -7240,7 +7245,14 @@ export const events =
                         new_room: false,
                         on_command: function()
                         {
-                            player.removeItem("Filled Flask");
+                            if(player.hasItem("water_lake"))
+                            {
+                                player.removeItem("water_lake");
+                            }
+                            else
+                            {
+                                player.removeItem("flask_full");
+                            }
                         }
                     }
                 ];
@@ -7315,20 +7327,19 @@ export const events =
     {
         description: function()
         {
-            player.removeItem("Net");
+            player.removeItem("net");
             let desc = "You quickly pull a net out of your backpack. You spin it above your head and throw it at the monster. You succeed - the monster is now trapped. ";
 
             if(game_vars.getFlag("377_wooden_stake_available"))
             {
-                player.removeItem("Wooden Stake");
+                player.removeItem("stake");
                 desc += "You throw your wooden stake at it, and it dies immediately.";
             }
             else
             {
                 desc += "However, you don't have anything you could use to finish it off. It quickly bites through the net and frees itself. Now it's running towards you! ";
 
-                if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
-                   player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+                if(player.countItemsWithTag("werewolf") > 0)
                 {
                     desc += "As the sword and net proved ineffective, you may use another weapon.";
                 }
@@ -7346,8 +7357,7 @@ export const events =
             {
                 return 32;
             }
-            else if(player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
-                    player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+            else if(player.countItemsWithTag("werewolf") > 0)
             {
                 return 63;
             }
@@ -7358,9 +7368,7 @@ export const events =
         },
         escape_redirect: function()
         {
-            if(game_vars.getFlag("377_wooden_stake_available") ||
-               player.hasItem("Bone Hunting Dagger") || player.hasItem("Heavy Hammer") ||
-               player.hasItem("Metal Shield") || player.hasItem("Bunch of Keys"))
+            if(game_vars.getFlag("377_wooden_stake_available") || player.countItemsWithTag("werewolf") > 0)
             {
                 return undefined;
             }

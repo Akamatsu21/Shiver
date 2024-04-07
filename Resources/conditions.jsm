@@ -43,7 +43,7 @@ export const conditions =
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
-            player.removeItem("Fireball");
+            player.removeItem("fireball_effect");
         },
         on_damage: function(damage)
         {
@@ -87,7 +87,7 @@ export const conditions =
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
-            player.removeItem("helmet_eff");
+            player.removeItem("helmet_effect");
         }
     }
 };

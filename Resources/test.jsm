@@ -98,16 +98,11 @@ export const events =
     },
     event5:
     {
-        description: "You found a chest. You find: [i]Amulet[/i], [i]Axe[/i] and [i]Cock Shield[/i]. You may only take two.",
+        description: "You found a chest. You find: [i]Emerald[/i], [i]Heavy Hammer[/i] and [i]Metal Shield[/i]. You may only take two.",
         north: 3,
         south: 9,
         east: 16,
-        items:
-        [
-            "Amulet",
-            "Axe",
-            "Cock Shield"
-        ],
+        items: ["emerald", "hammer", "shield_metal"],
         item_limit: 2
     },
     event6:
@@ -115,7 +110,7 @@ export const events =
         description: function()
         {
             let desc = "You encounter the [e]Kicker Troll[/e]. He kicks you in the nuts.<br />";
-            if(player.hasItem("Cock Shield"))
+            if(player.hasItem("shield_metal"))
             {
                 desc += "Your shield protects you. You may proceed.";
             }
@@ -230,7 +225,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Magical Sword");
+            player.addItem("sword_enchanted");
             return "The fairy hands you a huge sword covered in runes. You thank her and she bids you farewell.";
         },
         redirect: 11,
@@ -332,8 +327,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Cursed Gloves (-1 Agility)");
-            system.addCondition("cursed_gloves");
+            player.addItem("gloves");
             return "The evil gloves imprison you! You will lose agility in your next battle.";
         },
         north: 26,
@@ -353,8 +347,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Enchanted Sword (+1 Combat Score)");
-            system.addCondition("enchanted_sword");
+            player.addItem("sword_enchanted");
             return "This sword is better than your old one! It will improve your combat rolls.";
         },
         north: 26,
@@ -364,8 +357,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Helmet (+3 Constitution)");
-            system.addCondition("helmet");
+            player.addItem("helmet_effect");
             return "This is a tough helmet! It will give you more defense in your next fight.";
         },
         north: 26,
@@ -375,8 +367,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Fireball");
-            system.addCondition("fireball");
+            player.addItem("fireball_effect");
             return "You wield the power of the mighty fireball for one fight.";
         },
         north: 26,

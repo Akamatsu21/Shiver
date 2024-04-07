@@ -10,6 +10,11 @@ export const items =
 		name: "Backpack",
 		description: "An old sack with two strings attached to allow wearing it on one's back. It's useful for carrying food and the various trinkets you will find around the dungeon."
 	},
+	bone:
+	{
+		name: "Monster's Bone",
+		description: "A thick bone, probably from a leg of a big monster. You're not sure what sort of monster it could be."
+	},
 	butterfly:
 	{
 		name: "Tin Butterfly",
@@ -24,6 +29,7 @@ export const items =
 	dragon:
 	{
 		name: "Toy Dragon",
+		tags: ["guardian"],
 		description: "A wind-up toy that resembles a chubby silver dragon. It has some weight to it, more than you would expect from a toy like this. You're not sure if it really has a mechanism inside, or if it's actually just a statuette moved by magic."
 	},
 	dust:
@@ -31,10 +37,28 @@ export const items =
 		name: "Jar of Corrosive Dust",
 		description: "A huge jar filled with special dust that deteriorates surfaces which come into contact with it. It is said to be particularly poisonous to creatures that bury themselves in the desert, as they cannot tell it apart from normal sand."
 	},
+	elixir:
+	{
+		name: "Elixir of Inviolability",
+		description: "A magical potion that will make you immune to any damage for a very short time."
+	},
 	emerald:
 	{
 		name: "Emerald",
 		description: "Precious stone that shines with mysterious green light. According the Demon that was guarding it, this stone can grant its wielder the Gift of Wings one time."
+	},
+	fireball:
+	{
+		name: "Fireball",
+		tags: ["guardian"],
+		description: "A magical ball of fire which will listen to your every command. It's very powerful, so make sure to save it for a really tremendous enemy."
+	},
+	fireball_effect:
+	{
+		name: "Fireball",
+		status: "+2 Combat Score, +1 Damage, Damage Protection",
+		condition: "fireball",
+		description: "A magical ball of fire which will listen to your every command. Its support increases your hit rate and damage you deal, and it will occasionally block attacks for you."
 	},
 	flask_empty:
 	{
@@ -45,6 +69,7 @@ export const items =
 	flask_full:
 	{
 		name: "Filled Vessel",
+		tags: ["water"],
 		description: "A previously empty vessel that you have managed to fill with drinkable liquid."
 	},
 	gloves:
@@ -57,7 +82,7 @@ export const items =
 	hammer:
 	{
 		name: "Heavy Hammer",
-		tags: ["werewolf"],
+		tags: ["werewolf", "guardian"],
 		description: "A huge warhammer created by the goblin army. It was once stolen as a war trophy by the trolls. Can be effective as a throwing weapon."
 	},
 	helmet:
@@ -79,11 +104,29 @@ export const items =
 		tags: ["key"],
 		description: "Key with the number [k]12[/k] engraved on it. It was hidden in a secret shelf in a maze. You're curious what the number could mean..."
 	},
+	key45:
+	{
+		name: "Key#45",
+		tags: ["key"],
+		description: "Key with the number [k]45[/k] engraved on it. It was carried around by an Orc. You're curious what the number could mean..."
+	},
+	key70:
+	{
+		name: "Key#70",
+		tags: ["key"],
+		description: "Key with the number [k]70[/k] engraved on it. It was among a bunch of other keys that you stole from a dwarven prison. You're curious what the number could mean..."
+	},
 	key93:
 	{
 		name: "Key#93",
 		tags: ["key"],
 		description: "Key with the number [k]93[/k] engraved on it. It was hidden at the bottom of a pool filled with sand. You're curious what the number could mean..."
+	},
+	key122:
+	{
+		name: "Key#122",
+		tags: ["key"],
+		description: "Key with the number [k]122[/k] engraved on it. It was hidden at the bottom of a fountain. You're curious what the number could mean..."
 	},
 	key_bunch:
 	{
@@ -105,11 +148,6 @@ export const items =
 	{
 		name: "Crushed Lettuce",
 		description: "A lettuce from the Dwarven garden. It's the best snack available in this dungeon, unfortunately this one has been stepped on... Your probably don't want to eat that."
-	},
-	magic_water:
-	{
-		name: "Magical Water",
-		description: "A flask filled with water that was infused with a powerful healing spell. It will restore the strength of whoever drinks it. It seems to be poisonous to magical creatures."
 	},
 	net:
 	{
@@ -143,6 +181,11 @@ export const items =
 		tags: ["werewolf"],
 		description: "It's more cumbersome than your trusty wooden shield, but it will withstand a heavier hit."
 	},
+	spear:
+	{
+		name: "Spear",
+		description: "A primitive weapon meant for piercing or throwing."
+	},
 	stake:
 	{
 		name: "Wooden Stake",
@@ -157,12 +200,39 @@ export const items =
 	{
 		name: "Enchanted Sword",
 		status: "+1 Combat Score",
+		condition: "enchanted_sword",
 		description: "A magical sword, much better than your old one. Its power will increase your hit rate in combat."
+	},
+	sword_short:
+	{
+		name: "Short Sword",
+		description: "A tiny sword. A bit awkward when used by you, but it would be deadly in the hands of a gremlin."
+	},
+	sword_stone:
+	{
+		name: "Stone Sword",
+		description: "A sword made out of stone, quite heavy to swing around. It is best used thrown on the assailant's head from above. You have heard of amphibiosaurs being hunted this way."
+	},
+	sword_thin:
+	{
+		name: "Thin Sword",
+		description: "A sword much longer and thinner that your old one. It should prove especially effective when facing a witch."
 	},
 	tome:
 	{
 		name: "Tome",
 		description: "A book filled with magical knowledge. Unfortunately, it's written in the language of gremlins, so you are unable to read it."
+	},
+	water_lake:
+	{
+		name: "Lake Water",
+		tags: ["water"],
+		description: "Water from the underground lake, poured into a small bottle you found at the shore."
+	},
+	water_magic:
+	{
+		name: "Magical Water",
+		description: "A flask filled with water that was infused with a powerful healing spell. It will restore the strength of whoever drinks it. It seems to be poisonous to magical creatures."
 	},
 	werewolf_scalp:
 	{

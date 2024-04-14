@@ -64,6 +64,15 @@ ScriptApi* Game::getScriptApi()
     return _script_api;
 }
 
+void Game::createPlayer(int agility, int constitution, int luck, PlayerStat elixir)
+{
+    _player = new Player(this, agility, constitution, luck, elixir);
+    connect(_player, &Player::addItem, this, &Game::onAddItem);
+    connect(_player, &Player::removeItem, this, &Game::onRemoveItem);
+    connect(_player, &Player::addCondition, this, &Game::onAddCondition);
+    connect(_player, &Player::removeCondition, this, &Game::onRemoveCondition);
+}
+
 bool Game::handleDirectionCommand(Direction direction)
 {
     if(_combat_state.combat_in_progress)
@@ -192,6 +201,25 @@ void Game::handleHelpCommand()
 {
     _current_help_page = 1;
     displayHelpPage();
+}
+
+void Game::handleInspectCommand(const std::string& item_name)
+{
+    if(item_name.empty())
+    {
+        _console.writeText("Specify the name of the item from your inventory that you want to inspect.");
+        return;
+    }
+
+    std::optional<Item> result = _player->getInventory().findItemByName(item_name);
+    if(result.has_value())
+    {
+        _console.writeText(result.value().getDescription());
+    }
+    else
+    {
+        _console.writeText("You don't have that item in your inventory.");
+    }
 }
 
 bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_needed)
@@ -366,8 +394,6 @@ void Game::handleStatsCommand()
 
 void Game::handleTakeCommand(const std::string& item_name)
 {
-    std::string item_lowercase = utils::toLower(item_name);
-
     if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can pick up items.");
@@ -379,6 +405,7 @@ void Game::handleTakeCommand(const std::string& item_name)
         return;
     }
 
+    std::string item_lowercase = utils::toLower(item_name);
     if(item_lowercase == "gold")
     {
         if(_current_event.hasGold())
@@ -597,18 +624,18 @@ void Game::resolveDamage(bool player_win, int damage)
     _console.writeText(msg);
 }
 
-std::pair<bool, bool> Game::resolveYesNoQuestion(const std::string& user_input)
+std::optional<bool> Game::resolveYesNoQuestion(const std::string& user_input)
 {
-    auto [valid, answer] = CommandParser::parseYesNo(user_input);
-    if(!valid)
+    std::optional<bool> answer = CommandParser::parseYesNo(user_input);
+    if(!answer.has_value())
     {
         _console.writeText("Invalid answer. Please answer [o]yes[/o] or [o]no[/o].");
     }
 
-    return {valid, answer};
+    return answer;
 }
 
-std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<std::string>& options,
+std::optional<std::string> Game::resolveMultiChoiceQuestion(const std::vector<std::string>& options,
                                                               const std::string& user_input)
 {
     std::string answer = utils::toLower(user_input);
@@ -616,9 +643,10 @@ std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<
     if(!valid)
     {
         _console.writeText("Invalid answer. Please choose one of the highlighted answers.");
+        return {};
     }
 
-    return {valid, answer};
+    return answer;
 }
 
 bool Game::resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input)
@@ -913,11 +941,10 @@ void Game::restoreGameState(const GameState& game_state)
     };
 
     delete _player;
-    _player = new Player(this,
-                         game_state.player_start_agility,
-                         game_state.player_start_constitution,
-                         game_state.player_start_luck,
-                         static_cast<PlayerStat>(game_state.player_elixir_type));
+    createPlayer(game_state.player_start_agility,
+                 game_state.player_start_constitution,
+                 game_state.player_start_luck,
+                 static_cast<PlayerStat>(game_state.player_elixir_type));
 
     try
     {
@@ -1080,7 +1107,7 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
     else
     {
         auto [agility, constitution, luck] = _generated_stats;
-        _player = new Player(this, agility, constitution, luck, elixir);
+        createPlayer(agility, constitution, luck, elixir);
         _scripting_engine->registerPlayer(_player);
 
         _player->getInventory().addItem(_scripting_engine->parseItem("sword"));
@@ -1101,11 +1128,11 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
 {
     InputMode mode = InputMode::ESCAPE_CHECK;
     int damage = 2;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
-        if(answer)
+        if(answer.value())
         {
             bool player_lucky = _player->performLuckCheck();
             damage = player_lucky ? 1 : 3;
@@ -1175,6 +1202,9 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         break;
     case Command::TAKE:
         handleTakeCommand(utils::parseParams(params));
+        break;
+    case Command::INSPECT:
+        handleInspectCommand(utils::parseParams(params));
         break;
     case Command::EAT:
         handleEatCommand();
@@ -1255,12 +1285,12 @@ InputMode Game::resolveGameStartInput()
 InputMode Game::resolveLoadInput(const std::string& user_input)
 {
     InputMode mode = InputMode::LOAD_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = InputMode::GAME;
-        if(answer)
+        if(answer.value())
         {
             loadGame();
         }
@@ -1272,13 +1302,12 @@ InputMode Game::resolveLoadInput(const std::string& user_input)
 InputMode Game::resolveMultiChoice(const std::string& user_input)
 {
     InputMode mode = InputMode::MULTI_CHOICE;
-    auto [valid, answer] = resolveMultiChoiceQuestion(
-                            _current_event.getChoiceOptions(),
-                            user_input);
-    if(valid)
+    std::optional<std::string> answer = resolveMultiChoiceQuestion(_current_event.getChoiceOptions(), user_input);
+
+    if(answer.has_value())
     {
-        _current_event.triggerChoiceOptionCallback(answer);
-        UserOption option = _current_event.getChoiceOption(answer);
+        _current_event.triggerChoiceOptionCallback(answer.value());
+        UserOption option = _current_event.getChoiceOption(answer.value());
 
         if(option.redirect != 0)
         {
@@ -1335,12 +1364,12 @@ InputMode Game::resolveRedirectInput()
 InputMode Game::resolveSaveDelInput(const std::string& user_input)
 {
     InputMode mode = InputMode::SAVEDEL_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = _game_running ? InputMode::GAME : InputMode::TITLE_SCREEN;
-        if(answer)
+        if(answer.value())
         {
             deleteSaveFile();
         }
@@ -1352,12 +1381,12 @@ InputMode Game::resolveSaveDelInput(const std::string& user_input)
 InputMode Game::resolveSaveInput(const std::string& user_input)
 {
     InputMode mode = InputMode::SAVE_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = InputMode::GAME;
-        if(answer)
+        if(answer.value())
         {
             saveGame();
         }
@@ -1412,10 +1441,11 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
 InputMode Game::resolveYesNoChoice(const std::string& user_input)
 {
     InputMode mode = InputMode::YES_NO_CHOICE;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
-    if(valid)
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
+
+    if(answer.has_value())
     {
-        std::string answer_string = answer ? "yes" : "no";
+        std::string answer_string = answer.value() ? "yes" : "no";
         _current_event.triggerChoiceOptionCallback(answer_string);
         UserOption option = _current_event.getChoiceOption(answer_string);
 

@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "Enums/inputmode.h"
+#include "Enums/playerstat.h"
 #include "Models/event.h"
 #include "Models/combatstate.h"
 #include "System/savestatemanager.h"
@@ -43,6 +44,9 @@ class Game: public QObject
     // Secret switch.
     bool _conan;
 
+    // Setup.
+    void createPlayer(int agility, int constitution, int luck, PlayerStat elixir);
+
     // Command handlers.
     bool handleDirectionCommand(Direction direction);   // true if valid movement
     void handleDrinkCommand();
@@ -50,6 +54,7 @@ class Game: public QObject
     bool handleEscapeCommand(); // true if valid
     bool handleFightCommand();  // true if valid
     void handleHelpCommand();
+    void handleInspectCommand(const std::string& item_name);
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed); // true if successful
     bool handleLocalCommand(const std::string& input);  // true if valid
     bool handleLuckyCommand();  // true if valid
@@ -70,9 +75,9 @@ class Game: public QObject
     void deleteSaveFile();
     void loadGame();
     void resolveDamage(bool player_win, int damage);
-    std::pair<bool, bool> resolveYesNoQuestion(const std::string& user_input);
-    std::pair<bool, std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
-                                                            const std::string& user_input);
+    std::optional<bool> resolveYesNoQuestion(const std::string& user_input);
+    std::optional<std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
+                                                          const std::string& user_input);
     bool resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input);
     InputMode updateCurrentEvent(int id, bool new_room);
     InputMode updateRoomExit(InputMode default_mode);

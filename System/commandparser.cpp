@@ -1,6 +1,4 @@
 #include "commandparser.h"
-#include <algorithm>
-#include <cctype>
 #include <iterator>
 #include <sstream>
 
@@ -68,6 +66,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     {
         command = Command::TAKE;
     }
+    else if(input_command == "inspect")
+    {
+        command = Command::INSPECT;
+    }
     else if(input_command == "eat")
     {
         command = Command::EAT;
@@ -124,19 +126,19 @@ PlayerStat CommandParser::parseElixirType(const std::string& input)
     return elixir;
 }
 
-std::pair<bool, bool> CommandParser::parseYesNo(const std::string& input)
+std::optional<bool> CommandParser::parseYesNo(const std::string& input)
 {
     std::string answer = utils::toLower(input);
 
     if(answer == "yes" || answer == "y")
     {
-        return {true, true};
+        return true;
     }
 
     if(answer == "no" || answer == "n")
     {
-        return {true, false};
+        return false;
     }
 
-    return {false, false};
+    return {};
 }

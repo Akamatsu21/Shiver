@@ -91,7 +91,12 @@ std::string Inventory::toHTML() const
     return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0).getName(),
                            [](const std::string& acc, const Item& element)
                            {
-                               return acc + "<br />" + element.getName();
+                               std::string status("");
+                               if(!element.getStatus().empty())
+                               {
+                                   status = " (" + element.getStatus() + ")";
+                               }
+                               return acc + "<br />" + element.getName() + status;
                            });
 }
 

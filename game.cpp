@@ -392,17 +392,17 @@ void Game::handleStatsCommand()
     _console.writeText(msg);
 }
 
-void Game::handleTakeCommand(const std::string& item_name)
+bool Game::handleTakeCommand(const std::string& item_name)
 {
     if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can pick up items.");
-        return;
+        return false;
     }
     else if(item_name.empty())
     {
         _console.writeText("Specify which item to take.");
-        return;
+        return false;
     }
 
     std::string item_lowercase = utils::toLower(item_name);
@@ -417,12 +417,13 @@ void Game::handleTakeCommand(const std::string& item_name)
             QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                        "_gold_taken"));
             _game_vars->setFlag(flag, true);
+            return true;
         }
         else
         {
             _console.writeText("No gold to pick up here.");
+            return false;
         }
-        return;
     }
     else if(item_lowercase == "ration" || item_lowercase == "rations")
     {
@@ -445,12 +446,13 @@ void Game::handleTakeCommand(const std::string& item_name)
             QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                        "_rations_taken"));
             _game_vars->setFlag(flag, true);
+            return true;
         }
         else
         {
             _console.writeText("No rations to pick up here.");
+            return false;
         }
-        return;
     }
 
     std::optional<Item> result = _current_event.getItemList().findItemByName(item_name);
@@ -460,10 +462,12 @@ void Game::handleTakeCommand(const std::string& item_name)
         if(_player->getInventory().hasItemID(found_item.getID()))
         {
             _console.writeText("You've already picked up this item.");
+            return false;
         }
         else if(_current_event.getItemLimit() < 1)
         {
             _console.writeText("You cannot take any more items from this room.");
+            return false;
         }
         else
         {
@@ -479,11 +483,13 @@ void Game::handleTakeCommand(const std::string& item_name)
             {
                 onAddCondition(QString::fromStdString(found_item.getCondition()));
             }
+            return true;
         }
     }
     else
     {
         _console.writeText("Item not found in this room.");
+        return false;
     }
 }
 
@@ -1201,13 +1207,20 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         }
         break;
     case Command::TAKE:
-        handleTakeCommand(utils::parseParams(params));
-        break;
+    {
+        std::string item = utils::parseParams(params);
+        if(handleTakeCommand(item))
+        {
+            _current_event.triggerTakeCallback(utils::toLower(item));
+            perform_game_checks = true;
+        }
+    }   break;
     case Command::INSPECT:
         handleInspectCommand(utils::parseParams(params));
         break;
     case Command::EAT:
         handleEatCommand();
+        perform_game_checks = true; // callback might have happened
         break;
     case Command::DRINK:
         handleDrinkCommand();

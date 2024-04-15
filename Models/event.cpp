@@ -1,6 +1,4 @@
 #include "event.h"
-#include <algorithm>
-#include <numeric>
 
 #include "Utils/utils.h"
 
@@ -19,6 +17,7 @@ Event::Event(int id):
     _has_rations(false),
     _items{},
     _item_limit(0),
+    _take_callback(false),
     _eating_enabled(false),
     _eating_callback(false),
     _choice(),
@@ -229,6 +228,11 @@ void Event::setItemLimit(int value)
     _item_limit = value;
 }
 
+void Event::setTakeCallback(QJSValue callback)
+{
+    _take_callback = callback;
+}
+
 void Event::setEatingEnabled(bool value)
 {
     _eating_enabled = value;
@@ -360,6 +364,15 @@ void Event::triggerDirectionCallback(Direction direction)
     {
         QJSValueList args = {QJSValue(static_cast<int>(direction))};
         _direction_callback.call(args);
+    }
+}
+
+void Event::triggerTakeCallback(const std::string& item)
+{
+    if(_take_callback.isCallable())
+    {
+        QJSValueList args = {QJSValue(QString::fromStdString(item))};
+        _take_callback.call(args);
     }
 }
 

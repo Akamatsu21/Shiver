@@ -103,7 +103,14 @@ export const events =
         south: 9,
         east: 16,
         items: ["emerald", "hammer", "shield_metal"],
-        item_limit: 2
+        item_limit: 2,
+        on_take: function(item)
+        {
+            if(item === "metal shield")
+            {
+                system.message("You wish this was a cock shield instead.");
+            }
+        }
     },
     event6:
     {
@@ -122,7 +129,8 @@ export const events =
             return desc;
         },
         north: 5,
-        south: 7
+        south: 7,
+        west: 28
     },
     event7:
     {
@@ -400,5 +408,19 @@ export const events =
                 escape: 1
             }
         ]
+    },
+    event28:
+    {
+        description: "You must pick up one of these: [i]Stone Sword[/i], [i]Decorative Shield[/i], [i]Monster's Bone[/i].",
+        items: ["bone", "sword_stone", "shield_decorative"],
+        on_take: function(item)
+        {
+            system.redirect(29, true);
+        }
+    },
+    event29:
+    {
+        description: "You leave the room.",
+        east: 6
     }
 };

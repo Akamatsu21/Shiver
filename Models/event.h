@@ -27,6 +27,7 @@ class Event
     bool _has_rations;
     Inventory _items;
     int _item_limit;
+    QJSValue _take_callback;
     bool _eating_enabled;
     QJSValue _eating_callback;
     Choice _choice;
@@ -67,7 +68,6 @@ public:
     UserOption getLocalCommand(const std::string& command) const;
 
     Inventory& getItemList();
-
     void setRedirect(int value);
     void setNewRoom(bool value);
     void setEscapeRedirect(int value);
@@ -79,6 +79,7 @@ public:
     void setHasRations(bool value);
     void setRations(int value);
     void setItemLimit(int value);
+    void setTakeCallback(QJSValue callback);
     void setEatingEnabled(bool value);
     void setEatingCallback(QJSValue callback);
     void setExitCallback(QJSValue callback);
@@ -112,6 +113,7 @@ public:
     void triggerLocalCommandCallback(const std::string& command);
 
     void triggerDirectionCallback(Direction direction);
+    void triggerTakeCallback(const std::string& item);
     void triggerEatingCallback();
     void triggerExitCallback();
 };

@@ -58,6 +58,13 @@ export const eventX =
         "Item2"
     ],
     item_limit: 1,  // only one of the items from the list can be taken
+    on_take: function(item)
+    {
+        // Trigger after taking an item.
+        // Use the provided argument to check which item was taken.
+        // Note that this argument is not the item id.
+        // It is the name that the user typed with the take command, changed to all lowercase.
+    },
     eat: true,  // can use the eat command
     on_eat: function()
     {

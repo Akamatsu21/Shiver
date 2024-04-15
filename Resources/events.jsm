@@ -790,65 +790,12 @@ export const events =
     },
     event37:
     {
-        description: "You may choose a [o]metal[/o], [o]decorative[/o] or [o]leather[/o] shield.",
-        choice:
+        description: "You may choose a [i]metal shield[/i], a [i]decorative shield[/i] or a [i]leather shield[/i].",
+        items: ["shield_metal", "shield_decorative", "shield_leather"],
+        on_take: function(item)
         {
-            question: "Which shield do you take?",
-            options:
-            [
-                {
-                    answer: "metal",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("shield_metal"))
-                        {
-                            system.message("[i]Metal Shield[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("shield_metal");
-                            system.message("[i]Metal Shield[/i] added to your inventory.");
-                        }
-                    }
-                },
-                {
-                    answer: "decorative",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("shield_decorative"))
-                        {
-                            system.message("[i]Decorative Shield[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("shield_decorative");
-                            system.message("[i]Decorative Shield[/i] added to your inventory.");
-                        }
-                    }
-                },
-                {
-                    answer: "leather",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("shield_leather"))
-                        {
-                            system.message("[i]Leather Shield[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("shield_leather");
-                            system.message("[i]Leather Shield[/i] added to your inventory.");
-                        }
-                    }
-                }
-            ]
-        },
+            system.redirect(324, false);
+        }
     },
     event38:
     {
@@ -3850,65 +3797,12 @@ export const events =
     },
     event190:
     {
-        description: "You may choose a [o]thin[/o], [o]stone[/o] or [o]short[/o] sword.",
-        choice:
+        description: "You may choose a [i]thin sword[/i], a [i]stone sword[/i] or a [i]short sword[/i].",
+        items: ["sword_thin", "sword_stone", "sword_short"],
+        on_take: function(item)
         {
-            question: "Which sword do you take?",
-            options:
-            [
-                {
-                    answer: "thin",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("sword_thin"))
-                        {
-                            system.message("[i]Thin Sword[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("sword_thin");
-                            system.message("[i]Thin Sword[/i] added to your inventory.");
-                        }
-                    }
-                },
-                {
-                    answer: "stone",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("sword_stone"))
-                        {
-                            system.message("[i]Stone Sword[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("sword_stone");
-                            system.message("[i]Stone Sword[/i] added to your inventory.");
-                        }
-                    }
-                },
-                {
-                    answer: "short",
-                    redirect: 324,
-                    new_room: false,
-                    on_option: function()
-                    {
-                        if(player.hasItem("sword_short"))
-                        {
-                            system.message("[i]Short Sword[/i] is already in your inventory!");
-                        }
-                        else
-                        {
-                            player.addItem("sword_short");
-                            system.message("[i]Short Sword[/i] added to your inventory.");
-                        }
-                    }
-                }
-            ]
-        },
+            system.redirect(324, false);
+        }
     },
     event191:
     {
@@ -3920,126 +3814,68 @@ export const events =
     {
         description: function()
         {
-            let desc = "\"What if I try to get something out of this clown?\" you think. You reach for your sword. Eh, what need is there for the sword? Your fists will be more than enough. You approach the creature and take a swing. It's suddenly gone. On top of that, metal bars fall in front of the entrance through which you got into this room. You look around, but you can't find another exit. You approach the fountain. Indeed, you can see some mysterious items: a monster's [o]bone[/o], a [o]jar[/o] of All-Eaters (a constantly hungry species of a shellfish), a tin [o]butterfly[/o], a [o]spear[/o] and a small shiny [o]key[/o].";
+            let desc = "\"What if I try to get something out of this clown?\" you think. You reach for your sword. Eh, what need is there for the sword? Your fists will be more than enough. You approach the creature and take a swing. It's suddenly gone. On top of that, metal bars fall in front of the entrance through which you got into this room. You look around, but you can't find another exit. You approach the fountain. Indeed, you can see some mysterious items: a [i]monster's bone[/i], a [i]jar of all-eaters[/i] (a constantly hungry species of a shellfish), a [i]tin butterfly[/i], a [i]spear[/i] and a [i]small shiny key[/i].";
 
             if(player.countItemsWithTag("container") > 0)
             {
                 let container = player.hasItem("flask_empty") ? "flask" : "helmet";
-                desc += " Since you happen to have a container (your " + container + "), you may also take the [o]water[/o].";
+                desc += " Since you happen to have a container (your " + container + "), you may also take the [i]magical water[/i].";
             }
             if(player.countItemsWithTag("water") > 0)
             {
-                desc += " Since you happen to have a vessel, you may also take the [o]water[/o]. However, your vessel is currently full. If you choose this option, you must empty it.";
+                desc += " Since you happen to have a vessel, you may also take the [i]magical water[/i]. However, your vessel is currently full. If you choose this option, you must empty it.";
             }
             else
             {
                 desc += " If you had a container, you might also have been able to take some of the water...";
             }
 
+            desc += " Remember that you can only take one thing.";
+
             return desc;
         },
-        choice:
+        items: function()
         {
-            question: function()
+            let items = ["bone", "all_eaters", "butterfly", "spear", "key_small"];
+            if(player.countItemsWithTag("container") > 0 || player.countItemsWithTag("water") > 0)
             {
-                if(player.countItemsWithTag("container") > 0 || player.countItemsWithTag("water") > 0)
-                {
-                    return "So: do you want the [o]water[/o] or one of the items? Remember that you can only take one thing.";
-                }
-                else
-                {
-                    return "So: which item do you want? Remember that you can only take one thing.";
-                }
-            },
-            options: function()
+                items.push("water_magic");
+            }
+            return items;
+        },
+        on_take: function(item)
+        {
+            if(item === "magical water")
             {
-                let opt = [
+                if(player.countItemsWithTag("container") > 0)
+                {
+                    if(player.hasItem("flask_empty"))
                     {
-                        answer: "bone",
-                        redirect: 220,
-                        new_room: false,
-                        on_option: function()
-                        {
-                            player.addItem("bone");
-                        }
-                    },
-                    {
-                        answer: "butterfly",
-                        redirect: 220,
-                        new_room: false,
-                        on_option: function()
-                        {
-                            player.addItem("butterfly");
-                        }
-                    },
-                    {
-                        answer: "jar",
-                        redirect: 220,
-                        new_room: false,
-                        on_option: function()
-                        {
-                            player.addItem("all_eaters");
-                        }
-                    },
-                    {
-                        answer: "key",
-                        redirect: 220,
-                        new_room: false,
-                        on_option: function()
-                        {
-                            player.addItem("key_small");
-                        }
-                    },
-                    {
-                        answer: "spear",
-                        redirect: 220,
-                        new_room: false,
-                        on_option: function()
-                        {
-                            player.addItem("spear");
-                        }
+                        player.removeItem("flask_empty");
                     }
-                ];
-
-                if(player.countItemsWithTag("container") > 0 || player.countItemsWithTag("water") > 0)
-                {
-                    opt.push({
-                        answer: "water",
-                        redirect: 306,
-                        new_room: false,
-                        on_option: function()
-                        {
-
-                            if(player.countItemsWithTag("container") > 0)
-                            {
-                                if(player.hasItem("flask_empty"))
-                                {
-                                    player.removeItem("flask_empty");
-                                }
-                                else
-                                {
-                                    player.removeItem("helmet");
-                                }
-                            }
-                            else if(player.countItemsWithTag("water") > 0)
-                            {
-                                if(player.hasItem("water_lake"))
-                                {
-                                    player.removeItem("water_lake");
-                                    system.message("You pour the lake water onto the floor and fill the bottle with magical water.");
-                                }
-                                else
-                                {
-                                    player.removeItem("flask_full");
-                                    system.message("You empty your vessel onto the floor and fill it with magical water.");
-                                }
-                            }
-                            player.addItem("water_magic");
-                        }
-                    });
+                    else
+                    {
+                        player.removeItem("helmet");
+                    }
                 }
-
-                return opt;
+                else if(player.countItemsWithTag("water") > 0)
+                {
+                    if(player.hasItem("water_lake"))
+                    {
+                        player.removeItem("water_lake");
+                        system.message("You pour the lake water onto the floor and fill the bottle with magical water.");
+                    }
+                    else
+                    {
+                        player.removeItem("flask_full");
+                        system.message("You empty your vessel onto the floor and fill it with magical water.");
+                    }
+                }
+                system.redirect(306, false);
+            }
+            else
+            {
+                system.redirect(220, false);
             }
         }
     },

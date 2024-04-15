@@ -24,7 +24,7 @@ void ScriptingEngine::loadModules()
 {
     _js_engine.installExtensions(QJSEngine::AllExtensions);
     _condition_list = _js_engine.importModule(":js/conditions.jsm").property("conditions");
-    _event_list = _js_engine.importModule(":js/test.jsm").property("events");
+    _event_list = _js_engine.importModule(":js/events.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
     _item_list = _js_engine.importModule(":js/items.jsm").property("items");
 
@@ -297,6 +297,11 @@ Event ScriptingEngine::parseEvent(int id)
                 event.getItemList().addItem(parseItem(item_id));
             }
         }
+    }
+
+    if(event_object.hasProperty("on_take"))
+    {
+        event.setTakeCallback(event_object.property("on_take"));
     }
 
     if(event_object.hasProperty("eat"))

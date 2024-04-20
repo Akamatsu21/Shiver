@@ -67,6 +67,18 @@ int Inventory::countByTag(const std::string& tag) const
                          });
 }
 
+std::vector<Item> Inventory::findItemsWithTag(const std::string& tag) const
+{
+    std::vector<Item> result{};
+    std::copy_if(std::begin(_items), std::end(_items), std::back_inserter(result),
+                 [tag](const Item& item)
+                 {
+                     const auto& tags = item.getTags();
+                     return std::find(std::begin(tags), std::end(tags), tag) != std::end(tags);
+                 });
+    return result;
+}
+
 std::string Inventory::toString() const
 {
     if(empty())

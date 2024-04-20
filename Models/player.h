@@ -52,6 +52,7 @@ public:
     std::string getElixirTypeAsString() const;
     Q_INVOKABLE bool hasItem(const QVariant& item) const;
     Q_INVOKABLE int countItemsWithTag(const QVariant& tag) const;
+    Q_INVOKABLE QStringList getItemsWithTag(const QVariant& tag) const;
     std::vector<Condition> getConditions() const;
     std::string getConditionsString() const;
 

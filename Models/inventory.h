@@ -18,6 +18,7 @@ public:
     std::optional<Item> findItemByID(const std::string& item_id) const;
     std::optional<Item> findItemByName(const std::string& item_name) const;
     int countByTag(const std::string& tag) const;
+    std::vector<Item> findItemsWithTag(const std::string& tag) const;
 
     std::string toString() const;
     std::string toHTML() const;

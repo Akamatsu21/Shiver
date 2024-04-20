@@ -21,6 +21,11 @@ function jumpCommandEvent110()
     }
 }
 
+function keyValueEvent76(key)
+{
+    return key.substring(3);
+}
+
 export const events =
 {
     event1:
@@ -466,6 +471,41 @@ export const events =
 
             return loc;
         }
+    },
+    event23:
+    {
+        description: function()
+        {
+            let desc = "The door to the treasure vault waits open for you... Or does it? Oh no! It's locked. You see two locks. ";
+            
+            let keys = player.countItemsWithTag("key");
+            let key_string = keys == 1 ? "key" : "keys";
+            desc += `Over the course of your adventure, you have collected ${keys} numbered ${key_string}. `;
+
+            if(keys > 1)
+            {
+                desc += "Looks like you have enough to attempt opening this door. You enter two keys at random and the door opens up.";
+            }
+            else
+            {
+                player.modifyConstitution(-player.getConstitution());
+                desc += "Unfortunately, you need at least 2 to attempt opening this door. This is the end of your adventure. And you were so close!";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.countItemsWithTag("key") > 1)
+            {
+                return 185;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: false
     },
     event24:
     {
@@ -1636,6 +1676,109 @@ export const events =
         description: "You back off and go back towards the intersection. You pass the elderly man.",
         redirect: 200,
         new_room: true
+    },
+    event76:
+    {
+        description: function()
+        {
+            if(game_vars.getCounter("76_keys_inserted") == 0)
+            {
+                let desc = "";
+
+                if(game_vars.getFlag("76_print_luck_result"))
+                {
+                    desc += "Luck check successful!<br />You pick yourself back up and realise the dungeon will punish you severely if you try to damage its greatest treasure. It looks like the only option is to open the box.<br /><br />";
+                }
+
+                if(player.countItemsWithTag("key") < 3)
+                {
+                    player.modifyConstitution(-player.getConstitution());
+                    desc += "Unfortunately, you have not managed to collect three keys required to open this treasure. This is the end of your adventure. You were so close to the goal!";
+                    return desc;
+                }
+
+                let keys = player.getItemsWithTag("key").map(keyValueEvent76);
+                desc += "You are in possesion of the following keys: ";
+                for (let i = 0; i < keys.length; ++i)
+                {
+                    desc += "Key#[o]" + keys[i] + "[/o]";
+                    if(i != keys.length - 1)
+                    {
+                        desc += ", ";
+                    }
+                    else
+                    {
+                        desc += ".";
+                    }
+                }
+
+                return desc;
+            }
+            else
+            {
+                return "You insert the key into the padlock.";
+            }
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("76_keys_inserted") == 3)
+            {
+                return game_vars.getCounter("76_redirect");
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: true,
+        choice: function()
+        {
+            let padlock_count = "";
+            switch(game_vars.getCounter("76_keys_inserted"))
+            {
+            case 0:
+                padlock_count = "first";
+                break;
+            case 1:
+                padlock_count = "second";
+                break;
+            case 2:
+                padlock_count = "third";
+                break;
+            default:
+                return undefined;
+            }
+            const question = `Which key will you insert into the ${padlock_count} padlock?`;
+
+            let options = [];
+            let keys = player.getItemsWithTag("key").map(keyValueEvent76);
+
+            let insertKey = function(key_number)
+            {
+                return function()
+                {
+                    player.removeItem("key" + key_number);
+                    game_vars.incrementCounter("76_keys_inserted", 1);
+                    game_vars.incrementCounter("76_redirect", parseInt(key_number));
+                };
+            };
+
+            for(let i = 0; i < keys.length; ++i)
+            {
+                options.push(
+                {
+                    answer: keys[i],
+                    redirect: 76,
+                    new_room: false,
+                    on_option: insertKey(keys[i])
+                });
+            }
+
+            return {
+                question: question,
+                options: options
+            };
+        }
     },
     event77:
     {
@@ -2963,6 +3106,23 @@ export const events =
             yes_new_room: true
         }
     },
+    event149:
+    {
+        description: "You barely lift up your sword, when suddenly the ground starts shaking under your feet. You fall over.",
+        redirect: function()
+        {
+            if(player.performLuckCheck())
+            {
+                game_vars.setFlag("76_print_luck_result", true);
+                return 76;
+            }
+            else
+            {
+                return 352;
+            }
+        },
+        new_room: false
+    },
     event151:
     {
         description: function()
@@ -3740,6 +3900,12 @@ export const events =
             }
         ]
     },
+    event185:
+    {
+        description: "You enter the narrow corridor. It leads to a large room.",
+        redirect: 252,
+        new_room: true
+    },
     event186:
     {
         description: "You made it to the other edge. You see three exits: one leading to the [c]west[/c], one to the [l]northwest[/l] and one to the [c]north[/c].",
@@ -4419,6 +4585,12 @@ export const events =
             }
         }
     },
+    event222:
+    {
+        description: "You put all your gold on the table, some of the items and treasures, you even offer up your precious sword. All of it in return for opening the vault. He says nothing.",
+        redirect: 311,
+        new_room: false
+    },
     event223:
     {
         description: function()
@@ -4967,6 +5139,45 @@ export const events =
         description: "You leave the way you came in.",
         redirect: 39,
         new_room: true
+    },
+    event252:
+    {
+        description: function()
+        {
+            let desc = "You enter the vault. However, there are no treasures here. But there is a table, and on the table you see a steel case, locked with three padlocks. ";
+            if(player.countItemsWithTag("key") > 2)
+            {
+                desc += "You can [l]destroy[/l] the padlocks with your sword, or try to [l]open[/l] them with your keys.";
+            }
+            else
+            {
+                desc += "Since you don't have three keys on you, your only option is to l]destroy[/l] the padlocks with your sword.";
+            }
+
+            return desc;
+        },
+        locals: function()
+        {
+            let locals = [
+                {
+                    command: "destroy",
+                    redirect: 149,
+                    new_room: false
+                }
+            ];
+
+            if(player.countItemsWithTag("key") > 2)
+            {
+                locals.push(
+                {
+                    command: "open",
+                    redirect: 76,
+                    new_room: false
+                });
+            }
+
+            return locals;
+        }
     },
     event253:
     {
@@ -5956,6 +6167,12 @@ export const events =
         },
         new_room: false
     },
+    event311:
+    {
+        description: "He gets up from the lavishly decorated chair, and takes a stance, putting his right hand on the handle of his sword. Your move.",
+        redirect: 165,
+        new_room: false
+    },
     event312:
     {
         description: "[e]Man-Eater[/e], [e]Zombie[/e] and [e]Skeleton[/e] await you. You will fight them in this order.",
@@ -6758,6 +6975,14 @@ export const events =
     {
         description: "You squeeze through the corridor, largely inhibited by the stone rubble lying around. You move further [c]south[/c].",
         south: 64
+    },
+    event352:
+    {
+        description: function()
+        {
+            player.modifyConstitution(-player.getConstitution());
+            return "Luck check failed!<br />The ground shakes again, a crevice opens up. The ceiling collapses. You fall down. This is your end.";
+        }
     },
     event353:
     {

@@ -114,6 +114,18 @@ int Player::countItemsWithTag(const QVariant& tag) const
     return _inventory.countByTag(tag.toString().toStdString());
 }
 
+QStringList Player::getItemsWithTag(const QVariant& tag) const
+{
+    std::vector<Item> items_with_tag = _inventory.findItemsWithTag(tag.toString().toStdString());
+    QStringList item_ids{};
+    std::transform(std::begin(items_with_tag), std::end(items_with_tag), std::back_inserter(item_ids),
+                   [](const Item& item)
+                   {
+                       return QString::fromStdString(item.getID());
+                   });
+    return item_ids;
+}
+
 std::vector<Condition> Player::getConditions() const
 {
     return _conditions;

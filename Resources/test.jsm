@@ -18,7 +18,8 @@ export const events =
                 return 10;
             }
         },
-        south: 20
+        south: 20,
+        east: 30
     },
     event2:
     {
@@ -422,5 +423,47 @@ export const events =
     {
         description: "You leave the room.",
         east: 6
+    },
+    event30:
+    {
+        description: function()
+        {
+            let desc = "You will now receive random keys.";
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key12");
+                desc += "<br />Key 12 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key45");
+                desc += "<br />Key 45 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key70");
+                desc += "<br />Key 70 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key93");
+                desc += "<br />Key 93 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key122");
+                desc += "<br />Key 122 obtained.";
+            }
+            desc += "<br />Key assignment finished. You final key list: [ ";
+            let keys = player.getItemsWithTag("key");
+            for(let i = 0; i < keys.length; ++i)
+            {
+                desc += keys[i] + " ";
+            }
+            desc += "]";
+
+            return desc;
+        },
+        west: 1
     }
 };

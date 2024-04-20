@@ -184,6 +184,7 @@ export const items =
 	spear:
 	{
 		name: "Spear",
+		tags: ["guardian"],
 		description: "A primitive weapon meant for piercing or throwing."
 	},
 	stake:

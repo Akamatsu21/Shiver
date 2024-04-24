@@ -284,7 +284,7 @@ export const events =
                 new_room: true,
                 on_command: function()
                 {
-                    game_vars.setCounter("lake_return_point", 15);
+                    game_vars.setCounter("lake_return_point", 266);
                 }
             }
         ]
@@ -971,6 +971,12 @@ export const events =
             }
         }
         
+    },
+    event43:
+    {
+        description: "You go back the way you came, until you get to the edge of the chasm. On the way, you don't fight anyone, don't buy anything and don't take any items. You must try another path.",
+        redirect: 186,
+        new_room: true
     },
     event44:
     {
@@ -1698,6 +1704,22 @@ export const events =
                 }
 
                 let keys = player.getItemsWithTag("key").map(keyValueEvent76);
+                if(game_vars.getCounter("76_combinations_attempted") == 0)
+                {
+                    switch(keys.length)
+                    {
+                    case 3:
+                        game_vars.setCounter("76_combinations_attempted", 9); // 1 of 10 combinations available
+                        break;
+                    case 4:
+                        game_vars.setCounter("76_combinations_attempted", 6); // 4 of 10 combinations available
+                        break;
+                    case 5:
+                        game_vars.setCounter("76_combinations_attempted", 0); // 10 of 10 combinations available
+                        break;
+                    }
+                }
+
                 desc += "You are in possesion of the following keys: ";
                 for (let i = 0; i < keys.length; ++i)
                 {
@@ -1748,7 +1770,7 @@ export const events =
             default:
                 return undefined;
             }
-            const question = `Which key will you insert into the ${padlock_count} padlock?`;
+            const question = `Which key will you insert into the ${padlock_count} keyhole?`;
 
             let options = [];
             let keys = player.getItemsWithTag("key").map(keyValueEvent76);
@@ -2826,6 +2848,24 @@ export const events =
         },
         new_room: false
     },
+    event127:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("127_attempted"))
+            {
+                game_vars.setFlag("127_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]70[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
+    },
     event128:
     {
         description: "The door shuts behind you. You can hear the [e]Dwarves[/e] cackling loudly. An unbelievable stench makes it difficult to breathe. You light up the chamber. It's not big. You see big piles of rotten lettuce leaves, some reaching all the way to the ceiling. Other than that, this place is almost completely empty. There are some broken rakes and hoes lying around. In a corner of the room you notice a [i]bunch of keys[/i]. You may take it. You poke the walls with your sword. It seems that there is a spot on the easter wall that sounds a little differently from the rest. Yes, there is an opening there - you can [l]leave[/l]!",
@@ -3121,6 +3161,24 @@ export const events =
                 return 352;
             }
         },
+        new_room: false
+    },
+    event150:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("150_attempted"))
+            {
+                game_vars.setFlag("150_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]93[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
         new_room: false
     },
     event151:
@@ -3755,6 +3813,24 @@ export const events =
             game_vars.setFlag("315_new_room", true);
         }
     },
+    event175:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("175_attempted"))
+            {
+                game_vars.setFlag("175_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]70[/i], #[i]93[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
+    },
     event176:
     {
         description: "You approach an intersection. You may go [c]north[/c] or [c]east[/c].",
@@ -3783,6 +3859,24 @@ export const events =
     {
         description: "It's getting more and more difficult to lift your feet from the muddy sludge. The air is getting humid. The corridor is gradually widening, until finally you reach the shore of an underground lake. The area is full of plants with thick, wide leaves. The roof is very high up. In a few places thin rays of light are piercing through it. You look around. Is this a dead end? You don't see any exits, other than the corridor you came from.",
         redirect: 15,
+        new_room: false
+    },
+    event179:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("179_attempted"))
+            {
+                game_vars.setFlag("179_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]122[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
         new_room: false
     },
     event180:
@@ -4183,6 +4277,12 @@ export const events =
         redirect: 129,
         new_room: false
     },
+    event204:
+    {
+        description: "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]70[/i], #[i]122[/i].",
+        redirect: 387,
+        new_room: true
+    },
     event205:
     {
         description: "You approach the altar. You take the stone container and open the lid with the tip of your sword. Inside lies a green gem. It's an emerald! You pick it up and inspect, with the help of the oil lamp's light. It's wonderful. But... You drop it and it shatters on the stone floor.",
@@ -4275,6 +4375,24 @@ export const events =
 
             return loc;
         }
+    },
+    event208:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("208_attempted"))
+            {
+                game_vars.setFlag("208_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]70[/i], #[i]93[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
     },
     event209:
     {
@@ -4693,6 +4811,24 @@ export const events =
             }
         ]
     },
+    event227:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("227_attempted"))
+            {
+                game_vars.setFlag("227_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]93[/i], #[i]122[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
+    },
     event228:
     {
         description: "The corridor runs to the north and then turns [c]east[/c]. You see an intersection ahead.",
@@ -4850,6 +4986,24 @@ export const events =
     {
         description: "You enter the chamber. Two [e]Dwarves[/e] run up to you.",
         redirect: 4,
+        new_room: false
+    },
+    event237:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("237_attempted"))
+            {
+                game_vars.setFlag("237_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]70[/i], #[i]122[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
         new_room: false
     },
     event238:
@@ -5144,14 +5298,14 @@ export const events =
     {
         description: function()
         {
-            let desc = "You enter the vault. However, there are no treasures here. But there is a table, and on the table you see a steel case, locked with three padlocks. ";
+            let desc = "You enter the vault. However, there are no treasures here. But there is a table, and on the table you see a steel case, locked with a padlock that has three keyholes. ";
             if(player.countItemsWithTag("key") > 2)
             {
-                desc += "You can [l]destroy[/l] the padlocks with your sword, or try to [l]open[/l] them with your keys.";
+                desc += "You can [l]destroy[/l] the padlock with your sword, or try to [l]open[/l] it with your keys.";
             }
             else
             {
-                desc += "Since you don't have three keys on you, your only option is to l]destroy[/l] the padlocks with your sword.";
+                desc += "Since you don't have three keys on you, your only option is to [l]destroy[/l] the padlock with your sword.";
             }
 
             return desc;
@@ -5246,6 +5400,24 @@ export const events =
     {
         description: "You go back down the corridor, until you reach the pranksters' chamber. You open the door confidently. No one is there. You promptly reach the other door and come out to another corridor, continuing [c]south[/c].",
         south: 50
+    },
+    event260:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("260_attempted"))
+            {
+                game_vars.setFlag("260_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]93[/i], #[i]122[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
     },
     event261:
     {
@@ -5342,6 +5514,12 @@ export const events =
             yes: 83,
             yes_new_room: false
         }
+    },
+    event266:
+    {
+        description: "You reach the southern end of the lake without trouble.",
+        redirect: 15,
+        new_room: false
     },
     event267:
     {
@@ -5736,6 +5914,24 @@ export const events =
             return desc;
         },
         east: 50
+    },
+    event285:
+    {
+        description: function()
+        {
+            if(!game_vars.getFlag("285_attempted"))
+            {
+                game_vars.setFlag("285_attempted", true);
+                game_vars.incrementCounter("76_combinations_attempted", +1);
+                return "You attempt to open the box with this combination of keys: #[i]70[/i], #[i]93[/i], #[i]122[/i].";
+            }
+            else
+            {
+                return "You've already tried this combination!";
+            }
+        },
+        redirect: 373,
+        new_room: false
     },
     event286:
     {
@@ -7341,6 +7537,35 @@ export const events =
         redirect: 253,
         new_room: false
     },
+    event373:
+    {
+        description: function()
+        {
+            let desc = "This wasn't the right combination. ";
+            if(game_vars.getCounter("76_combinations_attempted") >= 10)
+            {
+                player.modifyConstitution(-player.getConstitution());
+                desc += "You've tried every possible combination with the keys you have. It looks like none of them were correct. There must have been some other keys that you've missed. This is the end of your adventure!";
+            }
+            else
+            {
+                desc += "You can attempt a different combination. Note that the order you put the keys in isn't important - only which keys you choose.";
+            }
+            return desc;
+        },
+        redirect: function()
+        {
+            if(game_vars.getCounter("76_combinations_attempted") >= 10)
+            {
+                return undefined;
+            }
+            else
+            {
+                return 76;
+            }
+        },
+        new_room: false
+    },
     event374:
     {
         description: "This isn't a corridor - it feels more like a sewer. Your legs sink into some muddy substance. The tunnel changes direction: It turns south first, then east, then finally [c]north[/c]. You may [c]eat[/c] a ration while you navigate through the twists.",
@@ -7562,5 +7787,10 @@ export const events =
         description: "You approach an intersection. You may go [c]west[/c] or [c]east[/c].",
         east: 273,
         west: 345
+    },
+    event387:
+    {
+        description: "You hear the padlock unlocking with a click. Carefully you pick up the lid of the box. At the bottom, you find a piece of paper. You read the message inscribed on the sheet:<br /><br />\"Thank you so much for playing Shiver. I hope you enjoyed your adventure. If you would like to know how you cheese the game, try typing 'Summon Conan The Barbarian King' when you're on the title screen. See you in my next game!\"<br /><br />You put the piece of paper in your pocket, knowing that the knowledge it contains will be invaluable in your next adventure.",
+        win: true
     }
 };

@@ -17,7 +17,8 @@ enum class InputMode
     KEY_DEATH,
     KEY_GAME_START,
     KEY_GAME_OVER,
-    KEY_REDIRECT
+    KEY_REDIRECT,
+    KEY_VICTORY
 };
 
 #endif // INPUTMODE_H

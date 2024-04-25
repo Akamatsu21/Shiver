@@ -1,6 +1,4 @@
 #include "event.h"
-#include <algorithm>
-#include <numeric>
 
 #include "Utils/utils.h"
 
@@ -19,6 +17,7 @@ Event::Event(int id):
     _has_rations(false),
     _items{},
     _item_limit(0),
+    _take_callback(false),
     _eating_enabled(false),
     _eating_callback(false),
     _choice(),
@@ -87,47 +86,6 @@ bool Event::hasRations() const
 int Event::getRations() const
 {
     return _rations;
-}
-
-bool Event::hasItems() const
-{
-    return !_items.empty();
-}
-
-bool Event::hasItem(const std::string& item) const
-{
-    return std::find(std::begin(_items), std::end(_items), item) != std::end(_items);
-}
-
-std::string Event::getItemList() const
-{
-    if(_items.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "\n" + element;
-        });
-}
-
-std::string Event::findItem(const std::string& item) const
-{
-    std::string itemLower = utils::toLower(item);
-    std::vector<std::string> itemsLower;
-    std::transform(std::begin(_items), std::end(_items), std::back_inserter(itemsLower),
-                   [](const std::string& s){ return utils::toLower(s); });
-    auto result = std::find(std::begin(itemsLower), std::end(itemsLower), itemLower);
-    if(result == std::end(itemsLower))
-    {
-        return "";
-    }
-    else
-    {
-        return _items.at(result - std::begin(itemsLower));
-    }
 }
 
 int Event::getItemLimit() const
@@ -210,6 +168,11 @@ UserOption Event::getLocalCommand(const std::string& command) const
     return _local_commands.at(command);
 }
 
+Inventory& Event::getItemList()
+{
+    return _items;
+}
+
 void Event::setRedirect(int value)
 {
     _redirect = value;
@@ -265,6 +228,11 @@ void Event::setItemLimit(int value)
     _item_limit = value;
 }
 
+void Event::setTakeCallback(QJSValue callback)
+{
+    _take_callback = callback;
+}
+
 void Event::setEatingEnabled(bool value)
 {
     _eating_enabled = value;
@@ -312,11 +280,6 @@ void Event::defeatAllEnemies()
     {
         _enemies.pop();
     }
-}
-
-void Event::addItem(const std::string& item)
-{
-    _items.push_back(item);
 }
 
 void Event::takeItem()
@@ -401,6 +364,15 @@ void Event::triggerDirectionCallback(Direction direction)
     {
         QJSValueList args = {QJSValue(static_cast<int>(direction))};
         _direction_callback.call(args);
+    }
+}
+
+void Event::triggerTakeCallback(const std::string& item)
+{
+    if(_take_callback.isCallable())
+    {
+        QJSValueList args = {QJSValue(QString::fromStdString(item))};
+        _take_callback.call(args);
     }
 }
 

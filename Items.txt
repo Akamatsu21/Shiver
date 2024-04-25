@@ -14,7 +14,8 @@ Heavy Hammer - found in 115, can be used to fight the Werewolf in 63 or the Guar
 Helmet - found in 298, use in 52 to protect from the gas or in 2 to increase Constitution against Garazan
 Jar of All-Eaters - found in 192, can be used in 106 to defeat the Worms
 Jar of Corrosive Dust - found in 147 or 55, can be used in 106 to defeat the Worms
-Key#45 - found 180
+Key#12 - found in 96
+Key#45 - found in 180
 Key#70 - found in 329
 Key#93 - found in 142
 Key#122 - found in 278
@@ -34,3 +35,15 @@ Tome - found in 49
 Toy Dragon - found in 369, can be used to fight the Guardian in 165 or 281
 Werewolf's Scalp - found in 119
 Wooden Stake - found in 147 or 55, allows entering the room in 135, can be used to attack the Gnome in 22, which may lead to it being sold in 289 or 369, also can be used to kill the Werewolf in 377
+
+Keys:
+12 45 70	127
+12 45 93	150
+12 70 93	175
+12 45 122	179
+	12 70 122	204
+45 70 93	208
+12 93 122	227
+45 70 122	237
+45 93 122	260
+70 93 122	285

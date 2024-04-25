@@ -1,6 +1,7 @@
 #ifndef COMMANDPARSER_H
 #define COMMANDPARSER_H
 
+#include <optional>
 #include <string>
 #include <queue>
 
@@ -16,7 +17,7 @@ public:
 
     static PlayerStat parseElixirType(const std::string& input);
 
-    static std::pair<bool, bool> parseYesNo(const std::string& input);
+    static std::optional<bool> parseYesNo(const std::string& input);
 };
 
 #endif // COMMANDPARSER_H

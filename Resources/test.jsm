@@ -18,7 +18,8 @@ export const events =
                 return 10;
             }
         },
-        south: 20
+        south: 20,
+        east: 30
     },
     event2:
     {
@@ -98,24 +99,26 @@ export const events =
     },
     event5:
     {
-        description: "You found a chest. You find: [i]Amulet[/i], [i]Axe[/i] and [i]Cock Shield[/i]. You may only take two.",
+        description: "You found a chest. You find: [i]Emerald[/i], [i]Heavy Hammer[/i] and [i]Metal Shield[/i]. You may only take two.",
         north: 3,
         south: 9,
         east: 16,
-        items:
-        [
-            "Amulet",
-            "Axe",
-            "Cock Shield"
-        ],
-        item_limit: 2
+        items: ["emerald", "hammer", "shield_metal"],
+        item_limit: 2,
+        on_take: function(item)
+        {
+            if(item === "metal shield")
+            {
+                system.message("You wish this was a cock shield instead.");
+            }
+        }
     },
     event6:
     {
         description: function()
         {
             let desc = "You encounter the [e]Kicker Troll[/e]. He kicks you in the nuts.<br />";
-            if(player.hasItem("Cock Shield"))
+            if(player.hasItem("shield_metal"))
             {
                 desc += "Your shield protects you. You may proceed.";
             }
@@ -127,7 +130,8 @@ export const events =
             return desc;
         },
         north: 5,
-        south: 7
+        south: 7,
+        west: 28
     },
     event7:
     {
@@ -230,7 +234,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Magical Sword");
+            player.addItem("sword_enchanted");
             return "The fairy hands you a huge sword covered in runes. You thank her and she bids you farewell.";
         },
         redirect: 11,
@@ -332,8 +336,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Cursed Gloves (-1 Agility)");
-            system.addCondition("cursed_gloves");
+            player.addItem("gloves");
             return "The evil gloves imprison you! You will lose agility in your next battle.";
         },
         north: 26,
@@ -353,8 +356,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Enchanted Sword (+1 Combat Score)");
-            system.addCondition("enchanted_sword");
+            player.addItem("sword_enchanted");
             return "This sword is better than your old one! It will improve your combat rolls.";
         },
         north: 26,
@@ -364,8 +366,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Helmet (+3 Constitution)");
-            system.addCondition("helmet");
+            player.addItem("helmet_effect");
             return "This is a tough helmet! It will give you more defense in your next fight.";
         },
         north: 26,
@@ -375,8 +376,7 @@ export const events =
     {
         description: function()
         {
-            player.addItem("Fireball");
-            system.addCondition("fireball");
+            player.addItem("fireball_effect");
             return "You wield the power of the mighty fireball for one fight.";
         },
         north: 26,
@@ -409,5 +409,61 @@ export const events =
                 escape: 1
             }
         ]
+    },
+    event28:
+    {
+        description: "You must pick up one of these: [i]Stone Sword[/i], [i]Decorative Shield[/i], [i]Monster's Bone[/i].",
+        items: ["bone", "sword_stone", "shield_decorative"],
+        on_take: function(item)
+        {
+            system.redirect(29, true);
+        }
+    },
+    event29:
+    {
+        description: "You leave the room.",
+        east: 6
+    },
+    event30:
+    {
+        description: function()
+        {
+            let desc = "You will now receive random keys.";
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key12");
+                desc += "<br />Key 12 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key45");
+                desc += "<br />Key 45 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key70");
+                desc += "<br />Key 70 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key93");
+                desc += "<br />Key 93 obtained.";
+            }
+            if(system.rollD6(1) > 4)
+            {
+                player.addItem("key122");
+                desc += "<br />Key 122 obtained.";
+            }
+            desc += "<br />Key assignment finished. You final key list: [ ";
+            let keys = player.getItemsWithTag("key");
+            for(let i = 0; i < keys.length; ++i)
+            {
+                desc += keys[i] + " ";
+            }
+            desc += "]";
+
+            return desc;
+        },
+        west: 1
     }
 };

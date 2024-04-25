@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "Enums/inputmode.h"
+#include "Enums/playerstat.h"
 #include "Models/event.h"
 #include "Models/combatstate.h"
 #include "System/savestatemanager.h"
@@ -32,6 +33,7 @@ class Game: public QObject
 
     // Game state.
     bool _game_running;
+    bool _game_won;
     CombatState _combat_state;
     std::tuple<int, int, int> _generated_stats;
     unsigned int _current_help_page;
@@ -43,6 +45,9 @@ class Game: public QObject
     // Secret switch.
     bool _conan;
 
+    // Setup.
+    void createPlayer(int agility, int constitution, int luck, PlayerStat elixir);
+
     // Command handlers.
     bool handleDirectionCommand(Direction direction);   // true if valid movement
     void handleDrinkCommand();
@@ -50,6 +55,7 @@ class Game: public QObject
     bool handleEscapeCommand(); // true if valid
     bool handleFightCommand();  // true if valid
     void handleHelpCommand();
+    void handleInspectCommand(const std::string& item_name);
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed); // true if successful
     bool handleLocalCommand(const std::string& input);  // true if valid
     bool handleLuckyCommand();  // true if valid
@@ -57,7 +63,7 @@ class Game: public QObject
     bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();
     void handleStatsCommand();
-    void handleTakeCommand(const std::string& item);
+    bool handleTakeCommand(const std::string& item_name); // true if picked something up
 
     // Text display
     void displayCombatStatus();
@@ -70,9 +76,9 @@ class Game: public QObject
     void deleteSaveFile();
     void loadGame();
     void resolveDamage(bool player_win, int damage);
-    std::pair<bool, bool> resolveYesNoQuestion(const std::string& user_input);
-    std::pair<bool, std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
-                                                            const std::string& user_input);
+    std::optional<bool> resolveYesNoQuestion(const std::string& user_input);
+    std::optional<std::string> resolveMultiChoiceQuestion(const std::vector<std::string>& options,
+                                                          const std::string& user_input);
     bool resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input);
     InputMode updateCurrentEvent(int id, bool new_room);
     InputMode updateRoomExit(InputMode default_mode);
@@ -97,6 +103,7 @@ public:
     Game(QObject* parent, Console& console);
     void setup();
 
+    Player* getPlayer();
     ScriptApi* getScriptApi();
 
     InputMode resolveCharacterCreationInput(const std::string& user_input);
@@ -114,6 +121,7 @@ public:
 
     void gameOverScreen();
     void titleScreen();
+    void victoryScreen();
     void nextHelpPage();
     void previousHelpPage();
     void exitHelpPage();
@@ -122,12 +130,15 @@ public:
 
 public slots:
     void onAddCondition(const QVariant& name);
+    void onAddItem(const QVariant& id);
     void onDisableEnemyEscape();
     void onDisableRoomEscape();
     void onEnableEnemyEscape(int redirect);
     void onEnableRoomEscape(int redirect);
     void onRemoveCondition(const QVariant& name);
+    void onRemoveItem(const QVariant& id);
     void onStopCombat();
+    void onWinGame();
 
 signals:
     void gameCrash();

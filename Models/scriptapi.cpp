@@ -37,7 +37,7 @@ QString ScriptApi::getFileContents(const QString& path) const
     {
         return QString::fromStdString(utils::accessStaticResource(path.toStdString()));
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error&)
     {
         return "<font color=\"red\">Error occured. Content not loaded.</font>";
     }

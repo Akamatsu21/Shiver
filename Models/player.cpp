@@ -104,42 +104,26 @@ std::string Player::getElixirTypeAsString() const
     }
 }
 
-bool Player::hasItem(const std::string& item) const
-{
-    return std::find(std::begin(_inventory), std::end(_inventory), item) != std::end(_inventory);
-}
-
 bool Player::hasItem(const QVariant& item) const
 {
-    return hasItem(item.toString().toStdString());
+    return _inventory.hasItemID(item.toString().toStdString());
 }
 
-std::string Player::getInventory() const
+int Player::countItemsWithTag(const QVariant& tag) const
 {
-    if(_inventory.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "\n" + element;
-        });
+    return _inventory.countByTag(tag.toString().toStdString());
 }
 
-std::string Player::getInventoryHtml() const
+QStringList Player::getItemsWithTag(const QVariant& tag) const
 {
-    if(_inventory.empty())
-    {
-        return "";
-    }
-
-    return std::accumulate(std::next(std::begin(_inventory)), std::end(_inventory), _inventory.at(0),
-        [](std::string acc, std::string element)
-        {
-            return acc + "<br />" + element;
-    });
+    std::vector<Item> items_with_tag = _inventory.findItemsWithTag(tag.toString().toStdString());
+    QStringList item_ids{};
+    std::transform(std::begin(items_with_tag), std::end(items_with_tag), std::back_inserter(item_ids),
+                   [](const Item& item)
+                   {
+                       return QString::fromStdString(item.getID());
+                   });
+    return item_ids;
 }
 
 std::vector<Condition> Player::getConditions() const
@@ -159,6 +143,11 @@ std::string Player::getConditionsString() const
         {
             return acc + "<br />" + element.getName();
     });
+}
+
+Inventory& Player::getInventory()
+{
+    return _inventory;
 }
 
 void Player::setAgility(int value)
@@ -347,34 +336,6 @@ bool Player::drinkElixir()
     return true;
 }
 
-void Player::addItem(const std::string& item)
-{
-    if(!hasItem(item))
-    {
-        _inventory.push_back(item);
-    }
-}
-
-void Player::addItem(const QVariant& item)
-{
-    addItem(item.toString().toStdString());
-}
-
-void Player::removeItem(const std::string& item)
-{
-    std::vector<std::string>::iterator found_item =
-            std::find(std::begin(_inventory), std::end(_inventory), item);
-    if(found_item != std::end(_inventory))
-    {
-        _inventory.erase(found_item);
-    }
-}
-
-void Player::removeItem(const QVariant& item)
-{
-    removeItem(item.toString().toStdString());
-}
-
 void Player::addConditionToList(const Condition& cond)
 {
     _conditions.push_back(cond);
@@ -415,7 +376,7 @@ void Player::applyCondition(const Condition& cond)
     addConditionToList(cond);
 }
 
-void Player::removeCondition(const std::string& name)
+void Player::clearCondition(const std::string& name)
 {
     std::vector<Condition>::iterator found_cond =
             std::find_if(std::begin(_conditions), std::end(_conditions),

@@ -7,6 +7,7 @@
 
 #include "choice.h"
 #include "enemy.h"
+#include "inventory.h"
 #include "quiz.h"
 #include "Enums/direction.h"
 
@@ -24,8 +25,9 @@ class Event
     bool _has_gold;
     int _rations;
     bool _has_rations;
-    std::vector<std::string> _items;
+    Inventory _items;
     int _item_limit;
+    QJSValue _take_callback;
     bool _eating_enabled;
     QJSValue _eating_callback;
     Choice _choice;
@@ -48,10 +50,6 @@ public:
     int getGold() const;
     bool hasRations() const;
     int getRations() const;
-    bool hasItems() const;
-    bool hasItem(const std::string& item) const;
-    std::string getItemList() const;
-    std::string findItem(const std::string& item) const;
     int getItemLimit() const;
     bool isEatingEnabled() const;
     bool hasEatingCallback() const;
@@ -69,6 +67,7 @@ public:
     std::vector<std::string> getLocalCommands() const;
     UserOption getLocalCommand(const std::string& command) const;
 
+    Inventory& getItemList();
     void setRedirect(int value);
     void setNewRoom(bool value);
     void setEscapeRedirect(int value);
@@ -80,6 +79,7 @@ public:
     void setHasRations(bool value);
     void setRations(int value);
     void setItemLimit(int value);
+    void setTakeCallback(QJSValue callback);
     void setEatingEnabled(bool value);
     void setEatingCallback(QJSValue callback);
     void setExitCallback(QJSValue callback);
@@ -96,7 +96,6 @@ public:
     void defeatCurrentEnemy();
     void defeatAllEnemies();
 
-    void addItem(const std::string& item);
     void takeItem();
 
     void setChoice(ChoiceType type, const std::string& question);
@@ -114,6 +113,7 @@ public:
     void triggerLocalCommandCallback(const std::string& command);
 
     void triggerDirectionCallback(Direction direction);
+    void triggerTakeCallback(const std::string& item);
     void triggerEatingCallback();
     void triggerExitCallback();
 };

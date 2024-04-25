@@ -12,6 +12,8 @@ SOURCES += \
         Models/enemy.cpp \
         Models/event.cpp \
         Models/gamevariables.cpp \
+        Models/inventory.cpp \
+        Models/item.cpp \
         Models/player.cpp \
         Models/scriptapi.cpp \
         System/commandparser.cpp \
@@ -42,6 +44,8 @@ HEADERS += \
     Models/event.h \
     Models/gamestate.h \
     Models/gamevariables.h \
+    Models/inventory.h \
+    Models/item.h \
     Models/player.h \
     Models/quiz.h \
     Models/scriptapi.h \

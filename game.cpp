@@ -24,6 +24,7 @@ Game::Game(QObject* parent, Console& console):
     _player(nullptr),
     _game_vars(new GameVariables(this)),
     _game_running(false),
+    _game_won(false),
     _combat_state{false, 0, 0, 0},
     _generated_stats{0, 0, 0},
     _current_help_page(0),
@@ -45,18 +46,32 @@ void Game::setup()
         _scripting_engine->loadModules();
         _help_pages = _scripting_engine->parseHelpPages();
     }
-    catch(const std::runtime_error& e)
+    catch(const std::runtime_error& err)
     {
         _console.writeError("Fatal error while loading the game.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game terminated.");
         emit gameCrash();
     }
 }
 
+Player* Game::getPlayer()
+{
+    return _player;
+}
+
 ScriptApi* Game::getScriptApi()
 {
     return _script_api;
+}
+
+void Game::createPlayer(int agility, int constitution, int luck, PlayerStat elixir)
+{
+    _player = new Player(this, agility, constitution, luck, elixir);
+    connect(_player, &Player::addItem, this, &Game::onAddItem);
+    connect(_player, &Player::removeItem, this, &Game::onRemoveItem);
+    connect(_player, &Player::addCondition, this, &Game::onAddCondition);
+    connect(_player, &Player::removeCondition, this, &Game::onRemoveCondition);
 }
 
 bool Game::handleDirectionCommand(Direction direction)
@@ -187,6 +202,25 @@ void Game::handleHelpCommand()
 {
     _current_help_page = 1;
     displayHelpPage();
+}
+
+void Game::handleInspectCommand(const std::string& item_name)
+{
+    if(item_name.empty())
+    {
+        _console.writeText("Specify the name of the item from your inventory that you want to inspect.");
+        return;
+    }
+
+    std::optional<Item> result = _player->getInventory().findItemByName(item_name);
+    if(result.has_value())
+    {
+        _console.writeText(result.value().getDescription());
+    }
+    else
+    {
+        _console.writeText("You don't have that item in your inventory.");
+    }
 }
 
 bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_needed)
@@ -355,24 +389,25 @@ void Game::handleStatsCommand()
                                           "<br />", _player->getElixirTypeAsString(), ": ",
                                             _player->getElixirCount(),
                                           "<br /><br />Inventory:<br />",
-                                            _player->getInventoryHtml());
+                                            _player->getInventory().toHTML());
     _console.writeText(msg);
 }
 
-void Game::handleTakeCommand(const std::string& item)
+bool Game::handleTakeCommand(const std::string& item_name)
 {
     if(_combat_state.combat_in_progress)
     {
         _console.writeText("You have to defeat all enemies before you can pick up items.");
-        return;
+        return false;
     }
-    else if(item.empty())
+    else if(item_name.empty())
     {
         _console.writeText("Specify which item to take.");
-        return;
+        return false;
     }
 
-    if(utils::toLower(item) == "gold")
+    std::string item_lowercase = utils::toLower(item_name);
+    if(item_lowercase == "gold")
     {
         if(_current_event.hasGold())
         {
@@ -383,14 +418,15 @@ void Game::handleTakeCommand(const std::string& item)
             QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                        "_gold_taken"));
             _game_vars->setFlag(flag, true);
+            return true;
         }
         else
         {
             _console.writeText("No gold to pick up here.");
+            return false;
         }
-        return;
     }
-    else if(utils::toLower(item) == "ration" || utils::toLower(item) == "rations")
+    else if(item_lowercase == "ration" || item_lowercase == "rations")
     {
         if(_current_event.hasRations())
         {
@@ -411,39 +447,50 @@ void Game::handleTakeCommand(const std::string& item)
             QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                        "_rations_taken"));
             _game_vars->setFlag(flag, true);
+            return true;
         }
         else
         {
             _console.writeText("No rations to pick up here.");
+            return false;
         }
-        return;
     }
 
-    std::string found_item = _current_event.findItem(item);
-    if(found_item.empty())
+    std::optional<Item> result = _current_event.getItemList().findItemByName(item_name);
+    if(result.has_value())
     {
-        _console.writeText("Item not found in this room.");
-    }
-    else
-    {
-        if(_player->hasItem(found_item))
+        Item found_item = result.value();
+        if(_player->getInventory().hasItemID(found_item.getID()))
         {
             _console.writeText("You've already picked up this item.");
+            return false;
         }
         else if(_current_event.getItemLimit() < 1)
         {
             _console.writeText("You cannot take any more items from this room.");
+            return false;
         }
         else
         {
             _current_event.takeItem();
-            _player->addItem(found_item);
-            _console.writeText(utils::createString("[i]", found_item, "[/i] added to your inventory."));
+            _player->getInventory().addItem(found_item);
+            _console.writeText(utils::createString("[i]", found_item.getName(), "[/i] added to your inventory."));
 
             QVariant counter = QString::fromStdString(utils::createString(_current_event.getId(),
                                                                           "_items_taken"));
             _game_vars->incrementCounter(counter, +1);
+
+            if(!found_item.getCondition().empty())
+            {
+                onAddCondition(QString::fromStdString(found_item.getCondition()));
+            }
+            return true;
         }
+    }
+    else
+    {
+        _console.writeText("Item not found in this room.");
+        return false;
     }
 }
 
@@ -526,10 +573,10 @@ void Game::deleteSaveFile()
                                                "\" successfully deleted."));
         _save_file = "";
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("File deletion failed.");
     }
 }
@@ -543,10 +590,10 @@ void Game::loadGame()
         _save_file = "";
         _game_running = true;
     }
-    catch(const std::runtime_error& e)
+    catch(const std::runtime_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Load failed.");
     }
 }
@@ -584,18 +631,18 @@ void Game::resolveDamage(bool player_win, int damage)
     _console.writeText(msg);
 }
 
-std::pair<bool, bool> Game::resolveYesNoQuestion(const std::string& user_input)
+std::optional<bool> Game::resolveYesNoQuestion(const std::string& user_input)
 {
-    auto [valid, answer] = CommandParser::parseYesNo(user_input);
-    if(!valid)
+    std::optional<bool> answer = CommandParser::parseYesNo(user_input);
+    if(!answer.has_value())
     {
         _console.writeText("Invalid answer. Please answer [o]yes[/o] or [o]no[/o].");
     }
 
-    return {valid, answer};
+    return answer;
 }
 
-std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<std::string>& options,
+std::optional<std::string> Game::resolveMultiChoiceQuestion(const std::vector<std::string>& options,
                                                               const std::string& user_input)
 {
     std::string answer = utils::toLower(user_input);
@@ -603,9 +650,10 @@ std::pair<bool, std::string> Game::resolveMultiChoiceQuestion(const std::vector<
     if(!valid)
     {
         _console.writeText("Invalid answer. Please choose one of the highlighted answers.");
+        return {};
     }
 
-    return {valid, answer};
+    return answer;
 }
 
 bool Game::resolveQuizQuestion(const std::vector<std::string>& answers, const std::string& user_input)
@@ -690,10 +738,10 @@ void Game::saveGame()
         }
         _save_file = "";
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Save failed.");
     }
 }
@@ -784,7 +832,7 @@ void Game::resolveCombatEndTriggers(bool escape)
     {
         if(condition.getClearTiming() == CallbackTiming::COMBAT_END)
         {
-            _player->removeCondition(condition.getName());
+            _player->clearCondition(condition.getName());
         }
     }
 
@@ -850,7 +898,7 @@ GameState Game::createGameState()
     game_state.player_rations = _player->getRations();
     game_state.player_elixir_count = _player->getElixirCount();
     game_state.player_elixir_type = static_cast<int>(_player->getElixirType());
-    game_state.player_inventory = _player->getInventory();
+    game_state.player_inventory = _player->getInventory().toString();
     game_state.player_conditions = _player->getConditionsString();
 
     game_state.event_id = _current_event.getId();
@@ -867,8 +915,8 @@ GameState Game::createGameState()
     }
     game_state.event_gold_present = _current_event.hasGold();
     game_state.event_rations_present = _current_event.hasRations();
-    game_state.event_items_present = _current_event.hasItems();
-    if(_current_event.hasItems())
+    game_state.event_items_present = !_current_event.getItemList().empty();
+    if(game_state.event_items_present)
     {
         game_state.event_item_limit = _current_event.getItemLimit();
     }
@@ -900,11 +948,10 @@ void Game::restoreGameState(const GameState& game_state)
     };
 
     delete _player;
-    _player = new Player(this,
-                         game_state.player_start_agility,
-                         game_state.player_start_constitution,
-                         game_state.player_start_luck,
-                         static_cast<PlayerStat>(game_state.player_elixir_type));
+    createPlayer(game_state.player_start_agility,
+                 game_state.player_start_constitution,
+                 game_state.player_start_luck,
+                 static_cast<PlayerStat>(game_state.player_elixir_type));
 
     try
     {
@@ -916,9 +963,9 @@ void Game::restoreGameState(const GameState& game_state)
         _player->setRations(game_state.player_rations);
         _player->setElixirCount(game_state.player_elixir_count);
     }
-    catch(const std::out_of_range& e)
+    catch(const std::out_of_range& err)
     {
-        reportError(e.what());
+        reportError(err.what());
         return;
     }
     _scripting_engine->registerPlayer(_player);
@@ -932,7 +979,7 @@ void Game::restoreGameState(const GameState& game_state)
         {
             std::string item;
             std::getline(ss, item);
-            _player->addItem(item);
+            _player->getInventory().addItem(_scripting_engine->parseItem(QString::fromStdString(item)));
         }
     }
 
@@ -1003,9 +1050,9 @@ void Game::restoreGameState(const GameState& game_state)
         {
             _current_event.getCurrentEnemy().setConstitution(game_state.event_enemy_constitution);
         }
-        catch(const std::out_of_range& e)
+        catch(const std::out_of_range& err)
         {
-            reportError(e.what());
+            reportError(err.what());
             return;
         }
         _current_event.getCurrentEnemy().setEscapeEnabled(game_state.event_enemy_escape_enabled);
@@ -1028,7 +1075,7 @@ void Game::restoreGameState(const GameState& game_state)
 
     if(game_state.event_items_present)
     {
-        if(!_current_event.hasItems())
+        if(_current_event.getItemList().empty())
         {
             reportError("Incorrect game state loaded. Error code: 9254");
             return;
@@ -1067,13 +1114,13 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
     else
     {
         auto [agility, constitution, luck] = _generated_stats;
-        _player = new Player(this, agility, constitution, luck, elixir);
+        createPlayer(agility, constitution, luck, elixir);
         _scripting_engine->registerPlayer(_player);
 
-        _player->addItem(std::string("Sword"));
-        _player->addItem(std::string("Shield"));
-        _player->addItem(std::string("Backpack"));
-        _player->addItem(std::string("Lantern"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("sword"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("shield"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("backpack"));
+        _player->getInventory().addItem(_scripting_engine->parseItem("lantern"));
 
         _console.writeText("<br />This is your character. Type [c]stats[/c] at any point to see this list.");
         handleStatsCommand();
@@ -1088,11 +1135,11 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
 {
     InputMode mode = InputMode::ESCAPE_CHECK;
     int damage = 2;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
-        if(answer)
+        if(answer.value())
         {
             bool player_lucky = _player->performLuckCheck();
             damage = player_lucky ? 1 : 3;
@@ -1161,10 +1208,20 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         }
         break;
     case Command::TAKE:
-        handleTakeCommand(utils::parseParams(params));
+    {
+        std::string item = utils::parseParams(params);
+        if(handleTakeCommand(item))
+        {
+            _current_event.triggerTakeCallback(utils::toLower(item));
+            perform_game_checks = true;
+        }
+    }   break;
+    case Command::INSPECT:
+        handleInspectCommand(utils::parseParams(params));
         break;
     case Command::EAT:
         handleEatCommand();
+        perform_game_checks = true; // callback might have happened
         break;
     case Command::DRINK:
         handleDrinkCommand();
@@ -1212,7 +1269,11 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         break;
     }
 
-    if(perform_game_checks)
+    if(_game_won)
+    {
+        mode = InputMode::KEY_VICTORY;
+    }
+    else if(perform_game_checks)
     {
         bool combat_happened = _combat_state.combat_in_progress;
         if(performGameChecks())
@@ -1242,12 +1303,12 @@ InputMode Game::resolveGameStartInput()
 InputMode Game::resolveLoadInput(const std::string& user_input)
 {
     InputMode mode = InputMode::LOAD_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = InputMode::GAME;
-        if(answer)
+        if(answer.value())
         {
             loadGame();
         }
@@ -1259,13 +1320,12 @@ InputMode Game::resolveLoadInput(const std::string& user_input)
 InputMode Game::resolveMultiChoice(const std::string& user_input)
 {
     InputMode mode = InputMode::MULTI_CHOICE;
-    auto [valid, answer] = resolveMultiChoiceQuestion(
-                            _current_event.getChoiceOptions(),
-                            user_input);
-    if(valid)
+    std::optional<std::string> answer = resolveMultiChoiceQuestion(_current_event.getChoiceOptions(), user_input);
+
+    if(answer.has_value())
     {
-        _current_event.triggerChoiceOptionCallback(answer);
-        UserOption option = _current_event.getChoiceOption(answer);
+        _current_event.triggerChoiceOptionCallback(answer.value());
+        UserOption option = _current_event.getChoiceOption(answer.value());
 
         if(option.redirect != 0)
         {
@@ -1322,12 +1382,12 @@ InputMode Game::resolveRedirectInput()
 InputMode Game::resolveSaveDelInput(const std::string& user_input)
 {
     InputMode mode = InputMode::SAVEDEL_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = _game_running ? InputMode::GAME : InputMode::TITLE_SCREEN;
-        if(answer)
+        if(answer.value())
         {
             deleteSaveFile();
         }
@@ -1339,12 +1399,12 @@ InputMode Game::resolveSaveDelInput(const std::string& user_input)
 InputMode Game::resolveSaveInput(const std::string& user_input)
 {
     InputMode mode = InputMode::SAVE_CONFIRMATION;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
 
-    if(valid)
+    if(answer.has_value())
     {
         mode = InputMode::GAME;
-        if(answer)
+        if(answer.value())
         {
             saveGame();
         }
@@ -1399,10 +1459,11 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
 InputMode Game::resolveYesNoChoice(const std::string& user_input)
 {
     InputMode mode = InputMode::YES_NO_CHOICE;
-    auto [valid, answer] = resolveYesNoQuestion(user_input);
-    if(valid)
+    std::optional<bool> answer = resolveYesNoQuestion(user_input);
+
+    if(answer.has_value())
     {
-        std::string answer_string = answer ? "yes" : "no";
+        std::string answer_string = answer.value() ? "yes" : "no";
         _current_event.triggerChoiceOptionCallback(answer_string);
         UserOption option = _current_event.getChoiceOption(answer_string);
 
@@ -1426,10 +1487,10 @@ void Game::gameOverScreen()
         _console.clearScreen();
         _console.pasteText(utils::accessStaticResource("gameover.txt"));
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game over screen returned an error.");
     }
 }
@@ -1441,11 +1502,26 @@ void Game::titleScreen()
         _console.clearScreen();
         _console.pasteText(utils::accessStaticResource("title.txt"));
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game couldn't be started.");
+    }
+}
+
+void Game::victoryScreen()
+{
+    try
+    {
+        _console.clearScreen();
+        _console.pasteText(utils::accessStaticResource("victory.txt"));
+    }
+    catch(const std::system_error& err)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(err.what());
+        _console.writeError("Victory screen returned an error.");
     }
 }
 
@@ -1484,6 +1560,16 @@ void Game::onAddCondition(const QVariant& name)
     _player->applyCondition(_scripting_engine->parseCondition(name.toString()));
 }
 
+void Game::onAddItem(const QVariant& id)
+{
+    Item item = _scripting_engine->parseItem(id.toString());
+    _player->getInventory().addItem(item);
+    if(!item.getCondition().empty())
+    {
+        onAddCondition(QString::fromStdString(item.getCondition()));
+    }
+}
+
 void Game::onDisableEnemyEscape()
 {
     _current_event.getCurrentEnemy().setEscapeEnabled(false);
@@ -1507,11 +1593,21 @@ void Game::onEnableRoomEscape(int redirect)
 
 void Game::onRemoveCondition(const QVariant& name)
 {
-    _player->removeCondition(name.toString().toStdString());
+    _player->clearCondition(name.toString().toStdString());
+}
+
+void Game::onRemoveItem(const QVariant& id)
+{
+    _player->getInventory().removeItem(id.toString().toStdString());
 }
 
 void Game::onStopCombat()
 {
     _combat_state.combat_in_progress = false;
     _current_event.defeatAllEnemies();
+}
+
+void Game::onWinGame()
+{
+    _game_won = true;
 }

@@ -12,7 +12,7 @@ export const conditions =
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
-            player.removeItem("Cursed Gloves (-1 Agility)");
+            player.removeItem("gloves");
             system.message("Due to the damage sustained in battle, the Cursed Gloves feel a lot looser. You attempt to take them off once again, and this time you succeed.");
         }
     },
@@ -43,7 +43,7 @@ export const conditions =
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
-            player.removeItem("Fireball");
+            player.removeItem("fireball_effect");
         },
         on_damage: function(damage)
         {
@@ -87,7 +87,7 @@ export const conditions =
         clear_timing: CallbackTiming.CombatEnd,
         on_clear: function()
         {
-            player.removeItem("Helmet");
+            player.removeItem("helmet_effect");
         }
     }
 };

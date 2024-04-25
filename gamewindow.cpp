@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
+#include "Models/player.h"
 #include "Models/scriptapi.h"
 #include "System/console.h"
 
@@ -54,10 +55,6 @@ void GameWindow::setupGameConnections()
             &_console, &Console::onMessage);
     connect(_game->getScriptApi(), &ScriptApi::stopCombat,
             _game, &Game::onStopCombat);
-    connect(_game->getScriptApi(), &ScriptApi::addCondition,
-            _game, &Game::onAddCondition);
-    connect(_game->getScriptApi(), &ScriptApi::removeCondition,
-            _game, &Game::onRemoveCondition);
     connect(_game->getScriptApi(), &ScriptApi::disableEnemyEscape,
             _game, &Game::onDisableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::disableRoomEscape,
@@ -66,6 +63,8 @@ void GameWindow::setupGameConnections()
             _game, &Game::onEnableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::enableRoomEscape,
             _game, &Game::onEnableRoomEscape);
+    connect(_game->getScriptApi(), &ScriptApi::winGame,
+            _game, &Game::onWinGame);
 }
 
 void GameWindow::updateInputState()
@@ -103,6 +102,7 @@ void GameWindow::updateInputState()
     case InputMode::KEY_GAME_START:
     case InputMode::KEY_GAME_OVER:
     case InputMode::KEY_REDIRECT:
+    case InputMode::KEY_VICTORY:
         _console.setWaitingForInput(false);
         _console.setWaitingForReturn(true);
         _console.setHelpVisible(false);
@@ -170,6 +170,10 @@ void GameWindow::onUserKeyReceived()
         return;
     case InputMode::KEY_REDIRECT:
         _input_mode = _game->resolveRedirectInput();
+        break;
+    case InputMode::KEY_VICTORY:
+        _game->victoryScreen();
+        _input_mode = InputMode::KEY_GAME_OVER;
         break;
     default:
         assert(false);

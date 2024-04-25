@@ -14,6 +14,7 @@ enum class Command
     FIGHT,
     ESCAPE,
     TAKE,
+    INSPECT,
     EAT,
     DRINK,
     LUCKY,

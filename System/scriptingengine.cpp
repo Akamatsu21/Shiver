@@ -26,6 +26,7 @@ void ScriptingEngine::loadModules()
     _condition_list = _js_engine.importModule(":js/conditions.jsm").property("conditions");
     _event_list = _js_engine.importModule(":js/events.jsm").property("events");
     _help_pages = _js_engine.importModule(":js/help.jsm").property("help_pages");
+    _item_list = _js_engine.importModule(":js/items.jsm").property("items");
 
     if(_condition_list.isError() || _event_list.isError() || _help_pages.isError()
     || _condition_list.isUndefined() || _event_list.isUndefined() || _help_pages.isUndefined())
@@ -292,9 +293,15 @@ Event ScriptingEngine::parseEvent(int id)
             int length = items.property("length").toInt();
             for(int i = 0; i < length; ++i)
             {
-                event.addItem(items.property(i).toString().toStdString());
+                QString item_id = items.property(i).toString();
+                event.getItemList().addItem(parseItem(item_id));
             }
         }
+    }
+
+    if(event_object.hasProperty("on_take"))
+    {
+        event.setTakeCallback(event_object.property("on_take"));
     }
 
     if(event_object.hasProperty("eat"))
@@ -427,4 +434,42 @@ std::vector<std::string> ScriptingEngine::parseHelpPages()
     }
 
     return pages;
+}
+
+Item ScriptingEngine::parseItem(const QString& id)
+{
+    assert(_item_list.hasProperty(id));
+    QJSValue item_object = _item_list.property(id);
+
+    assert(item_object.hasProperty("name"));
+    std::string name = getObjectProperty(item_object, "name").toString().toStdString();
+
+    std::string status;
+    if(item_object.hasProperty("status"))
+    {
+        status = getObjectProperty(item_object, "status").toString().toStdString();
+    }
+
+    std::string condition;
+    if(item_object.hasProperty("condition"))
+    {
+        condition = getObjectProperty(item_object, "condition").toString().toStdString();
+    }
+
+    std::vector<std::string> tags{};
+    if(item_object.hasProperty("tags"))
+    {
+        QJSValue tags_object = getObjectProperty(item_object, "tags");
+        assert(tags_object.isArray());
+        int length = tags_object.property("length").toInt();
+        for(int i = 0; i < length; ++i)
+        {
+            tags.push_back(tags_object.property(i).toString().toStdString());
+        }
+    }
+
+    assert(item_object.hasProperty("description"));
+    std::string description = getObjectProperty(item_object, "description").toString().toStdString();
+
+    return Item(id.toStdString(), name, status, condition, tags, description);
 }

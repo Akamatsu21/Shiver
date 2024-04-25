@@ -63,6 +63,8 @@ void GameWindow::setupGameConnections()
             _game, &Game::onEnableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::enableRoomEscape,
             _game, &Game::onEnableRoomEscape);
+    connect(_game->getScriptApi(), &ScriptApi::winGame,
+            _game, &Game::onWinGame);
 }
 
 void GameWindow::updateInputState()
@@ -100,6 +102,7 @@ void GameWindow::updateInputState()
     case InputMode::KEY_GAME_START:
     case InputMode::KEY_GAME_OVER:
     case InputMode::KEY_REDIRECT:
+    case InputMode::KEY_VICTORY:
         _console.setWaitingForInput(false);
         _console.setWaitingForReturn(true);
         _console.setHelpVisible(false);
@@ -167,6 +170,10 @@ void GameWindow::onUserKeyReceived()
         return;
     case InputMode::KEY_REDIRECT:
         _input_mode = _game->resolveRedirectInput();
+        break;
+    case InputMode::KEY_VICTORY:
+        _game->victoryScreen();
+        _input_mode = InputMode::KEY_GAME_OVER;
         break;
     default:
         assert(false);

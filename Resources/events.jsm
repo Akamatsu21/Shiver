@@ -7790,7 +7790,10 @@ export const events =
     },
     event387:
     {
-        description: "You hear the padlock unlocking with a click. Carefully you pick up the lid of the box. At the bottom, you find a piece of paper. You read the message inscribed on the sheet:<br /><br />\"Thank you so much for playing Shiver. I hope you enjoyed your adventure. If you would like to know how you cheese the game, try typing 'Summon Conan The Barbarian King' when you're on the title screen. See you in my next game!\"<br /><br />You put the piece of paper in your pocket, knowing that the knowledge it contains will be invaluable in your next adventure.",
-        win: true
+        description: function()
+        {
+            system.winGame();
+            return "You hear the padlock unlocking with a click. Carefully you pick up the lid of the box. At the bottom, you find a piece of paper. You read the message inscribed on the sheet:<br /><br />\"Thank you so much for playing Shiver. I hope you enjoyed your adventure. If you would like to know how you cheese the game, try typing 'Summon Conan The Barbarian King' when you're on the title screen. See you in my next game!\"<br /><br />You put the piece of paper in your pocket, knowing that the knowledge it contains will be invaluable in your next adventure.";
+        }
     }
 };

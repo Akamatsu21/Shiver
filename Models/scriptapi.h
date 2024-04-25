@@ -31,6 +31,7 @@ signals:
     void message(const QVariant& text);
     void redirect(int id, bool new_room);
     void stopCombat();
+    void winGame();
 };
 
 #endif // SCRIPTAPI_H

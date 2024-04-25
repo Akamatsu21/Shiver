@@ -24,6 +24,7 @@ Game::Game(QObject* parent, Console& console):
     _player(nullptr),
     _game_vars(new GameVariables(this)),
     _game_running(false),
+    _game_won(false),
     _combat_state{false, 0, 0, 0},
     _generated_stats{0, 0, 0},
     _current_help_page(0),
@@ -45,10 +46,10 @@ void Game::setup()
         _scripting_engine->loadModules();
         _help_pages = _scripting_engine->parseHelpPages();
     }
-    catch(const std::runtime_error& e)
+    catch(const std::runtime_error& err)
     {
         _console.writeError("Fatal error while loading the game.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game terminated.");
         emit gameCrash();
     }
@@ -572,10 +573,10 @@ void Game::deleteSaveFile()
                                                "\" successfully deleted."));
         _save_file = "";
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("File deletion failed.");
     }
 }
@@ -589,10 +590,10 @@ void Game::loadGame()
         _save_file = "";
         _game_running = true;
     }
-    catch(const std::runtime_error& e)
+    catch(const std::runtime_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Load failed.");
     }
 }
@@ -737,10 +738,10 @@ void Game::saveGame()
         }
         _save_file = "";
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Save failed.");
     }
 }
@@ -962,9 +963,9 @@ void Game::restoreGameState(const GameState& game_state)
         _player->setRations(game_state.player_rations);
         _player->setElixirCount(game_state.player_elixir_count);
     }
-    catch(const std::out_of_range& e)
+    catch(const std::out_of_range& err)
     {
-        reportError(e.what());
+        reportError(err.what());
         return;
     }
     _scripting_engine->registerPlayer(_player);
@@ -1049,9 +1050,9 @@ void Game::restoreGameState(const GameState& game_state)
         {
             _current_event.getCurrentEnemy().setConstitution(game_state.event_enemy_constitution);
         }
-        catch(const std::out_of_range& e)
+        catch(const std::out_of_range& err)
         {
-            reportError(e.what());
+            reportError(err.what());
             return;
         }
         _current_event.getCurrentEnemy().setEscapeEnabled(game_state.event_enemy_escape_enabled);
@@ -1268,7 +1269,11 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         break;
     }
 
-    if(perform_game_checks)
+    if(_game_won)
+    {
+        mode = InputMode::KEY_VICTORY;
+    }
+    else if(perform_game_checks)
     {
         bool combat_happened = _combat_state.combat_in_progress;
         if(performGameChecks())
@@ -1482,10 +1487,10 @@ void Game::gameOverScreen()
         _console.clearScreen();
         _console.pasteText(utils::accessStaticResource("gameover.txt"));
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game over screen returned an error.");
     }
 }
@@ -1497,11 +1502,26 @@ void Game::titleScreen()
         _console.clearScreen();
         _console.pasteText(utils::accessStaticResource("title.txt"));
     }
-    catch(const std::system_error& e)
+    catch(const std::system_error& err)
     {
         _console.writeError("Error encountered.");
-        _console.writeError(e.what());
+        _console.writeError(err.what());
         _console.writeError("Game couldn't be started.");
+    }
+}
+
+void Game::victoryScreen()
+{
+    try
+    {
+        _console.clearScreen();
+        _console.pasteText(utils::accessStaticResource("victory.txt"));
+    }
+    catch(const std::system_error& err)
+    {
+        _console.writeError("Error encountered.");
+        _console.writeError(err.what());
+        _console.writeError("Victory screen returned an error.");
     }
 }
 
@@ -1585,4 +1605,9 @@ void Game::onStopCombat()
 {
     _combat_state.combat_in_progress = false;
     _current_event.defeatAllEnemies();
+}
+
+void Game::onWinGame()
+{
+    _game_won = true;
 }

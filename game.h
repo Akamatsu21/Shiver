@@ -33,6 +33,7 @@ class Game: public QObject
 
     // Game state.
     bool _game_running;
+    bool _game_won;
     CombatState _combat_state;
     std::tuple<int, int, int> _generated_stats;
     unsigned int _current_help_page;
@@ -120,6 +121,7 @@ public:
 
     void gameOverScreen();
     void titleScreen();
+    void victoryScreen();
     void nextHelpPage();
     void previousHelpPage();
     void exitHelpPage();
@@ -136,6 +138,7 @@ public slots:
     void onRemoveCondition(const QVariant& name);
     void onRemoveItem(const QVariant& id);
     void onStopCombat();
+    void onWinGame();
 
 signals:
     void gameCrash();

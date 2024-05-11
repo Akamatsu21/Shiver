@@ -86,7 +86,7 @@ std::string Inventory::toString() const
         return "";
     }
 
-    return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0).getName(),
+    return std::accumulate(std::next(std::begin(_items)), std::end(_items), _items.at(0).getID(),
                            [](const std::string& acc, const Item& element)
                            {
                                return acc + "\n" + element.getID();

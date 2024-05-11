@@ -53,12 +53,12 @@ class Game: public QObject
     void handleDrinkCommand();
     void handleEatCommand();
     bool handleEscapeCommand(); // true if valid
-    bool handleFightCommand();  // true if valid
+    void handleFightCommand();
     void handleHelpCommand();
     void handleInspectCommand(const std::string& item_name);
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed); // true if successful
     bool handleLocalCommand(const std::string& input);  // true if valid
-    bool handleLuckyCommand();  // true if valid
+    void handleLuckyCommand();
     bool handleSaveCommand(const std::string& save_file); // true if input mode change needed
     bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();

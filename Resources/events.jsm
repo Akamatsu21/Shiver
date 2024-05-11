@@ -253,13 +253,38 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            return "You don't even need to look around. Let's be completely blunt. This chamber is actually a lair of a [e]Werewolf[/e]. It knows you're here. You take a few steps in the dark. Behind a gap in the rocks you notice a shiny spot. You quietly reach for your sword and take a few more steps. Now there are two spots. Rumbling. It jumps from behind a rock. Within a strip of light that entered the cavern through the half-opened door, all you can see are white fangs and green eyes. Immediately, you grab your sword with both your hands. You take a swing and... Your whole body stops. The green eyes paralyse you and you take 2 damage. But that's just for a short moment. With massive leaps, you dash towards the monster.";
+            let desc = "You don't even need to look around. Let's be completely blunt. This chamber is actually a lair of a [e]Werewolf[/e]. It knows you're here. You take a few steps in the dark. Behind a gap in the rocks you notice a shiny spot. You quietly reach for your sword and take a few more steps. Now there are two spots. Rumbling. It jumps from behind a rock. Within a strip of light that entered the cavern through the half-opened door, all you can see are white fangs and green eyes. Immediately, you grab your sword with both your hands. You take a swing and... Your whole body stops. The green eyes paralyse you and you take 2 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "But that's just for a short moment. With massive leaps, you dash towards the monster.";
+            }
+            else
+            {
+                desc += "You feel your body lose strength. The monster leaps at you...";
+            }
+
+            return desc;
         },
-        redirect: 126,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 126;
+            }
+            else
+            {
+                return undefined;
+            }
+            
+        },
         new_room: false,
         on_exit: function()
         {
-            game_vars.setFlag("126_luck_check", player.performLuckCheck());
+            if(player.getConstitution() > 0)
+            {
+                game_vars.setFlag("126_luck_check", player.performLuckCheck());
+            }
         }
     },
     event14:
@@ -496,7 +521,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.countItemsWithTag("key") > 1)
+            if(player.getConstitution() > 0)
             {
                 return 185;
             }
@@ -944,7 +969,7 @@ export const events =
         },
         quiz: function()
         {
-            if(game_vars.getFlag("42_incorrect_spell"))
+            if(player.getConstitution() <= 0)
             {
                 return undefined;
             }
@@ -1181,9 +1206,26 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            return "You make another attempt at breaking the door. Once again, your efforts are futile. You take 1 damage.";
+            let desc = "You make another attempt at breaking the door. Once again, your efforts are futile. You take 1 damage.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " This has exhausted the rest of your strength and you collapse to the floor...";
+            }
+
+            return desc;
         },
-        redirect: 75,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 75;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: true
     },
     event57:
@@ -1603,7 +1645,17 @@ export const events =
             if(success < 3)
             {
                 player.modifyConstitution(-1);
-                desc += "You got unlucky! You fall over and scrape your leg. You take 1 damage. You slowly pull yourself back up and continue forward. ";
+                desc += "You got unlucky! You fall over and scrape your leg. You take 1 damage. ";
+
+                if(player.getConstitution() > 0)
+                {
+                    desc += "You slowly pull yourself back up and continue forward. ";
+                }
+                else
+                {
+                    desc += "You feel the strength leave your body and you collapse, falling into the flaming abyss...";
+                    return desc;
+                }
             }
             else
             {
@@ -1625,7 +1677,7 @@ export const events =
         },
         redirect: function()
         {
-            if(player.hasItem("net"))
+            if(player.hasItem("net") && player.getConstitution() > 0)
             {
                 return 240;
             }
@@ -1637,7 +1689,7 @@ export const events =
         new_room: false,
         locals: function()
         {
-            if(player.hasItem("net"))
+            if(player.hasItem("net") || player.getConstitution() <= 0)
             {
                 return undefined;
             }
@@ -1693,6 +1745,7 @@ export const events =
 
                 if(game_vars.getFlag("76_print_luck_result"))
                 {
+                    game_vars.setFlag("76_print_luck_result", false);
                     desc += "Luck check successful!<br />You pick yourself back up and realise the dungeon will punish you severely if you try to damage its greatest treasure. It looks like the only option is to open the box.<br /><br />";
                 }
 
@@ -1755,6 +1808,11 @@ export const events =
         new_room: true,
         choice: function()
         {
+            if(player.getConstitution() <= 0)
+            {
+                return undefined;
+            }
+
             let padlock_count = "";
             switch(game_vars.getCounter("76_keys_inserted"))
             {
@@ -1780,8 +1838,8 @@ export const events =
                 return function()
                 {
                     player.removeItem("key" + key_number);
-                    game_vars.incrementCounter("76_keys_inserted", 1);
-                    game_vars.incrementCounter("76_redirect", parseInt(key_number));
+                    game_vars.incrementCounter("76_keys_inserted", +1);
+                    game_vars.incrementCounter("76_redirect", +parseInt(key_number));
                 };
             };
 
@@ -1983,18 +2041,39 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            return "You swim like a madman. You manage to safely reach the shore. You're in the same place you ended up in after crossing the lake. You take the [i]net[/i] and unfold it on the ground. You throw away entangles leaves and roots. Suddenly, the white marine rat, [e]Uruburu[/e], jumps out from underneath the floating trash. It bites your foot and runs: You take 2 damage. You may clean the [i]net[/i] and put it in your backpack. Then, it's time to [l]leave[/l].";
+            let desc = "You swim like a madman. You manage to safely reach the shore. You're in the same place you ended up in after crossing the lake. You take the [i]net[/i] and unfold it on the ground. You throw away entangles leaves and roots. Suddenly, the white marine rat, [e]Uruburu[/e], jumps out from underneath the floating trash. It bites your foot and runs: You take 2 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "You may clean the [i]net[/i] and put it in your backpack. Then, it's time to [l]leave[/l].";
+            }
+            else
+            {
+                desc += "With not much energy left in you, this pain is too much to take. You fall over and get entangled into the net. With no strength left to escape, you feel the water filling your lungs, as your consciousness fades...";
+            }
+
+            return desc;
         },
         items: ["net"],
         item_limit: 1,
-        locals:
-        [
+        locals: function()
+        {
+            if(player.getConstitution() > 0)
             {
-                command: "leave",
-                redirect: 195,
-                new_room: true
+                return [
+                    {
+                        command: "leave",
+                        redirect: 195,
+                        new_room: true
+                    }
+                ];
             }
-        ]
+            else
+            {
+                return undefined;
+            }
+        }
+        
     },
     event89:
     {
@@ -2300,15 +2379,31 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            return "You attempt to break the door. You run towards it and hit it with your shoulder using all your strength. The door won't even budge. You take 1 damage.";
+            let desc = "You attempt to break the door. You run towards it and hit it with your shoulder using all your strength. The door won't even budge. You take 1 damage.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " This has exhausted the rest of your strength and you collapse to the floor...";
+            }
+
+            return desc;
         },
-        yes_no_choice:
+        yes_no_choice: function()
         {
-            question: "Would you like to try again?",
-            yes: 56,
-            yes_new_room: false,
-            no: 75,
-            no_new_room: true
+            if(player.getConstitution() > 0)
+            {
+                return {
+                    question: "Would you like to try again?",
+                    yes: 56,
+                    yes_new_room: false,
+                    no: 75,
+                    no_new_room: true
+                };
+            }
+            else
+            {
+                return undefined;
+            }
         }
     },
     event106:
@@ -2856,6 +2951,9 @@ export const events =
             {
                 game_vars.setFlag("127_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key12");
+                player.addItem("key45");
+                player.addItem("key70");
                 return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]70[/i].";
             }
             else
@@ -3171,6 +3269,9 @@ export const events =
             {
                 game_vars.setFlag("150_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key12");
+                player.addItem("key45");
+                player.addItem("key93");
                 return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]93[/i].";
             }
             else
@@ -3397,17 +3498,23 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            let desc = "You take 1 damage as you plummet downwards.<br /><br />";
+            let desc = "You take 1 damage as you plummet downwards.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " This was the last nail in your coffin. Your body runs out of strength to resist. You disappear in the depths of the abyss...";
+                return desc;
+            }
 
             if(game_vars.getFlag("162_luck_check"))
             {
-                desc += "Luck check successful!<br />A [e]Bat[/e] catches you as you're falling. The scoundrel wants gold as a reward for saving you. You can offer a [o]low[/o] reward of 10 gold, and it'll bring you back to the edge you came from. You can also offer a [o]high[/o] reward of 20 gold, and it'll bring you to the other edge. You have to make an offer regardless of whether you have the money or not.";
+                desc += "<br /><br />Luck check successful!<br />A [e]Bat[/e] catches you as you're falling. The scoundrel wants gold as a reward for saving you. You can offer a [o]low[/o] reward of 10 gold, and it'll bring you back to the edge you came from. You can also offer a [o]high[/o] reward of 20 gold, and it'll bring you to the other edge. You have to make an offer regardless of whether you have the money or not.";
             }
             else
             {
                 player.modifyAgility(+2);
                 player.modifyLuck(+3);
-                desc += "Luck check failed!<br />You fall down the abyss, getting hit by many of the protruding rocks on the way. You manage to grab onto one of them, and you notice an opening leading to some sort of a tunnel. You manage to crawl into the orifice. You are dreadfully tired. You should [c]eat[/c] something - you might get a special bonus if you do! For the heroic feat, you gain 2 Agility. Additionally, your unbelievable fortune earns you 3 Luck. You get up. The corridor is wide and lit, it leads into a round room. A rope is hanging from the top. You pull yourself upwards. At the top of this \"chimney\" you find yourself in another identical room. You see a door ahead of you. You push it. It turns out to be a revolving door. You end up in another corridor, and the door closes shut. It's impossible to find it anymore. You end up at a turning point of a tunnel, which goes from the north towards the east. You move east. You reach a thick door. You may [l]open[/l] it.";
+                desc += "<br /><br />Luck check failed!<br />You fall down the abyss, getting hit by many of the protruding rocks on the way. You manage to grab onto one of them, and you notice an opening leading to some sort of a tunnel. You manage to crawl into the orifice. You are dreadfully tired. You should [c]eat[/c] something - you might get a special bonus if you do! For the heroic feat, you gain 2 Agility. Additionally, your unbelievable fortune earns you 3 Luck. You get up. The corridor is wide and lit, it leads into a round room. A rope is hanging from the top. You pull yourself upwards. At the top of this \"chimney\" you find yourself in another identical room. You see a door ahead of you. You push it. It turns out to be a revolving door. You end up in another corridor, and the door closes shut. It's impossible to find it anymore. You end up at a turning point of a tunnel, which goes from the north towards the east. You move east. You reach a thick door. You may [l]open[/l] it.";
             }
 
             return desc;
@@ -3431,7 +3538,7 @@ export const events =
         },
         choice: function()
         {
-            if(game_vars.getFlag("162_luck_check"))
+            if(game_vars.getFlag("162_luck_check") && player.getConstitution() > 0)
             {
                 return {
                     question: "What will your offer be?",
@@ -3467,7 +3574,7 @@ export const events =
         },
         locals: function()
         {
-            if(game_vars.getFlag("162_luck_check"))
+            if(game_vars.getFlag("162_luck_check") || player.getConstitution() <= 0)
             {
                 return undefined;
             }
@@ -3821,6 +3928,9 @@ export const events =
             {
                 game_vars.setFlag("175_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key12");
+                player.addItem("key70");
+                player.addItem("key93");
                 return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]70[/i], #[i]93[/i].";
             }
             else
@@ -3869,6 +3979,9 @@ export const events =
             {
                 game_vars.setFlag("179_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key12");
+                player.addItem("key45");
+                player.addItem("key122");
                 return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]45[/i], #[i]122[/i].";
             }
             else
@@ -4195,9 +4308,26 @@ export const events =
         {
             player.modifyConstitution(-1);
             game_vars.setFlag("138_threw_dragon", true);
-            return "You throw the dragon. It bounces off a rock and instead of hitting the [e]Guardian[/e], it hits you. You take 1 damage.";
+            let desc = "You throw the dragon. It bounces off a rock and instead of hitting the [e]Guardian[/e], it hits you. You take 1 damage.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " As it turns out, that was enough to knock you out completely. The [e]Guardian[/e] does not let the chance slip by, and follows up with a lethal blow...";
+            }
+
+            return desc;
         },
-        redirect: 138,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 138;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: false
     },
     event199:
@@ -4384,6 +4514,9 @@ export const events =
             {
                 game_vars.setFlag("208_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key45");
+                player.addItem("key70");
+                player.addItem("key93");
                 return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]70[/i], #[i]93[/i].";
             }
             else
@@ -4819,6 +4952,9 @@ export const events =
             {
                 game_vars.setFlag("227_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key12");
+                player.addItem("key93");
+                player.addItem("key122");
                 return "You attempt to open the box with this combination of keys: #[i]12[/i], #[i]93[/i], #[i]122[/i].";
             }
             else
@@ -4996,6 +5132,9 @@ export const events =
             {
                 game_vars.setFlag("237_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key45");
+                player.addItem("key70");
+                player.addItem("key122");
                 return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]70[/i], #[i]122[/i].";
             }
             else
@@ -5177,9 +5316,30 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            return "The [e]Werewolf[/e] paralyses you again, and then knocks the sword out of your hands - you take 1 damage. You pick your sword back up, but you're thinking that you might need a better weapon.";
+            let desc = "The [e]Werewolf[/e] paralyses you again, and then knocks the sword out of your hands - you take 1 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "You pick your sword back up, but you're thinking that you might need a better weapon.";
+            }
+            else
+            {
+                desc += "You feel your body lose strength. The monster leaps at you...";
+            }
+
+            return desc;
         },
-        redirect: 63,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 63;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: false
     },
     event245:
@@ -5187,9 +5347,26 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-1);
-            return "You hit it with your shoulder, using all of your strength. The door won't even budge. You take 1 damage.";
+            let desc = "You hit it with your shoulder, using all of your strength. The door won't even budge. You take 1 damage.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " This has exhausted the rest of your strength and you collapse to the floor...";
+            }
+
+            return desc;
         },
-        redirect: 108,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 108;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: true
     },
     event246:
@@ -5409,6 +5586,9 @@ export const events =
             {
                 game_vars.setFlag("260_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key45");
+                player.addItem("key93");
+                player.addItem("key122");
                 return "You attempt to open the box with this combination of keys: #[i]45[/i], #[i]93[/i], #[i]122[/i].";
             }
             else
@@ -5461,18 +5641,38 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            return "You leave the barely breathing monster and approach the altar. Doing as the [e]Demon[/e] said, you may take the [i]emerald[/i]. As you grab your backpack, you hear a terrifying scream behind you. The wounded [e]Demon[/e] charges at you with all its remaining strength. It pierces your back with its talons: you take 2 damage. You jump away and deal what turns out to be the final blow. You may now [l]collect[/l] the gold.";
+            let desc = "You leave the barely breathing monster and approach the altar. Doing as the [e]Demon[/e] said, you may take the [i]emerald[/i]. As you grab your backpack, you hear a terrifying scream behind you. The wounded [e]Demon[/e] charges at you with all its remaining strength. It pierces your back with its talons: you take 2 damage.";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += " You jump away and deal what turns out to be the final blow. You may now [l]collect[/l] the gold.";
+            }
+            else
+            {
+                desc += " You suddenly feel week as blood flows from the wound. You took too much damage. This is the end...";
+            }
+
+            return desc;
         },
         items: ["emerald"],
         item_limit: 1,
-        locals:
-        [
+        locals: function()
+        {
+            if(player.getConstitution() > 0)
             {
-                command: "collect",
-                redirect: 326,
-                new_room: false
+                return [
+                    {
+                        command: "collect",
+                        redirect: 326,
+                        new_room: false
+                    }
+                ];
             }
-        ]
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event264:
     {
@@ -5569,38 +5769,58 @@ export const events =
             player.modifyConstitution(-2);
             player.removeItem("rope");
             game_vars.setFlag("269_rope_present", true);
-            return "You take the rope out of your backpack. It's fireproof and has a hook attached. You approach the edge. With a wide swing, you throw the hook in between the rocks on the other side. It's secured. You tie the other end to a rock next to you. You will attempt to go through the chasm, holding onto the rope with your hands. You grab the rope. Suddenly... Bang! The hook falls off. You climb back up. You take 2 damage. You can choose another way to cross the gap: [l]pay[/l] the dragon, [l]walk[/l] on the bridge or [l]jump[/l] over the chasm. The rope will remain here, so you could attempt to [l]throw[/l] it again. But first, you can [c]eat[/c] a ration.";
+            let desc = "You take the rope out of your backpack. It's fireproof and has a hook attached. You approach the edge. With a wide swing, you throw the hook in between the rocks on the other side. It's secured. You tie the other end to a rock next to you. You will attempt to go through the chasm, holding onto the rope with your hands. You grab the rope. Suddenly... Bang! The hook falls off. You climb back up. You take 2 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "You can choose another way to cross the gap: [l]pay[/l] the dragon, [l]walk[/l] on the bridge or [l]jump[/l] over the chasm. The rope will remain here, so you could attempt to [l]throw[/l] it again. But first, you can [c]eat[/c] a ration.";
+            }
+            else
+            {
+                desc += "You feel weak from all the wounds taken up to this point. You lie down to rest but then realise you're unable to get back up. Your vision slowly fades...";
+            }
+
+            return desc;
         },
         eat: true,
-        locals:
-        [
+        locals: function()
+        {
+            if(player.getConstitution() > 0)
             {
-                command: "jump",
-                redirect: 110,
-                new_room: false,
-                on_command: jumpCommandEvent110
-            },
-            {
-                command: "pay",
-                redirect: 35,
-                new_room: false,
-                on_command: payCommandEvent35
-            },
-            {
-                command: "throw",
-                redirect: 358,
-                new_room: false,
-                on_command: function()
-                {
-                    game_vars.setFlag("358_elixir_present", player.hasItem("elixir"));
-                }
-            },
-            {
-                command: "walk",
-                redirect: 74,
-                new_room: false
+                return [
+                    {
+                        command: "jump",
+                        redirect: 110,
+                        new_room: false,
+                        on_command: jumpCommandEvent110
+                    },
+                    {
+                        command: "pay",
+                        redirect: 35,
+                        new_room: false,
+                        on_command: payCommandEvent35
+                    },
+                    {
+                        command: "throw",
+                        redirect: 358,
+                        new_room: false,
+                        on_command: function()
+                        {
+                            game_vars.setFlag("358_elixir_present", player.hasItem("elixir"));
+                        }
+                    },
+                    {
+                        command: "walk",
+                        redirect: 74,
+                        new_room: false
+                    }
+                ];
             }
-        ]
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event270:
     {
@@ -5647,25 +5867,45 @@ export const events =
             game_vars.setFlag("sword_upgraded", true);
             player.modifyConstitution(-1);
             player.removeItem("sword");
-            return "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. Is that a good or bad sign?";
+            let desc = "You take an embellished, shiny sword. You turn the handle in your hand. Suddenly, you drop the weapon and hurt your arm, you take 1 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "You pick up another one. It looks quite modest. It feels good in your hand. You discard your old sword, which turns into a rat with a hiss. You wonder if that's a good or bad sign...";
+            }
+            else
+            {
+                desc += "On top of all the wounds you've taken thus far, you are unable to stop your arm from bleeding. You slowly lose consciousness. To think that this is where your journey ends...";
+            }
+
+            return desc;
         },
-        choice:
+        choice: function()
         {
-            question: "Would you like to [o]keep[/o] this mysterious sword or [o]exchange[/o] it for a different one?",
-            options:
-            [
-                {
-                    answer: "exchange",
-                    redirect: 190,
-                    new_room: false
-                },
-                {
-                    answer: "keep",
-                    redirect: 153,
-                    new_room: false
-                }
-            ]
-        },
+            if(player.getConstitution() > 0)
+            {
+                return {
+                    question: "Would you like to [o]keep[/o] this mysterious sword or [o]exchange[/o] it for a different one?",
+                    options:
+                    [
+                        {
+                            answer: "exchange",
+                            redirect: 190,
+                            new_room: false
+                        },
+                        {
+                            answer: "keep",
+                            redirect: 153,
+                            new_room: false
+                        }
+                    ]
+                };
+            }
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event272:
     {
@@ -5909,6 +6149,11 @@ export const events =
             {
                 player.modifyConstitution(-2);
                 desc += "Luck check failed!<br />You take 2 damage.";
+
+                if(player.getConstitution() <= 0)
+                {
+                    desc += " You're too weak to pull yourself up. The stalactite is crushing your lungs. You desperately draw your final breath...";
+                }
             }
 
             return desc;
@@ -5923,6 +6168,9 @@ export const events =
             {
                 game_vars.setFlag("285_attempted", true);
                 game_vars.incrementCounter("76_combinations_attempted", +1);
+                player.addItem("key70");
+                player.addItem("key93");
+                player.addItem("key122");
                 return "You attempt to open the box with this combination of keys: #[i]70[/i], #[i]93[/i], #[i]122[/i].";
             }
             else
@@ -6014,9 +6262,26 @@ export const events =
         description: function()
         {
             player.modifyConstitution(-2);
-            return "You approach the exit, when out of nowhere a small, blue dart hits you in the stomach. You take 2 damage.";
+            let desc = "You approach the exit, when out of nowhere a small, blue dart hits you in the stomach. You take 2 damage.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " Whoever is responsible for this, they must have known you were wounded and tired. The dart is small but it hurts as if your body was being pierced with a spear. You collapse to the ground and slowly drift away...";
+            }
+
+            return desc;
         },
-        redirect: 330,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 330;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: false
     },
     event292:
@@ -6502,20 +6767,35 @@ export const events =
         description: function()
         {
             const result = system.rollD6(1);
+            let desc = "";
             if(result < 4)
             {
-                return "You got lucky and avoided the damage!";
+                desc += "You got lucky and avoided the damage!";
             }
             else
             {
                 player.modifyConstitution(-3);
                 player.modifyAgility(-1);
-                return "You've been hit! You lose 3 Constitution and 1 Agility.";
+                desc += "You've been hit! You lose 3 Constitution and 1 Agility.";
+
+                if(player.getConstitution() <= 0)
+                {
+                    desc += " You've taken too much damage. This is a lethal blow! You collaps to the ground...";
+                }
             }
+
+            return desc;
         },
         redirect: function()
         {
-            return game_vars.getCounter("315_redirect");
+            if(player.getConstitution() > 0)
+            {
+                return game_vars.getCounter("315_redirect");
+            }
+            else
+            {
+                return undefined;
+            }
         },
         new_room: function()
         {
@@ -6572,9 +6852,26 @@ export const events =
         {
             player.modifyConstitution(-3);
             player.modifyAgility(-2);
-            return "You pull out your sword and swing. Suddenly, with a horrific rumble, the ceiling of this cavern parts into two. The room is covered with unusual brightness. It's just daylight. Which is probably needed by the lettuces, but it blinds you so much that you need to retreat the way you came. You lose 3 Constitution and 2 Agility.";
+            let desc = "You pull out your sword and swing. Suddenly, with a horrific rumble, the ceiling of this cavern parts into two. The room is covered with unusual brightness. It's just daylight. Which is probably needed by the lettuces, but it blinds you so much that you need to retreat the way you came. You lose 3 Constitution and 2 Agility.";
+
+            if(player.getConstitution() <= 0)
+            {
+                desc += " This is too much for you to take. You suddenly feel the damage from all your previous fights amplified. You collapse and destroy a few lettuces with the impact. Unfortunately you won't live to see what the [e]Dwarves[/e] will do with you in return...";
+            }
+
+            return desc;
         },
-        redirect: 90,
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 90;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
         new_room: true
     },
     event319:
@@ -6818,29 +7115,59 @@ export const events =
         {
             game_vars.setFlag("336_door_open", true);
             player.modifyConstitution(-2);
-            return "The door is covered with a thick metal sheet. Thin, metallic stripes run diagonally across the surface, with a steel convex sticking out at their crossing point. You push your back against it. Your feet are slipping across the slushy ground. The door gives in with a horrific creak. You can hear a hurried murmur from inside the chamber. You squeeze into the opening, and with your back now against a rock you push the door, using all of your strength. With plenty of resistance, they finally open wide. This required mad effort - you take 2 damage. You raise your lantern to be at your head's height and... Your heart momentarily leaps into your throat. Hidden behind the wall, there is a [e]Troll[/e] here. It's bending its body like an arch. It's holding a sword with both of its hands, high above its head. It pushes out its hairy stomach. Its mad eyes are bloodshot. Its grinning, showing its clenched teeth. In just a moment, its gigantic sword will come down and cut the air. You reach for your sword. [e]Troll[/e] immediately attacks, but you manage to dodge. This will be a fight to the death.";
-        },
-        redirect: 6,
-        new_room: false,
-        enemies:
-        [
+            let desc = "The door is covered with a thick metal sheet. Thin, metallic stripes run diagonally across the surface, with a steel convex sticking out at their crossing point. You push your back against it. Your feet are slipping across the slushy ground. The door gives in with a horrific creak. You can hear a hurried murmur from inside the chamber. You squeeze into the opening, and with your back now against a rock you push the door, using all of your strength. With plenty of resistance, they finally open wide. This required mad effort - you take 2 damage. ";
+
+            if(player.getConstitution() > 0)
             {
-                name: "Troll",
-                agility: 8,
-                constitution: 8,
-                callbacks:
-                [
-                    {
-                        timing: CallbackTiming.CombatEnd,
-                        callback: function()
-                        {
-                            player.modifyLuck(+1);
-                            system.message("You gain 1 Luck.");
-                        }
-                    }
-                ]
+                desc += "You raise your lantern to be at your head's height and... Your heart momentarily leaps into your throat. Hidden behind the wall, there is a [e]Troll[/e] here. It's bending its body like an arch. It's holding a sword with both of its hands, high above its head. It pushes out its hairy stomach. Its mad eyes are bloodshot. Its grinning, showing its clenched teeth. In just a moment, its gigantic sword will come down and cut the air. You reach for your sword. [e]Troll[/e] immediately attacks, but you manage to dodge. This will be a fight to the death.";
             }
-        ]
+            else
+            {
+                desc += "You collapse, exhausted. You've taken so much damage, your body's starting to give in. Then, out of nowhere, a gigantic sword comes down from above you and cuts your body cleanly in half...";
+            }
+
+            return desc;
+        },
+        redirect: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return 6;
+            }
+            else
+            {
+                return undefined;
+            }
+        },
+        new_room: false,
+        enemies: function()
+        {
+            if(player.getConstitution() > 0)
+            {
+                return [
+                    {
+                        name: "Troll",
+                        agility: 8,
+                        constitution: 8,
+                        callbacks:
+                        [
+                            {
+                                timing: CallbackTiming.CombatEnd,
+                                callback: function()
+                                {
+                                    player.modifyLuck(+1);
+                                    system.message("You gain 1 Luck.");
+                                }
+                            }
+                        ]
+                    }
+                ];
+            }
+            else
+            {
+                return undefined;
+            }
+        }
     },
     event333:
     {
@@ -7103,7 +7430,18 @@ export const events =
         {
             player.modifyConstitution(-1);
             player.removeItem("hammer");
-            return "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. You have no choice other than to [c]escape[/c].";
+            let desc = "In one of the battles between trolls and goblins, the trolls stole an impressive war hammer. You found it in the armoury. It's time to try it out. You grab the stem, take a half-turn and... Bang! The wooden handle breaks and you take 1 damage. ";
+
+            if(player.getConstitution() > 0)
+            {
+                desc += "You have no choice other than to [c]escape[/c].";
+            }
+            else
+            {
+                desc += "It looks like you finished yourself off before the [e]Werewolf[/e] ever had a chance to deal any damage. Your journey ends in a pathetic failure...";
+            }
+
+            return desc;
         },
         escape_redirect: 275
     },
@@ -7549,13 +7887,15 @@ export const events =
             }
             else
             {
+                game_vars.setCounter("76_redirect", 0);
+                game_vars.setCounter("76_keys_inserted", 0);
                 desc += "You can attempt a different combination. Note that the order you put the keys in isn't important - only which keys you choose.";
             }
             return desc;
         },
         redirect: function()
         {
-            if(game_vars.getCounter("76_combinations_attempted") >= 10)
+            if(player.getConstitution() <= 0)
             {
                 return undefined;
             }

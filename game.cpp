@@ -177,25 +177,24 @@ bool Game::handleEscapeCommand()
     return true;
 }
 
-bool Game::handleFightCommand()
+void Game::handleFightCommand()
 {
     if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
-        return false;
+        return;
     }
 
     resolveRoundActionTriggers(_combat_state.combat_round);
     if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
-        return false;
+        return;
     }
 
     resolveDamage(_combat_state.player_score > _combat_state.enemy_score, 2);
     displayCombatStatus();
     resolveRoundEndTriggers(_combat_state.combat_round);
-    return true;
 }
 
 void Game::handleHelpCommand()
@@ -269,19 +268,19 @@ bool Game::handleLocalCommand(const std::string& input)
     return false;
 }
 
-bool Game::handleLuckyCommand()
+void Game::handleLuckyCommand()
 {
     if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
-        return false;
+        return;
     }
 
     resolveRoundActionTriggers(_combat_state.combat_round);
     if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
-        return false;
+        return;
     }
 
     bool player_win = _combat_state.player_score > _combat_state.enemy_score;
@@ -300,7 +299,6 @@ bool Game::handleLuckyCommand()
     resolveDamage(player_win, damage);
     displayCombatStatus();
     resolveRoundEndTriggers(_combat_state.combat_round);
-    return true;
 }
 
 bool Game::handleSaveCommand(const std::string& save_file)
@@ -1174,7 +1172,6 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
 InputMode Game::resolveGameInput(const std::string& user_input)
 {
     InputMode mode = InputMode::GAME;
-    bool perform_game_checks = false;
     auto [command, params] = CommandParser::parseCommand(user_input);
     switch(command)
     {
@@ -1194,12 +1191,11 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         if(handleDirectionCommand(direction))
         {
             _current_event.triggerDirectionCallback(direction);
-            perform_game_checks = true;
             mode = updateCurrentEvent(_current_event.getDestination(utils::commandToDirection(command)), true);
         }
     }   break;
     case Command::FIGHT:
-        perform_game_checks = handleFightCommand();
+        handleFightCommand();
         break;
     case Command::ESCAPE:
         if(handleEscapeCommand())
@@ -1213,7 +1209,6 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         if(handleTakeCommand(item))
         {
             _current_event.triggerTakeCallback(utils::toLower(item));
-            perform_game_checks = true;
         }
     }   break;
     case Command::INSPECT:
@@ -1221,13 +1216,12 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         break;
     case Command::EAT:
         handleEatCommand();
-        perform_game_checks = true; // callback might have happened
         break;
     case Command::DRINK:
         handleDrinkCommand();
         break;
     case Command::LUCKY:
-        perform_game_checks = handleLuckyCommand();
+        handleLuckyCommand();
         break;
     case Command::SAVE:
         if(handleSaveCommand(utils::parseParams(params)))
@@ -1253,7 +1247,6 @@ InputMode Game::resolveGameInput(const std::string& user_input)
     default:
         if(handleLocalCommand(user_input))
         {
-            perform_game_checks = true;
             _current_event.triggerLocalCommandCallback(utils::toLower(user_input));
             UserOption local_command = _current_event.getLocalCommand(utils::toLower(user_input));
 
@@ -1273,7 +1266,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
     {
         mode = InputMode::KEY_VICTORY;
     }
-    else if(perform_game_checks)
+    else
     {
         bool combat_happened = _combat_state.combat_in_progress;
         if(performGameChecks())

@@ -35,18 +35,20 @@ class Game: public QObject
     bool _game_running;
     bool _game_won;
     CombatState _combat_state;
-    std::tuple<int, int, int> _generated_stats;
     unsigned int _current_help_page;
     std::string _save_file;
 
     // Object for exporting game information to JavaScript.
     ScriptApi* _script_api;
 
-    // Secret switch.
+
+    // Helper variables for character creation.
+    std::string _entered_name;
+    std::tuple<int, int, int> _generated_stats;
     bool _conan;
 
     // Setup.
-    void createPlayer(int agility, int constitution, int luck, PlayerStat elixir);
+    void createPlayer(std::string name, int agility, int constitution, int luck, PlayerStat elixir);
 
     // Command handlers.
     bool handleDirectionCommand(Direction direction);   // true if valid movement
@@ -72,7 +74,6 @@ class Game: public QObject
     void displayHelpPage();
 
     // Mechanics resolution
-    void characterCreation();
     void deleteSaveFile();
     void loadGame();
     void resolveDamage(bool player_win, int damage);
@@ -113,6 +114,7 @@ public:
     InputMode resolveLoadInput(const std::string& user_input);
     InputMode resolveMultiChoice(const std::string& user_input);
     InputMode resolveQuiz(const std::string& user_input);
+    InputMode resolvePlayerNameInput(const std::string user_input);
     InputMode resolveRedirectInput();
     InputMode resolveSaveDelInput(const std::string& user_input);
     InputMode resolveSaveInput(const std::string& user_input);

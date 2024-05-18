@@ -12,6 +12,8 @@ class Player: public QObject
 {
     Q_OBJECT
 
+    std::string _name;
+
     int _agility;
     int _constitution;
     int _luck;
@@ -33,8 +35,9 @@ class Player: public QObject
     std::vector<Condition> _conditions;
 
 public:
-    Player(QObject* parent, int agility, int constitution, int luck, PlayerStat elixir_type);
+    Player(QObject* parent, std::string name, int agility, int constitution, int luck, PlayerStat elixir_type);
 
+    std::string getName() const;
     Q_INVOKABLE int getAgility() const;
     Q_INVOKABLE int getConstitution() const;
     Q_INVOKABLE int getLuck() const;

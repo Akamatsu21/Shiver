@@ -41,7 +41,8 @@ void SaveStateManager::createSaveFileContents(const GameState& game_state)
     std::ostringstream ss;
 
     // Player stats.
-    ss << game_state.player_agility << "\n"
+    ss << game_state.player_name << "\n"
+       << game_state.player_agility << "\n"
        << game_state.player_constitution << "\n"
        << game_state.player_luck << "\n"
        << game_state.player_start_agility << "\n"
@@ -113,7 +114,8 @@ GameState SaveStateManager::parseSaveFileContents()
     std::istringstream ss(_save_file_contents);
     GameState game_state = {};
 
-    ss >> game_state.player_agility
+    ss >> game_state.player_name
+       >> game_state.player_agility
        >> game_state.player_constitution
        >> game_state.player_luck
        >> game_state.player_start_agility

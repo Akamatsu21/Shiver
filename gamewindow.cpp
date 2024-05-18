@@ -2,7 +2,6 @@
 #include <QCoreApplication>
 #include <QQmlApplicationEngine>
 
-#include "Models/player.h"
 #include "Models/scriptapi.h"
 #include "System/console.h"
 
@@ -85,6 +84,7 @@ void GameWindow::updateInputState()
         _console.setHelpVisible(true);
         break;
     case InputMode::TITLE_SCREEN:
+    case InputMode::PLAYER_NAME:
     case InputMode::CHARACTER_CREATION:
     case InputMode::GAME:
     case InputMode::YES_NO_CHOICE:
@@ -120,6 +120,9 @@ void GameWindow::onUserInputReceived(const QString& user_input)
         break;
     case InputMode::CHARACTER_CREATION:
         _input_mode = _game->resolveCharacterCreationInput(user_input.toStdString());
+        break;
+    case InputMode::PLAYER_NAME:
+        _input_mode = _game->resolvePlayerNameInput(user_input.toStdString());
         break;
     case InputMode::GAME:
         _input_mode = _game->resolveGameInput(user_input.toStdString());

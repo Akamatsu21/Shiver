@@ -26,10 +26,11 @@ Game::Game(QObject* parent, Console& console):
     _game_running(false),
     _game_won(false),
     _combat_state{false, 0, 0, 0},
-    _generated_stats{0, 0, 0},
     _current_help_page(0),
     _save_file(""),
     _script_api(new ScriptApi(this, _current_event, _combat_state)),
+    _entered_name(""),
+    _generated_stats{0, 0, 0},
     _conan(false)
 {
 
@@ -65,9 +66,9 @@ ScriptApi* Game::getScriptApi()
     return _script_api;
 }
 
-void Game::createPlayer(int agility, int constitution, int luck, PlayerStat elixir)
+void Game::createPlayer(std::string name, int agility, int constitution, int luck, PlayerStat elixir)
 {
-    _player = new Player(this, agility, constitution, luck, elixir);
+    _player = new Player(this, name, agility, constitution, luck, elixir);
     connect(_player, &Player::addItem, this, &Game::onAddItem);
     connect(_player, &Player::removeItem, this, &Game::onRemoveItem);
     connect(_player, &Player::addCondition, this, &Game::onAddCondition);
@@ -362,14 +363,11 @@ void Game::handleSaveListCommand()
 
 void Game::handleStatsCommand()
 {
-    std::string player_name = _conan ? "Conan The Barbarian King"
-                                     : "Adventurer";
-
     std::string temp_constitution = _player->getTempConstitution() > 0
                                         ? " (+" + std::to_string(_player->getTempConstitution()) + ")"
                                         : "";
 
-    std::string msg = utils::createString("[p]", player_name, "[/p]",
+    std::string msg = utils::createString("[p]", _player->getName(), "[/p]",
                                           "<br />Agility: ",
                                             _player->getAgility(),
                                             "/", _player->getStartingAgility(),
@@ -497,7 +495,7 @@ void Game::displayCombatStatus()
     std::string msg = utils::createString("<br />Remaining constitution:<br />[e]",
                               _current_event.getCurrentEnemy().getName(), "[/e]: ",
                               _current_event.getCurrentEnemy().getConstitution(),
-                              "<br />[p]Player[/p]: ",
+                              "<br />[p]", _player->getName(), "[/p]: ",
                               _player->getConstitution());
 
     _console.writeText(msg);
@@ -531,34 +529,6 @@ void Game::displayHelpPage()
     _console.showHelpPage(_current_help_page,
                           _help_pages.size(),
                           _help_pages.at(_current_help_page - 1));
-}
-
-void Game::characterCreation()
-{
-    _console.clearScreen();
-    std::string msg;
-    int agility, constitution, luck;
-    if(_conan)
-    {
-        msg = "Creating your character...<br />Conan The Barbarian King begins with the highest possible stats:<br />";
-        agility = 12;
-        constitution = 24;
-        luck = 12;
-    }
-    else
-    {
-        msg = "Creating your character...<br />Randomly assigning player stats:<br />";
-        agility = utils::rollD6(1) + 6;
-        constitution = utils::rollD6(2) + 12;
-        luck = utils::rollD6(1) + 6;
-    }
-    _generated_stats = std::make_tuple(agility, constitution, luck);
-
-    msg += utils::createString("Agility: ", agility,
-                               "<br />Constitution: ", constitution,
-                               "<br />Luck: ", luck,
-                               "<br /><br />Choose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
-    _console.writeText(msg);
 }
 
 void Game::deleteSaveFile()
@@ -785,7 +755,7 @@ void Game::handleCombatRound()
                                               _combat_state.combat_round,
                                               "<br />[e]", _current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
                                               _combat_state.enemy_score,
-                                              "<br />[p]Player[/p]'s score: ",
+                                              "<br />[p]", _player->getName(), "[/p]'s score: ",
                                               _combat_state.player_score);
 
         _console.writeText(msg);
@@ -885,6 +855,7 @@ void Game::resolveRoundEndTriggers(int round)
 GameState Game::createGameState()
 {
     GameState game_state = {};
+    game_state.player_name = _player->getName();
     game_state.player_agility = _player->getAgility();
     game_state.player_constitution = _player->getConstitution();
     game_state.player_luck = _player->getLuck();
@@ -946,7 +917,8 @@ void Game::restoreGameState(const GameState& game_state)
     };
 
     delete _player;
-    createPlayer(game_state.player_start_agility,
+    createPlayer(game_state.player_name,
+                 game_state.player_start_agility,
                  game_state.player_start_constitution,
                  game_state.player_start_luck,
                  static_cast<PlayerStat>(game_state.player_elixir_type));
@@ -1112,7 +1084,7 @@ InputMode Game::resolveCharacterCreationInput(const std::string& user_input)
     else
     {
         auto [agility, constitution, luck] = _generated_stats;
-        createPlayer(agility, constitution, luck, elixir);
+        createPlayer(_entered_name, agility, constitution, luck, elixir);
         _scripting_engine->registerPlayer(_player);
 
         _player->getInventory().addItem(_scripting_engine->parseItem("sword"));
@@ -1361,6 +1333,36 @@ InputMode Game::resolveQuiz(const std::string& user_input)
     return mode;
 }
 
+InputMode Game::resolvePlayerNameInput(const std::string user_input)
+{
+    _entered_name = user_input;
+    std::string msg;
+    int agility, constitution, luck;
+    if(_conan)
+    {
+        msg = "Creating your character...<br />Conan The Barbarian King begins with the highest possible stats:<br />";
+        agility = 12;
+        constitution = 24;
+        luck = 12;
+    }
+    else
+    {
+        msg = "Creating your character...<br />Randomly assigning player stats:<br />";
+        agility = utils::rollD6(1) + 6;
+        constitution = utils::rollD6(2) + 12;
+        luck = utils::rollD6(1) + 6;
+    }
+    _generated_stats = std::make_tuple(agility, constitution, luck);
+
+    msg += utils::createString("Agility: ", agility,
+                               "<br />Constitution: ", constitution,
+                               "<br />Luck: ", luck,
+                               "<br /><br />Choose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
+    _console.writeText(msg);
+
+    return InputMode::CHARACTER_CREATION;
+}
+
 InputMode Game::resolveRedirectInput()
 {
     InputMode mode = updateCurrentEvent(_current_event.getRedirect(),
@@ -1414,10 +1416,12 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
     {
     case Command::CHEAT:
         _conan = true;
-        // Intentional fallthrough.
+        mode = resolvePlayerNameInput("Conan The Barbarian King");
+        break;
     case Command::BEGIN:
-        characterCreation();
-        mode = InputMode::CHARACTER_CREATION;
+        _console.clearScreen();
+        _console.writeText("What is your character's name?");
+        mode = InputMode::PLAYER_NAME;
         break;
     case::Command::HELP:
         handleHelpCommand();

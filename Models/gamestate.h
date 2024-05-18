@@ -5,6 +5,7 @@
 
 struct GameState
 {
+    std::string player_name;
     int player_agility;
     int player_constitution;
     int player_luck;

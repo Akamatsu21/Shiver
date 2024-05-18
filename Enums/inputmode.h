@@ -5,6 +5,7 @@ enum class InputMode
 {
     HELP,
     TITLE_SCREEN,
+    PLAYER_NAME,
     CHARACTER_CREATION,
     GAME,
     YES_NO_CHOICE,

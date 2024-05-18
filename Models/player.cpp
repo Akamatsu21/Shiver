@@ -3,8 +3,9 @@
 
 #include "Utils/utils.h"
 
-Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerStat elixir_type):
+Player::Player(QObject* parent, std::string name, int agility, int constitution, int luck, PlayerStat elixir_type):
     QObject(parent),
+    _name(name),
     _agility(agility),
     _constitution(constitution),
     _luck(luck),
@@ -22,6 +23,11 @@ Player::Player(QObject* parent, int agility, int constitution, int luck, PlayerS
     _conditions{}
 {
 
+}
+
+std::string Player::getName() const
+{
+    return _name;
 }
 
 int Player::getAgility() const

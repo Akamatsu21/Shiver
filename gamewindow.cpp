@@ -82,6 +82,13 @@ void GameWindow::updateInputState()
         _console.setWaitingForInput(false);
         _console.setWaitingForReturn(false);
         _console.setHelpVisible(true);
+        _console.setSettingsVisible(false);
+        break;
+    case InputMode::SETTINGS:
+        _console.setWaitingForInput(false);
+        _console.setWaitingForReturn(false);
+        _console.setHelpVisible(false);
+        _console.setSettingsVisible(true);
         break;
     case InputMode::TITLE_SCREEN:
     case InputMode::PLAYER_NAME:
@@ -97,6 +104,7 @@ void GameWindow::updateInputState()
         _console.setWaitingForInput(true);
         _console.setWaitingForReturn(false);
         _console.setHelpVisible(false);
+        _console.setSettingsVisible(false);
         break;
     case InputMode::KEY_DEATH:
     case InputMode::KEY_GAME_START:
@@ -106,6 +114,7 @@ void GameWindow::updateInputState()
         _console.setWaitingForInput(false);
         _console.setWaitingForReturn(true);
         _console.setHelpVisible(false);
+        _console.setSettingsVisible(false);
         break;
     }
 }
@@ -198,6 +207,15 @@ void GameWindow::onPreviousHelpPage()
 
 void GameWindow::onLeaveHelp()
 {
+    // TODO: Implement a proper entry/exit for settings screen
+    if(_console.areSettingsVisible())
+    {
+        _console.setSettingsVisible(false);
+        _input_mode = _prev_mode;
+        updateInputState();
+        return;
+    }
+
     _game->exitHelpPage();
     _input_mode = _prev_mode;
     updateInputState();
@@ -208,6 +226,7 @@ void GameWindow::onGameCrash()
     _console.setWaitingForInput(false);
     _console.setWaitingForReturn(false);
     _console.setHelpVisible(false);
+    _console.setSettingsVisible(false);
 }
 
 void GameWindow::onRedirect(int id, bool new_room)

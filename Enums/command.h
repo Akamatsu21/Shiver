@@ -22,6 +22,7 @@ enum class Command
     LOAD,
     SAVELIST,
     SAVEDEL,
+    SETTINGS,
     CHEAT
 };
 

@@ -64,6 +64,7 @@ class Game: public QObject
     bool handleSaveCommand(const std::string& save_file); // true if input mode change needed
     bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();
+    void handleSettingsCommand();
     void handleStatsCommand();
     bool handleTakeCommand(const std::string& item_name); // true if picked something up
 

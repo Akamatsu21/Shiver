@@ -97,6 +97,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     {
         command = Command::SAVEDEL;
     }
+    else if(input_command == "settings")
+    {
+        command = Command::SETTINGS;
+    }
 
     return {command, params};
 }

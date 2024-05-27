@@ -61,9 +61,40 @@ Window
         scrollDown();
     }
 
+    Rectangle
+    {
+        id: settings_page
+        visible: terminalController.settingsVisible
+        anchors.fill: parent
+        color: "black"
+
+        onVisibleChanged:
+        {
+            if(visible)
+            {
+                forceActiveFocus();
+            }
+        }
+
+        Keys.onEscapePressed:
+        {
+            escapeReceived();
+        }
+
+        Rectangle
+        {
+            id: settings_window
+            width: parent.width / 2
+            height: parent.height / 2
+            anchors.centerIn: parent
+            color: "white"
+        }
+    }
+
     ScrollView
     {
         id: terminal
+        visible: !terminalController.settingsVisible
         contentWidth: parent.width
         contentHeight: terminal_log.height + user_input.height
         anchors.fill: parent
@@ -75,6 +106,14 @@ Window
         Component.onCompleted:
         {
             terminal_log.forceActiveFocus();
+        }
+
+        onVisibleChanged:
+        {
+            if(visible)
+            {
+                terminal_log.forceActiveFocus();
+            }
         }
 
         Keys.onReturnPressed:
@@ -203,6 +242,7 @@ Window
         Text
         {
             id: carret
+            visible: terminalController.waitingForInput && !timer.running
             anchors
             {
                 top: terminal_log.bottom
@@ -215,13 +255,14 @@ Window
                 pointSize: 16
             }
             textFormat: Text.RichText
-            visible: terminalController.waitingForInput && !timer.running
             text: "> "
         }
 
         TextInput
         {
             id: user_input
+            visible: terminalController.waitingForInput && !timer.running
+            focus: terminalController.waitingForInput && !timer.running
             anchors
             {
                 top: terminal_log.bottom
@@ -236,9 +277,6 @@ Window
                 pointSize: 16
             }
 
-            visible: terminalController.waitingForInput && !timer.running
-            focus: terminalController.waitingForInput && !timer.running
-
             Keys.onReturnPressed:
             {
                 terminalController.obtainUserInput(text);
@@ -250,6 +288,7 @@ Window
         Text
         {
             id: elipses
+            visible: terminalController.waitingForReturn && !timer.running
             anchors
             {
                 top: terminal_log.bottom
@@ -262,7 +301,6 @@ Window
                 pointSize: 16
             }
             textFormat: Text.RichText
-            visible: terminalController.waitingForReturn && !timer.running
             text: ""
             onVisibleChanged:
             {

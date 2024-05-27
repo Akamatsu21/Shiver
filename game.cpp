@@ -359,6 +359,11 @@ void Game::handleSaveListCommand()
     }
 }
 
+void Game::handleSettingsCommand()
+{
+    _console.setSettingsVisible(true);
+}
+
 void Game::handleStatsCommand()
 {
     std::string temp_constitution = _player->getTempConstitution() > 0
@@ -1218,6 +1223,10 @@ InputMode Game::resolveGameInput(const std::string& user_input)
             mode = InputMode::SAVEDEL_CONFIRMATION;
         }
         break;
+    case Command::SETTINGS:
+        handleSettingsCommand();
+        mode = InputMode::SETTINGS;
+        break;
     default:
         if(handleLocalCommand(user_input))
         {
@@ -1448,6 +1457,10 @@ InputMode Game::resolveTitleScreenInput(const std::string& user_input)
         {
             mode = InputMode::SAVEDEL_CONFIRMATION;
         }
+        break;
+    case Command::SETTINGS:
+        handleSettingsCommand();
+        mode = InputMode::SETTINGS;
         break;
     default:
         _console.writeText("Invalid command.");

@@ -177,18 +177,6 @@ void Console::showHelpPage(int page_number, int total_pages, const std::string& 
     emit visibleTextChanged();
 }
 
-void Console::showSettings(std::map<std::string, std::string> settings)
-{
-    clearVisibleText();
-    std::string contents = std::accumulate(std::begin(settings), std::end(settings), std::string(""),
-        [](const std::string& acc, std::pair<std::string, std::string> setting)
-        {
-            return acc + setting.first + "<br />";
-        });
-    _visible_text = QString::fromStdString(contents);
-    emit visibleTextChanged();
-}
-
 void Console::writeError(const std::string& error)
 {
     _log += "<font color=\"red\">" + error + "</font><br />";

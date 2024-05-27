@@ -12,6 +12,7 @@ class Player;
 class QCoreApplication;
 class QQmlApplicationEngine;
 class ScriptingEngine;
+class SettingsManager;
 
 class GameWindow: public QObject
 {
@@ -19,6 +20,7 @@ class GameWindow: public QObject
 
     Game* _game;
     Console& _console;
+    SettingsManager& _settings;
 
     InputMode _input_mode;
     InputMode _prev_mode;
@@ -43,7 +45,8 @@ private slots:
     void onRedirect(int id, bool new_room);
 
 public:
-    GameWindow(QCoreApplication* parent, Console& console, QQmlApplicationEngine& qml_engine);
+    GameWindow(QCoreApplication* parent, Console& console,
+        SettingsManager& settings, QQmlApplicationEngine& qml_engine);
 
     void startGame();
 

@@ -46,7 +46,6 @@ public:
     void pasteLine();
     void pasteText(const std::string& text);
     void showHelpPage(int page_number, int total_pages, const std::string& text);
-    void showSettings(std::map<std::string, std::string> settings);
     void writeError(const std::string& error);
     void writeLine();
     void writeText(const std::string& text);

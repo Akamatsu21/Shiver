@@ -20,6 +20,7 @@ SOURCES += \
         System/console.cpp \
         System/savestatemanager.cpp \
         System/scriptingengine.cpp \
+        System/settingsmanager.cpp \
         Utils/utils.cpp \
         game.cpp \
         gamewindow.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     System/console.h \
     System/savestatemanager.h \
     System/scriptingengine.h \
+    System/settingsmanager.h \
     Utils/utils.h \
     game.h \
     gamewindow.h

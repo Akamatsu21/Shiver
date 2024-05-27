@@ -61,36 +61,6 @@ Window
         scrollDown();
     }
 
-    Rectangle
-    {
-        id: settings_page
-        visible: terminalController.settingsVisible
-        anchors.fill: parent
-        color: "black"
-
-        onVisibleChanged:
-        {
-            if(visible)
-            {
-                forceActiveFocus();
-            }
-        }
-
-        Keys.onEscapePressed:
-        {
-            escapeReceived();
-        }
-
-        Rectangle
-        {
-            id: settings_window
-            width: parent.width / 2
-            height: parent.height / 2
-            anchors.centerIn: parent
-            color: "white"
-        }
-    }
-
     ScrollView
     {
         id: terminal
@@ -324,6 +294,41 @@ Window
                         elipses.text += ".";
                     }
                 }
+            }
+        }
+    }
+
+    Rectangle
+    {
+        id: settings_page
+        visible: terminalController.settingsVisible
+        anchors.fill: parent
+        color: "black"
+
+        onVisibleChanged:
+        {
+            if(visible)
+            {
+                forceActiveFocus();
+            }
+        }
+
+        Keys.onEscapePressed:
+        {
+            escapeReceived();
+        }
+
+        Rectangle
+        {
+            id: settings_window
+            width: parent.width / 2
+            height: parent.height / 2
+            anchors.centerIn: parent
+            color: "black"
+            border
+            {
+                width: 10
+                color: "white"
             }
         }
     }

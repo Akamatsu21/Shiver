@@ -6,6 +6,7 @@
 
 #include "gamewindow.h"
 #include "System/console.h"
+#include "System/settingsmanager.h"
 
 int main(int argc, char* argv[])
 {
@@ -23,10 +24,13 @@ int main(int argc, char* argv[])
         }, Qt::QueuedConnection);
 
     Console* console = new Console(&app);
+    SettingsManager* settings = new SettingsManager(&app);
+
     engine.rootContext()->setContextProperty("terminalController", console);
+    engine.rootContext()->setContextProperty("settingsManager", settings);
     engine.load(url);
 
-    GameWindow* gameWindow = new GameWindow(&app, *console, engine);
+    GameWindow* gameWindow = new GameWindow(&app, *console, *settings, engine);
     gameWindow->startGame();
 
     return app.exec();

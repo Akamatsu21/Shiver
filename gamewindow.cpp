@@ -5,10 +5,12 @@
 #include "Models/scriptapi.h"
 #include "System/console.h"
 
-GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicationEngine& qml_engine):
+GameWindow::GameWindow(QCoreApplication* parent, Console& console,
+    SettingsManager& settings, QQmlApplicationEngine& qml_engine):
     QObject(parent),
     _game(new Game(this, console)),
     _console(console),
+    _settings(settings),
     _input_mode(InputMode::TITLE_SCREEN),
     _prev_mode(InputMode::TITLE_SCREEN),
     _interrupted(false),

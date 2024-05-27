@@ -178,24 +178,25 @@ bool Game::handleEscapeCommand()
     return true;
 }
 
-void Game::handleFightCommand()
+bool Game::handleFightCommand()
 {
     if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
-        return;
+        return false;
     }
 
     resolveRoundActionTriggers(_combat_state.combat_round);
     if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
-        return;
+        return false;
     }
 
     resolveDamage(_combat_state.player_score > _combat_state.enemy_score, 2);
     displayCombatStatus();
     resolveRoundEndTriggers(_combat_state.combat_round);
+    return true;
 }
 
 void Game::handleHelpCommand()
@@ -269,19 +270,19 @@ bool Game::handleLocalCommand(const std::string& input)
     return false;
 }
 
-void Game::handleLuckyCommand()
+bool Game::handleLuckyCommand()
 {
     if(!_combat_state.combat_in_progress)
     {
         _console.writeText("No enemies present!");
-        return;
+        return false;
     }
 
     resolveRoundActionTriggers(_combat_state.combat_round);
     if(!_combat_state.combat_in_progress)
     {
         // Trigger ended the combat.
-        return;
+        return false;
     }
 
     bool player_win = _combat_state.player_score > _combat_state.enemy_score;
@@ -300,6 +301,7 @@ void Game::handleLuckyCommand()
     resolveDamage(player_win, damage);
     displayCombatStatus();
     resolveRoundEndTriggers(_combat_state.combat_round);
+    return true;
 }
 
 bool Game::handleSaveCommand(const std::string& save_file)
@@ -779,7 +781,7 @@ void Game::handleCombatRound()
     }
 }
 
-bool Game::performGameChecks()
+bool Game::performGameChecks(bool advance_combat_round)
 {
     checkForEnemyDeath();
     if(_player->getConstitution() == 0)
@@ -787,7 +789,7 @@ bool Game::performGameChecks()
         _combat_state.combat_in_progress = false;
         return true;
     }
-    if(_combat_state.combat_in_progress)
+    if(_combat_state.combat_in_progress && advance_combat_round)
     {
         handleCombatRound();
     }
@@ -1144,6 +1146,7 @@ InputMode Game::resolveEscapeInput(const std::string& user_input)
 InputMode Game::resolveGameInput(const std::string& user_input)
 {
     InputMode mode = InputMode::GAME;
+    bool advance_combat_round = false;
     auto [command, params] = CommandParser::parseCommand(user_input);
     switch(command)
     {
@@ -1167,7 +1170,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         }
     }   break;
     case Command::FIGHT:
-        handleFightCommand();
+        advance_combat_round = handleFightCommand();
         break;
     case Command::ESCAPE:
         if(handleEscapeCommand())
@@ -1193,7 +1196,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         handleDrinkCommand();
         break;
     case Command::LUCKY:
-        handleLuckyCommand();
+        advance_combat_round = handleLuckyCommand();
         break;
     case Command::SAVE:
         if(handleSaveCommand(utils::parseParams(params)))
@@ -1241,7 +1244,7 @@ InputMode Game::resolveGameInput(const std::string& user_input)
     else
     {
         bool combat_happened = _combat_state.combat_in_progress;
-        if(performGameChecks())
+        if(performGameChecks(advance_combat_round))
         {
             mode = InputMode::KEY_DEATH;
         }

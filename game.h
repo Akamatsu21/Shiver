@@ -55,12 +55,12 @@ class Game: public QObject
     void handleDrinkCommand();
     void handleEatCommand();
     bool handleEscapeCommand(); // true if valid
-    void handleFightCommand();
+    bool handleFightCommand(); // true if needs to advance combat state
     void handleHelpCommand();
     void handleInspectCommand(const std::string& item_name);
     bool handleLoadCommand(const std::string& save_file, bool confirmation_needed); // true if successful
     bool handleLocalCommand(const std::string& input);  // true if valid
-    void handleLuckyCommand();
+    bool handleLuckyCommand(); // true if needs to advance combat state
     bool handleSaveCommand(const std::string& save_file); // true if input mode change needed
     bool handleSaveDelCommand(const std::string& save_file); // true if valid
     void handleSaveListCommand();
@@ -88,7 +88,7 @@ class Game: public QObject
     // Game checks
     void checkForEnemyDeath();
     void handleCombatRound();
-    bool performGameChecks();   // true if player died
+    bool performGameChecks(bool advance_combat_round = false);   // true if player died
 
     // Resolve triggers
     void resolveCombatEndTriggers(bool escape);

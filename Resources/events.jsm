@@ -503,8 +503,8 @@ export const events =
         {
             let desc = "The door to the treasure vault waits open for you... Or does it? Oh no! It's locked. You see two locks. ";
             
-            let keys = player.countItemsWithTag("key");
-            let key_string = keys == 1 ? "key" : "keys";
+            const keys = player.countItemsWithTag("key");
+            const key_string = keys == 1 ? "key" : "keys";
             desc += `Over the course of your adventure, you have collected ${keys} numbered ${key_string}. `;
 
             if(keys > 1)
@@ -568,8 +568,8 @@ export const events =
     {
         description: function()
         {
-            let pranksters_left = game_vars.getCounter("pranksters_left");
-            let gold = 5 * (5 - pranksters_left);
+            const pranksters_left = game_vars.getCounter("pranksters_left");
+            const gold = 5 * (5 - pranksters_left);
             player.modifyGold(+gold);
             if(pranksters_left === 5)
             {
@@ -1641,7 +1641,7 @@ export const events =
         description: function()
         {
             let desc = "You approach the bridge. Wooden planks squeak at every step. Suddenly one of them slips from under your legs and falls down the chasm with a crash. ";
-            let success = system.rollD6(1);
+            const success = system.rollD6(1);
             if(success < 3)
             {
                 player.modifyConstitution(-1);
@@ -1828,10 +1828,10 @@ export const events =
             default:
                 return undefined;
             }
-            const question = `Which key will you insert into the ${padlock_count} keyhole?`;
 
+            const question = `Which key will you insert into the ${padlock_count} keyhole?`;
+            const keys = player.getItemsWithTag("key").map(keyValueEvent76);
             let options = [];
-            let keys = player.getItemsWithTag("key").map(keyValueEvent76);
 
             let insertKey = function(key_number)
             {
@@ -1948,7 +1948,7 @@ export const events =
             let desc = "The host offers to share the drink on the table with you. ";
             if(player.countItemsWithTag("container") > 0)
             {
-                let container = player.hasItem("flask_empty") ? "flask" : "helmet";
+                const container = player.hasItem("flask_empty") ? "flask" : "helmet";
                 desc += "You may [l]refuse[/l], [l]down[/l] the drink or [l]fill[/l] your " + container + " with it.";
             }
             else
@@ -4143,7 +4143,7 @@ export const events =
         description: function()
         {
             let desc = "";
-            let evils_left = game_vars.getCounter("189_evils_left");
+            const evils_left = game_vars.getCounter("189_evils_left");
             if(evils_left < 1)
             {
                 desc += "There are no [e]Evils[/e] left.";
@@ -4191,7 +4191,7 @@ export const events =
 
             if(player.countItemsWithTag("container") > 0)
             {
-                let container = player.hasItem("flask_empty") ? "flask" : "helmet";
+                const container = player.hasItem("flask_empty") ? "flask" : "helmet";
                 desc += " Since you happen to have a container (your " + container + "), you may also take the [i]magical water[/i].";
             }
             if(player.countItemsWithTag("water") > 0)
@@ -4256,7 +4256,7 @@ export const events =
     {
         description: function()
         {
-            let gold = 5 * game_vars.getCounter("193_enemies_defeated");
+            const gold = 5 * game_vars.getCounter("193_enemies_defeated");
             player.modifyGold(+gold);
             player.modifyAgility(+2);
             player.modifyLuck(+2);
@@ -4542,11 +4542,11 @@ export const events =
         description: function()
         {
             let desc = "";
-            let ante = game_vars.getCounter("211_ante");
+            const ante = game_vars.getCounter("211_ante");
             if(ante != 0)
             {
-                let player_score = system.rollD6(1);
-                let evil_score = system.rollD6(1);
+                const player_score = system.rollD6(1);
+                const evil_score = system.rollD6(1);
                 desc += `You scored ${player_score} hits and [e]Evil[/e] scored ${evil_score}.<br />`;
 
                 if(player_score > evil_score)
@@ -4646,7 +4646,7 @@ export const events =
                 max_ante = player.getGold();
             }
 
-            let setAnteCallback = function(ante)
+            const setAnteCallback = function(ante)
             {
                 return function()
                 {
@@ -4742,8 +4742,8 @@ export const events =
             for(let i = 0; i < 2; ++i)
             {
                 desc += "You aim at prankster no. " + pranksters_left + ".<br />";
-                let result1 = system.rollD6(1);
-                let result2 = system.rollD6(1);
+                const result1 = system.rollD6(1);
+                const result2 = system.rollD6(1);
                 if(result1 === 5 || result2 === 5)
                 {
                     --pranksters_left;
@@ -5690,7 +5690,7 @@ export const events =
             for(let i = 0; i < 3; ++i)
             {
                 desc += "You aim at prankster no. " + pranksters_left + ".<br />";
-                let result = system.rollD6(1);
+                const result = system.rollD6(1);
                 if(result === 5)
                 {
                     --pranksters_left;
@@ -7642,7 +7642,7 @@ export const events =
             for(let i = 0; i < 2; ++i)
             {
                 desc += "You aim at prankster no. " + pranksters_left + ".<br />";
-                let result = system.rollD6(1);
+                const result = system.rollD6(1);
                 if(result === 5)
                 {
                     --pranksters_left;

@@ -16,11 +16,10 @@ std::pair<Command, std::queue<std::string>> CommandParser::parseCommand(const st
     }
 
     std::istringstream iss(input);
-    std::queue<std::string> params(
-                std::deque<std::string>(
-                    (std::istream_iterator<std::string>(iss)),
-                    std::istream_iterator<std::string>()
-                ));
+    std::queue<std::string> params(std::deque<std::string>(
+            (std::istream_iterator<std::string>(iss)),
+            std::istream_iterator<std::string>()
+        ));
     std::string input_command = params.front();
     params.pop();
     input_command = utils::toLower(input_command);

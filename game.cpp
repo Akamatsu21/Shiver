@@ -116,7 +116,7 @@ void Game::handleDrinkCommand()
         }
 
         std::string msg = utils::createString("You drank your elixir. ",
-                                              stat, " restored to the starting value.");
+            stat, " restored to the starting value.");
         if(_player->getElixirType() == PlayerStat::LUCK)
         {
             msg += "<br />Your starting luck has increased by 1!";
@@ -234,9 +234,8 @@ bool Game::handleLoadCommand(const std::string& save_file, bool confirmation_nee
 
     if(!_save_state_manager.saveFileExists(save_file))
     {
-        _console.writeText(utils::createString("Save file \"",
-                                               save_file,
-                                               "\" not found."));
+        _console.writeText(utils::createString(
+            "Save file \"", save_file, "\" not found."));
         return false;
     }
 
@@ -259,8 +258,8 @@ bool Game::handleLocalCommand(const std::string& input)
         std::string command = utils::toLower(input);
         const std::vector<std::string>& local_commands = _current_event.getLocalCommands();
         bool valid = std::find(std::begin(local_commands),
-                               std::end(local_commands),
-                               command) != std::end(local_commands);
+                         std::end(local_commands),
+                         command) != std::end(local_commands);
         if(valid)
         {
             return !_combat_state.combat_in_progress;
@@ -320,9 +319,8 @@ bool Game::handleSaveCommand(const std::string& save_file)
     }
     else
     {
-        _console.writeText(utils::createString("Are you sure you want to overwrite save file \"",
-                                               _save_file,
-                                               "\"?"));
+        _console.writeText(utils::createString(
+            "Are you sure you want to overwrite save file \"", _save_file, "\"?"));
         return true;
     }
 }
@@ -337,16 +335,14 @@ bool Game::handleSaveDelCommand(const std::string& save_file)
 
     if(!_save_state_manager.saveFileExists(save_file))
     {
-        _console.writeText(utils::createString("Save file \"",
-                                               save_file,
-                                               "\" not found."));
+        _console.writeText(utils::createString(
+            "Save file \"", save_file, "\" not found."));
         return false;
     }
 
     _save_file = save_file;
-    _console.writeText(utils::createString("Are you sure you want to delete save file \"",
-                                           _save_file,
-                                           "\"?"));
+    _console.writeText(utils::createString(
+        "Are you sure you want to delete save file \"", _save_file, "\"?"));
     return true;
 }
 
@@ -369,25 +365,26 @@ void Game::handleStatsCommand()
                                         ? " (+" + std::to_string(_player->getTempConstitution()) + ")"
                                         : "";
 
-    std::string msg = utils::createString("[p]", _player->getName(), "[/p]",
-                                          "<br />Agility: ",
-                                            _player->getAgility(),
-                                            "/", _player->getStartingAgility(),
-                                          "<br />Constitution: ",
-                                            _player->getConstitution(),
-                                            "/", _player->getStartingConstitution(),
-                                          temp_constitution,
-                                          "<br />Luck: ",
-                                            _player->getLuck(),
-                                            "/", _player->getStartingLuck(),
-                                          "<br />Gold: ",
-                                            _player->getGold(),
-                                          "<br />Rations: ",
-                                            _player->getRations(),
-                                          "<br />", _player->getElixirTypeAsString(), ": ",
-                                            _player->getElixirCount(),
-                                          "<br /><br />Inventory:<br />",
-                                            _player->getInventory().toHTML());
+    std::string msg = utils::createString(
+        "[p]", _player->getName(), "[/p]",
+        "<br />Agility: ",
+        _player->getAgility(),
+        "/", _player->getStartingAgility(),
+        "<br />Constitution: ",
+        _player->getConstitution(),
+        "/", _player->getStartingConstitution(),
+        temp_constitution,
+        "<br />Luck: ",
+        _player->getLuck(),
+        "/", _player->getStartingLuck(),
+        "<br />Gold: ",
+        _player->getGold(),
+        "<br />Rations: ",
+        _player->getRations(),
+        "<br />", _player->getElixirTypeAsString(), ": ",
+        _player->getElixirCount(),
+        "<br /><br />Inventory:<br />",
+        _player->getInventory().toHTML());
     _console.writeText(msg);
 }
 
@@ -413,8 +410,8 @@ bool Game::handleTakeCommand(const std::string& item_name)
             _current_event.setHasGold(false);
             _console.writeText(utils::createString("You picked up ", _current_event.getGold(), " gold."));
 
-            QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
-                                                                       "_gold_taken"));
+            QVariant flag = QString::fromStdString(utils::createString(
+                _current_event.getId(), "_gold_taken"));
             _game_vars->setFlag(flag, true);
             return true;
         }
@@ -437,13 +434,12 @@ bool Game::handleTakeCommand(const std::string& item_name)
             }
             else
             {
-                _console.writeText(utils::createString("You picked up ",
-                                                       _current_event.getRations(),
-                                                       " rations."));
+                _console.writeText(utils::createString(
+                    "You picked up ", _current_event.getRations(), " rations."));
             }
 
-            QVariant flag = QString::fromStdString(utils::createString(_current_event.getId(),
-                                                                       "_rations_taken"));
+            QVariant flag = QString::fromStdString(
+                utils::createString(_current_event.getId(), "_rations_taken"));
             _game_vars->setFlag(flag, true);
             return true;
         }
@@ -474,8 +470,8 @@ bool Game::handleTakeCommand(const std::string& item_name)
             _player->getInventory().addItem(found_item);
             _console.writeText(utils::createString("[i]", found_item.getName(), "[/i] added to your inventory."));
 
-            QVariant counter = QString::fromStdString(utils::createString(_current_event.getId(),
-                                                                          "_items_taken"));
+            QVariant counter = QString::fromStdString(
+                utils::createString(_current_event.getId(), "_items_taken"));
             _game_vars->incrementCounter(counter, +1);
 
             if(!found_item.getCondition().empty())
@@ -494,11 +490,12 @@ bool Game::handleTakeCommand(const std::string& item_name)
 
 void Game::displayCombatStatus()
 {
-    std::string msg = utils::createString("<br />Remaining constitution:<br />[e]",
-                              _current_event.getCurrentEnemy().getName(), "[/e]: ",
-                              _current_event.getCurrentEnemy().getConstitution(),
-                              "<br />[p]", _player->getName(), "[/p]: ",
-                              _player->getConstitution());
+    std::string msg = utils::createString(
+        "<br />Remaining constitution:<br />[e]",
+        _current_event.getCurrentEnemy().getName(), "[/e]: ",
+        _current_event.getCurrentEnemy().getConstitution(),
+        "<br />[p]", _player->getName(), "[/p]: ",
+        _player->getConstitution());
 
     _console.writeText(msg);
     _console.writeLine();
@@ -516,21 +513,23 @@ void Game::displayCurrentEvent()
 void Game::displayCurrentEnemy()
 {
     _console.writeLine();
-    std::string msg = utils::createString("You are fighting against [e]",
-                                          _current_event.getCurrentEnemy().getName(),
-                                          "[/e]<br />Agility: ",
-                                          _current_event.getCurrentEnemy().getAgility(),
-                                          "<br />Constitution: ",
-                                          _current_event.getCurrentEnemy().getConstitution());
+    std::string msg = utils::createString(
+        "You are fighting against [e]",
+        _current_event.getCurrentEnemy().getName(),
+        "[/e]<br />Agility: ",
+        _current_event.getCurrentEnemy().getAgility(),
+        "<br />Constitution: ",
+        _current_event.getCurrentEnemy().getConstitution());
     _console.writeText(msg);
     _console.writeLine();
 }
 
 void Game::displayHelpPage()
 {
-    _console.showHelpPage(_current_help_page,
-                          _help_pages.size(),
-                          _help_pages.at(_current_help_page - 1));
+    _console.showHelpPage(
+        _current_help_page,
+        _help_pages.size(),
+        _help_pages.at(_current_help_page - 1));
 }
 
 void Game::deleteSaveFile()
@@ -538,9 +537,8 @@ void Game::deleteSaveFile()
     try
     {
         _save_state_manager.deleteSaveFile(_save_file);
-        _console.writeText(utils::createString("Save file \"",
-                                               _save_file,
-                                               "\" successfully deleted."));
+        _console.writeText(utils::createString(
+            "Save file \"", _save_file, "\" successfully deleted."));
         _save_file = "";
     }
     catch(const std::system_error& err)
@@ -577,9 +575,10 @@ void Game::resolveDamage(bool player_win, int damage)
 
         if(_current_event.getCurrentEnemy().isInvincible())
         {
-            msg += utils::createString("Your attack is ineffective. [e]",
-                                       _current_event.getCurrentEnemy().getName(),
-                                       "[/e] takes no damage!");
+            msg += utils::createString(
+                "Your attack is ineffective. [e]",
+                _current_event.getCurrentEnemy().getName(),
+                "[/e] takes no damage!");
         }
         else
         {
@@ -696,15 +695,13 @@ void Game::saveGame()
         _save_state_manager.saveCurrentGameState(_save_file);
         if(new_file)
         {
-            _console.writeText(utils::createString("New save file \"",
-                                                   _save_file,
-                                                   "\" created successfully."));
+            _console.writeText(utils::createString(
+                "New save file \"", _save_file, "\" created successfully."));
         }
         else
         {
-            _console.writeText(utils::createString("Save file \"",
-                                                   _save_file,
-                                                   "\" overwritten successfully."));
+            _console.writeText(utils::createString(
+                "Save file \"", _save_file, "\" overwritten successfully."));
         }
         _save_file = "";
     }
@@ -722,8 +719,8 @@ void Game::checkForEnemyDeath()
     {
         if(_current_event.getCurrentEnemy().getConstitution() == 0)
         {
-            std::string msg = utils::createString("You have defeated [e]",
-                                                  _current_event.getCurrentEnemy().getName(), "[/e]");
+            std::string msg = utils::createString(
+                "You have defeated [e]", _current_event.getCurrentEnemy().getName(), "[/e]");
             _console.writeText(msg);
             resolveCombatEndTriggers(false);
             _current_event.defeatCurrentEnemy();
@@ -753,12 +750,13 @@ void Game::handleCombatRound()
         _combat_state.enemy_score = enemy_dbg + _current_event.getCurrentEnemy().getAgility();
         _combat_state.player_score = player_dbg + _player->getAgility() + _player->getCombatModifier();
 
-        std::string msg = utils::createString("Combat round ",
-                                              _combat_state.combat_round,
-                                              "<br />[e]", _current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
-                                              _combat_state.enemy_score,
-                                              "<br />[p]", _player->getName(), "[/p]'s score: ",
-                                              _combat_state.player_score);
+        std::string msg = utils::createString(
+            "Combat round ",
+            _combat_state.combat_round,
+            "<br />[e]", _current_event.getCurrentEnemy().getName(), "[/e]'s score: ",
+            _combat_state.enemy_score,
+            "<br />[p]", _player->getName(), "[/p]'s score: ",
+            _combat_state.player_score);
 
         _console.writeText(msg);
 
@@ -831,8 +829,8 @@ void Game::resolveRoundActionTriggers(int round)
     for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
     {
         if(callback.isValid()
-        && callback.getTiming() == CallbackTiming::ROUND_ACTION
-        && (callback.getRound() == round
+            && callback.getTiming() == CallbackTiming::ROUND_ACTION
+            && (callback.getRound() == round
                 || callback.getRound() == 0))
         {
             callback();
@@ -845,8 +843,8 @@ void Game::resolveRoundEndTriggers(int round)
     for(auto callback: _current_event.getCurrentEnemy().getCallbacks())
     {
         if(callback.isValid()
-        && callback.getTiming() == CallbackTiming::ROUND_END
-        && (callback.getRound() == round
+            && callback.getTiming() == CallbackTiming::ROUND_END
+            && (callback.getRound() == round
                 || callback.getRound() == 0))
         {
             callback();
@@ -919,11 +917,12 @@ void Game::restoreGameState(const GameState& game_state)
     };
 
     delete _player;
-    createPlayer(game_state.player_name,
-                 game_state.player_start_agility,
-                 game_state.player_start_constitution,
-                 game_state.player_start_luck,
-                 static_cast<PlayerStat>(game_state.player_elixir_type));
+    createPlayer(
+        game_state.player_name,
+        game_state.player_start_agility,
+        game_state.player_start_constitution,
+        game_state.player_start_luck,
+        static_cast<PlayerStat>(game_state.player_elixir_type));
 
     try
     {
@@ -1357,10 +1356,11 @@ InputMode Game::resolvePlayerNameInput(const std::string user_input)
     }
     _generated_stats = std::make_tuple(agility, constitution, luck);
 
-    msg += utils::createString("Agility: ", agility,
-                               "<br />Constitution: ", constitution,
-                               "<br />Luck: ", luck,
-                               "<br /><br />Choose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
+    msg += utils::createString(
+        "Agility: ", agility,
+        "<br />Constitution: ", constitution,
+        "<br />Luck: ", luck,
+        "<br /><br />Choose one of the three stats. You will receive an elixir that can be used up to twice per game to recover that statistic back to the starting value.");
     _console.writeText(msg);
 
     return InputMode::CHARACTER_CREATION;
@@ -1368,8 +1368,9 @@ InputMode Game::resolvePlayerNameInput(const std::string user_input)
 
 InputMode Game::resolveRedirectInput()
 {
-    InputMode mode = updateCurrentEvent(_current_event.getRedirect(),
-                                        _current_event.leadsToNewRoom());
+    InputMode mode = updateCurrentEvent(
+        _current_event.getRedirect(),
+        _current_event.leadsToNewRoom());
     if(performGameChecks())
     {
         mode = InputMode::KEY_DEATH;

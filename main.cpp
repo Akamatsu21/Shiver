@@ -14,13 +14,13 @@ int main(int argc, char* argv[])
     QQmlApplicationEngine engine;
     QUrl url("qrc:qml/main.qml");
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app,
-                     [url](QObject* obj, const QUrl& objUrl)
-                     {
-                        if(!obj && url == objUrl)
-                        {
-                            QCoreApplication::exit(-1);
-                        }
-                     }, Qt::QueuedConnection);
+        [url](QObject* obj, const QUrl& objUrl)
+        {
+            if(!obj && url == objUrl)
+            {
+                QCoreApplication::exit(-1);
+            }
+        }, Qt::QueuedConnection);
 
     Console* console = new Console(&app);
     engine.rootContext()->setContextProperty("terminalController", console);

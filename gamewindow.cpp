@@ -16,16 +16,16 @@ GameWindow::GameWindow(QCoreApplication* parent, Console& console, QQmlApplicati
     _interrupt_new_room(false)
 {
     connect(qml_engine.rootObjects().at(0), SIGNAL(leftArrowReceived()),
-            this, SLOT(onPreviousHelpPage()));
+        this, SLOT(onPreviousHelpPage()));
     connect(qml_engine.rootObjects().at(0), SIGNAL(rightArrowReceived()),
-            this, SLOT(onNextHelpPage()));
+        this, SLOT(onNextHelpPage()));
     connect(qml_engine.rootObjects().at(0), SIGNAL(escapeReceived()),
-            this, SLOT(onLeaveHelp()));
+        this, SLOT(onLeaveHelp()));
 
     connect(&_console, &Console::inputReady,
-            this, &GameWindow::onUserInputReceived);
+        this, &GameWindow::onUserInputReceived);
     connect(&_console, &Console::returnReady,
-            this, &GameWindow::onUserKeyReceived);
+        this, &GameWindow::onUserKeyReceived);
 
     setupGameConnections();
 }
@@ -47,23 +47,23 @@ void GameWindow::resetGame()
 void GameWindow::setupGameConnections()
 {
     connect(_game, &Game::gameCrash,
-            this, &GameWindow::onGameCrash);
+        this, &GameWindow::onGameCrash);
     connect(_game->getScriptApi(), &ScriptApi::redirect,
-            this, &GameWindow::onRedirect);
+        this, &GameWindow::onRedirect);
     connect(_game->getScriptApi(), &ScriptApi::message,
-            &_console, &Console::onMessage);
+        &_console, &Console::onMessage);
     connect(_game->getScriptApi(), &ScriptApi::stopCombat,
-            _game, &Game::onStopCombat);
+        _game, &Game::onStopCombat);
     connect(_game->getScriptApi(), &ScriptApi::disableEnemyEscape,
-            _game, &Game::onDisableEnemyEscape);
+        _game, &Game::onDisableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::disableRoomEscape,
-            _game, &Game::onDisableRoomEscape);
+        _game, &Game::onDisableRoomEscape);
     connect(_game->getScriptApi(), &ScriptApi::enableEnemyEscape,
-            _game, &Game::onEnableEnemyEscape);
+        _game, &Game::onEnableEnemyEscape);
     connect(_game->getScriptApi(), &ScriptApi::enableRoomEscape,
-            _game, &Game::onEnableRoomEscape);
+        _game, &Game::onEnableRoomEscape);
     connect(_game->getScriptApi(), &ScriptApi::winGame,
-            _game, &Game::onWinGame);
+        _game, &Game::onWinGame);
 }
 
 void GameWindow::updateInputState()

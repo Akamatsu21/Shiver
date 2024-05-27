@@ -11,18 +11,18 @@ GameVariables::GameVariables(QObject *parent):
 std::string GameVariables::toString() const
 {
     return std::accumulate(std::begin(_variables), std::end(_variables), std::string(""),
-                           [](std::string acc, auto element)
-                           {
-                               bool is_counter = std::holds_alternative<int>(element.second);
-                               std::string type = is_counter ? "counter" : "flag";
-                               std::string val = std::to_string(is_counter
-                                                                ? std::get<int>(element.second)
-                                                                : std::get<bool>(element.second));
-                               return acc
-                                      + type + "\n"
-                                      + element.first + "\n"
-                                      + val + "\n";
-                           });
+        [](std::string acc, auto element)
+        {
+            bool is_counter = std::holds_alternative<int>(element.second);
+            std::string type = is_counter ? "counter" : "flag";
+            std::string val = std::to_string(is_counter
+                                                 ? std::get<int>(element.second)
+                                                 : std::get<bool>(element.second));
+            return acc
+                   + type + "\n"
+                   + element.first + "\n"
+                   + val + "\n";
+        });
 }
 
 int GameVariables::getCounter(const QVariant& var)

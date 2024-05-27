@@ -259,12 +259,12 @@ Enemy& Event::getCurrentEnemy()
 }
 
 void Event::addEnemy(const std::string& name,
-                     int agility,
-                     int constitution,
-                     bool escape_enabled,
-                     int escape_redirect,
-                     bool invincible,
-                     const std::vector<Callback>& callbacks)
+    int agility,
+    int constitution,
+    bool escape_enabled,
+    int escape_redirect,
+    bool invincible,
+    const std::vector<Callback>& callbacks)
 {
     _enemies.emplace(name, agility, constitution, escape_enabled, escape_redirect, invincible, callbacks);
 }

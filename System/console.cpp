@@ -1,7 +1,5 @@
 #include "console.h"
 #include <algorithm>
-#include <iostream>
-#include <limits>
 #include <sstream>
 #include <QVariant>
 
@@ -15,11 +13,12 @@ static std::string replaceTag(const std::string& text,
     std::ostringstream ss;
     std::string buffer = text;
     std::string::iterator open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
-                                                     std::begin(open_tag), std::end(open_tag));
+        std::begin(open_tag), std::end(open_tag));
     while(open_tag_pos != std::end(buffer))
     {
         std::string::iterator close_tag_pos = std::search(open_tag_pos, std::end(buffer),
-                                                          std::begin(close_tag), std::end(close_tag));
+            std::begin(close_tag), std::end(close_tag));
+
         ss << std::string(std::begin(buffer), open_tag_pos)
            << "<font color=\"" << colour << "\">"
            << std::string(open_tag_pos + open_tag.length(), close_tag_pos)
@@ -29,7 +28,7 @@ static std::string replaceTag(const std::string& text,
         buffer = ss.str();
         ss.str("");
         open_tag_pos = std::search(std::begin(buffer), std::end(buffer),
-                                   std::begin(open_tag), std::end(open_tag));
+            std::begin(open_tag), std::end(open_tag));
     }
 
     return buffer;
@@ -55,6 +54,7 @@ Console::Console(QObject* parent):
     _waiting_for_input(false),
     _waiting_for_return(false),
     _help_visible(false),
+    _settings_visible(false),
     _input_history{},
     _history_it(std::begin(_input_history))
 {
@@ -84,6 +84,11 @@ bool Console::isWatingForReturn() const
 bool Console::isHelpVisible() const
 {
     return _help_visible;
+}
+
+bool Console::areSettingsVisible() const
+{
+    return _settings_visible;
 }
 
 void Console::setLog(const std::string& value)
@@ -127,6 +132,15 @@ void Console::setHelpVisible(bool value)
     }
 }
 
+void Console::setSettingsVisible(bool value)
+{
+    if(_settings_visible != value)
+    {
+        _settings_visible = value;
+        emit settingsVisibleChanged();
+    }
+}
+
 void Console::clearVisibleText()
 {
     _visible_text = "";
@@ -156,10 +170,22 @@ void Console::showHelpPage(int page_number, int total_pages, const std::string& 
 {
     clearVisibleText();
     std::string page = utils::createString(parseMarkup(text),
-                                           "<br/><br />Page ", page_number, "/", total_pages,
-                                           "<br />Use arrow keys to navigate the pages.",
-                                           "<br />Press escape to exit.");
+        "<br/><br />Page ", page_number, "/", total_pages,
+        "<br />Use arrow keys to navigate the pages.",
+        "<br />Press escape to exit.");
     _visible_text = QString::fromStdString(page);
+    emit visibleTextChanged();
+}
+
+void Console::showSettings(std::map<std::string, std::string> settings)
+{
+    clearVisibleText();
+    std::string contents = std::accumulate(std::begin(settings), std::end(settings), std::string(""),
+        [](const std::string& acc, std::pair<std::string, std::string> setting)
+        {
+            return acc + setting.first + "<br />";
+        });
+    _visible_text = QString::fromStdString(contents);
     emit visibleTextChanged();
 }
 

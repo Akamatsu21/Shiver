@@ -29,7 +29,7 @@ void ScriptingEngine::loadModules()
     _item_list = _js_engine.importModule(":js/items.jsm").property("items");
 
     if(_condition_list.isError() || _event_list.isError() || _help_pages.isError()
-    || _condition_list.isUndefined() || _event_list.isUndefined() || _help_pages.isUndefined())
+        || _condition_list.isUndefined() || _event_list.isUndefined() || _help_pages.isUndefined())
     {
         throw std::runtime_error("Failure loading JS modules.");
     }
@@ -41,7 +41,7 @@ void ScriptingEngine::registerEnums()
     for(const auto &[key, val]: utils::getAllPlayerStatsWithLabels())
     {
         _player_stats.setProperty(QString::fromStdString(key),
-                                  QJSValue(static_cast<int>(val)));
+            QJSValue(static_cast<int>(val)));
     }
     _js_engine.globalObject().setProperty("PlayerStat", _player_stats);
 
@@ -49,7 +49,7 @@ void ScriptingEngine::registerEnums()
     for(const auto &[key, val]: utils::getAllDirectionsWithLabels())
     {
         _directions.setProperty(QString::fromStdString(key),
-                                QJSValue(static_cast<int>(val)));
+            QJSValue(static_cast<int>(val)));
     }
     _js_engine.globalObject().setProperty("Direction", _directions);
 
@@ -57,7 +57,7 @@ void ScriptingEngine::registerEnums()
     for(const auto &[key, val]: utils::getAllCallbackTimingsWithLabels())
     {
         _callback_timings.setProperty(QString::fromStdString(key),
-                                      QJSValue(static_cast<int>(val)));
+            QJSValue(static_cast<int>(val)));
     }
     _js_engine.globalObject().setProperty("CallbackTiming", _callback_timings);
 }
@@ -114,15 +114,15 @@ Condition ScriptingEngine::parseCondition(const QString& name)
 
     assert(condition_object.hasProperty("clear_timing"));
     CallbackTiming timing = static_cast<CallbackTiming>(
-                getObjectProperty(condition_object, "clear_timing").toInt());
+        getObjectProperty(condition_object, "clear_timing").toInt());
 
     QJSValue clear_callback = condition_object.hasProperty("on_clear")
                                   ? condition_object.property("on_clear")
                                   : QJSValue(false);
 
     QJSValue damage_callback = condition_object.hasProperty("on_damage")
-                                  ? condition_object.property("on_damage")
-                                  : QJSValue(false);
+                                   ? condition_object.property("on_damage")
+                                   : QJSValue(false);
 
     return Condition(name.toStdString(), modifiers, timing, clear_callback, damage_callback);
 }
@@ -232,12 +232,12 @@ Event ScriptingEngine::parseEvent(int id)
                 }
 
                 event.addEnemy(getObjectProperty(enemy, "name").toString().toStdString(),
-                               getObjectProperty(enemy, "agility").toInt(),
-                               getObjectProperty(enemy, "constitution").toInt(),
-                               escape_enabled,
-                               escape_redirect,
-                               invincible,
-                               enemy_callbacks);
+                    getObjectProperty(enemy, "agility").toInt(),
+                    getObjectProperty(enemy, "constitution").toInt(),
+                    escape_enabled,
+                    escape_redirect,
+                    invincible,
+                    enemy_callbacks);
             }
         }
     }
@@ -322,20 +322,20 @@ Event ScriptingEngine::parseEvent(int id)
             event.setChoice(ChoiceType::YES_NO, getObjectProperty(choice, "question").toString().toStdString());
 
             QJSValue on_no_callback = choice.hasProperty("on_no")
-                                      ? choice.property("on_no")
-                                      : QJSValue::UndefinedValue;
+                                          ? choice.property("on_no")
+                                          : QJSValue::UndefinedValue;
             QJSValue on_yes_callback = choice.hasProperty("on_yes")
-                                       ? choice.property("on_yes")
-                                       : QJSValue::UndefinedValue;
+                                           ? choice.property("on_yes")
+                                           : QJSValue::UndefinedValue;
 
             event.addChoiceOption("yes",
-                                  getObjectProperty(choice, "yes").toInt(),
-                                  getObjectProperty(choice, "yes_new_room").toBool(),
-                                  on_yes_callback);
+                getObjectProperty(choice, "yes").toInt(),
+                getObjectProperty(choice, "yes_new_room").toBool(),
+                on_yes_callback);
             event.addChoiceOption("no",
-                                  getObjectProperty(choice, "no").toInt(),
-                                  getObjectProperty(choice, "no_new_room").toBool(),
-                                  on_no_callback);
+                getObjectProperty(choice, "no").toInt(),
+                getObjectProperty(choice, "no_new_room").toBool(),
+                on_no_callback);
         }
     }
     else if(event_object.hasProperty("choice"))
@@ -352,13 +352,13 @@ Event ScriptingEngine::parseEvent(int id)
             {
                 QJSValue option = options.property(i);
                 QJSValue on_option_callback = option.hasProperty("on_option")
-                                              ? option.property("on_option")
-                                              : QJSValue::UndefinedValue;
+                                                  ? option.property("on_option")
+                                                  : QJSValue::UndefinedValue;
 
                 event.addChoiceOption(getObjectProperty(option, "answer").toString().toStdString(),
-                                      getObjectProperty(option, "redirect").toInt(),
-                                      getObjectProperty(option, "new_room").toBool(),
-                                      on_option_callback);
+                    getObjectProperty(option, "redirect").toInt(),
+                    getObjectProperty(option, "new_room").toBool(),
+                    on_option_callback);
             }
         }
     }
@@ -378,18 +378,18 @@ Event ScriptingEngine::parseEvent(int id)
             }
 
             QJSValue on_correct_callback = quiz.hasProperty("on_correct")
-                                           ? quiz.property("on_correct")
-                                           : QJSValue::UndefinedValue;
+                                               ? quiz.property("on_correct")
+                                               : QJSValue::UndefinedValue;
             QJSValue on_incorrect_callback = quiz.hasProperty("on_incorrect")
-                                             ? quiz.property("on_incorrect")
-                                             : QJSValue::UndefinedValue;
+                                                 ? quiz.property("on_incorrect")
+                                                 : QJSValue::UndefinedValue;
 
             event.setQuizCorrectOption(getObjectProperty(quiz, "correct").toInt(),
-                                       getObjectProperty(quiz, "correct_new_room").toBool(),
-                                       on_correct_callback);
+                getObjectProperty(quiz, "correct_new_room").toBool(),
+                on_correct_callback);
             event.setQuizIncorrectOption(getObjectProperty(quiz, "incorrect").toInt(),
-                                         getObjectProperty(quiz, "incorrect_new_room").toBool(),
-                                         on_incorrect_callback);
+                getObjectProperty(quiz, "incorrect_new_room").toBool(),
+                on_incorrect_callback);
         }
     }
 
@@ -404,13 +404,13 @@ Event ScriptingEngine::parseEvent(int id)
             {
                 QJSValue command = locals.property(i);
                 QJSValue on_command_callback = command.hasProperty("on_command")
-                                               ? command.property("on_command")
-                                               : QJSValue::UndefinedValue;
+                                                   ? command.property("on_command")
+                                                   : QJSValue::UndefinedValue;
 
                 event.addLocalCommand(getObjectProperty(command, "command").toString().toStdString(),
-                                      getObjectProperty(command, "redirect").toInt(),
-                                      getObjectProperty(command, "new_room").toBool(),
-                                      on_command_callback);
+                    getObjectProperty(command, "redirect").toInt(),
+                    getObjectProperty(command, "new_room").toBool(),
+                    on_command_callback);
             }
         }
     }

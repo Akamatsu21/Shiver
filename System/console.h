@@ -11,12 +11,14 @@ class Console: public QObject
     Q_PROPERTY(bool waitingForInput READ isWatingForInput NOTIFY waitingForInputChanged)
     Q_PROPERTY(bool waitingForReturn READ isWatingForReturn NOTIFY waitingForReturnChanged)
     Q_PROPERTY(bool helpVisible READ isHelpVisible NOTIFY helpVisibleChanged)
+    Q_PROPERTY(bool settingsVisible READ areSettingsVisible NOTIFY settingsVisibleChanged)
 
     std::string _log;
     QString _visible_text;
     bool _waiting_for_input;
     bool _waiting_for_return;
     bool _help_visible;
+    bool _settings_visible;
 
     std::vector<std::string> _input_history;
     std::vector<std::string>::iterator _history_it;
@@ -31,17 +33,20 @@ public:
     bool isWatingForInput() const;
     bool isWatingForReturn() const;
     bool isHelpVisible() const;
+    bool areSettingsVisible() const;
 
     void setLog(const std::string& value);
     void setVisibleText(const QString& value);
     void setWaitingForInput(bool value);
     void setWaitingForReturn(bool value);
     void setHelpVisible(bool value);
+    void setSettingsVisible(bool value);
 
     void clearScreen();
     void pasteLine();
     void pasteText(const std::string& text);
     void showHelpPage(int page_number, int total_pages, const std::string& text);
+    void showSettings(std::map<std::string, std::string> settings);
     void writeError(const std::string& error);
     void writeLine();
     void writeText(const std::string& text);
@@ -61,6 +66,7 @@ signals:
     void waitingForInputChanged();
     void waitingForReturnChanged();
     void helpVisibleChanged();
+    void settingsVisibleChanged();
     void changeInputTextField(const QString& text);
     void inputReady(const QString& input);
     void returnReady();

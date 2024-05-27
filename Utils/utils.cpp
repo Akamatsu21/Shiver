@@ -44,10 +44,11 @@ std::string directionToString(Direction direction)
 
 std::map<std::string, CallbackTiming> getAllCallbackTimingsWithLabels()
 {
-    return std::map<std::string, CallbackTiming> {{"None", CallbackTiming::NONE},
-                                                  {"RoundAction", CallbackTiming::ROUND_ACTION},
-                                                  {"RoundEnd", CallbackTiming::ROUND_END},
-                                                  {"CombatEnd", CallbackTiming::COMBAT_END}};
+    return std::map<std::string, CallbackTiming> {
+        {"None", CallbackTiming::NONE},
+        {"RoundAction", CallbackTiming::ROUND_ACTION},
+        {"RoundEnd", CallbackTiming::ROUND_END},
+        {"CombatEnd", CallbackTiming::COMBAT_END}};
 }
 
 std::vector<Direction> getAllDirections()
@@ -57,20 +58,22 @@ std::vector<Direction> getAllDirections()
 
 std::map<std::string, Direction> getAllDirectionsWithLabels()
 {
-    return std::map<std::string, Direction> {{"North", Direction::NORTH},
-                                             {"South", Direction::SOUTH},
-                                             {"East", Direction::EAST},
-                                             {"West", Direction::WEST}};
+    return std::map<std::string, Direction> {
+        {"North", Direction::NORTH},
+        {"South", Direction::SOUTH},
+        {"East", Direction::EAST},
+        {"West", Direction::WEST}};
 }
 
 std::map<std::string, PlayerStat> getAllPlayerStatsWithLabels()
 {
-    return std::map<std::string, PlayerStat> {{"Invalid", PlayerStat::INVALID},
-                                              {"Agility", PlayerStat::AGILITY},
-                                              {"Constitution", PlayerStat::CONSTITUTION},
-                                              {"Luck", PlayerStat::LUCK},
-                                              {"CombatStrength", PlayerStat::COMBAT_STRENGTH},
-                                              {"Damage", PlayerStat::DAMAGE}};
+    return std::map<std::string, PlayerStat> {
+        {"Invalid", PlayerStat::INVALID},
+        {"Agility", PlayerStat::AGILITY},
+        {"Constitution", PlayerStat::CONSTITUTION},
+        {"Luck", PlayerStat::LUCK},
+        {"CombatStrength", PlayerStat::COMBAT_STRENGTH},
+        {"Damage", PlayerStat::DAMAGE}};
 }
 
 Direction commandToDirection(Command command)
@@ -136,7 +139,7 @@ std::string toLower(const std::string& s)
 {
     std::string result;
     std::transform(std::cbegin(s), std::cend(s), std::back_inserter(result),
-                   [](char c){ return std::tolower(c); });
+        [](char c){ return std::tolower(c); });
     return result;
 }
 

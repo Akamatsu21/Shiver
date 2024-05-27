@@ -125,10 +125,10 @@ QStringList Player::getItemsWithTag(const QVariant& tag) const
     std::vector<Item> items_with_tag = _inventory.findItemsWithTag(tag.toString().toStdString());
     QStringList item_ids{};
     std::transform(std::begin(items_with_tag), std::end(items_with_tag), std::back_inserter(item_ids),
-                   [](const Item& item)
-                   {
-                       return QString::fromStdString(item.getID());
-                   });
+        [](const Item& item)
+        {
+            return QString::fromStdString(item.getID());
+        });
     return item_ids;
 }
 
@@ -148,7 +148,7 @@ std::string Player::getConditionsString() const
         [](std::string acc, Condition element)
         {
             return acc + "<br />" + element.getName();
-    });
+        });
 }
 
 Inventory& Player::getInventory()
@@ -385,7 +385,7 @@ void Player::applyCondition(const Condition& cond)
 void Player::clearCondition(const std::string& name)
 {
     std::vector<Condition>::iterator found_cond =
-            std::find_if(std::begin(_conditions), std::end(_conditions),
+        std::find_if(std::begin(_conditions), std::end(_conditions),
             [&name](const Condition& cond){return cond.getName() == name;});
 
     if(found_cond != std::end(_conditions))

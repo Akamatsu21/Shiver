@@ -4172,6 +4172,7 @@ export const events =
     {
         description: "You may choose a [i]thin sword[/i], a [i]stone sword[/i] or a [i]short sword[/i].",
         items: ["sword_thin", "sword_stone", "sword_short"],
+        item_limit: 1,
         on_take: function(item)
         {
             system.redirect(324, false);
@@ -7119,7 +7120,7 @@ export const events =
 
             if(player.getConstitution() > 0)
             {
-                desc += "You raise your lantern to be at your head's height and... Your heart momentarily leaps into your throat. Hidden behind the wall, there is a [e]Troll[/e] here. It's bending its body like an arch. It's holding a sword with both of its hands, high above its head. It pushes out its hairy stomach. Its mad eyes are bloodshot. Its grinning, showing its clenched teeth. In just a moment, its gigantic sword will come down and cut the air. You reach for your sword. [e]Troll[/e] immediately attacks, but you manage to dodge. This will be a fight to the death.";
+                desc += "You raise your lantern to be at your head's height and... Your heart momentarily leaps into your throat. Hidden behind the wall, there is a [e]Troll[/e] here. It's bending its body like an arch. It's holding a sword with both of its hands, high above its head. It pushes out its hairy stomach. Its mad eyes are bloodshot. It's grinning, showing its clenched teeth. In just a moment, its gigantic sword will come down and cut the air. You reach for your sword. [e]Troll[/e] immediately attacks, but you manage to dodge. This will be a fight to the death.";
             }
             else
             {

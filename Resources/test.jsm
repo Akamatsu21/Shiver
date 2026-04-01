@@ -34,6 +34,7 @@ export const events =
         description: "Enemy fight",
         east: 2,
         south: 5,
+        north: 31,
         enemies:
         [
             {
@@ -90,7 +91,7 @@ export const events =
                         round: 1,
                         callback: function()
                         {
-                            system.enableEscape(2);
+                            system.enableEnemyEscape(2);
                         }
                     }
                 ]
@@ -392,7 +393,7 @@ export const events =
                 name: "Gorgonzola",
                 agility: 100,
                 constitution: 100,
-                escape: 1
+                escape_redirect: 1
             }
         ]
     },
@@ -406,7 +407,7 @@ export const events =
                 name: "Mozarella",
                 agility: 1,
                 constitution: 1,
-                escape: 1
+                escape_redirect: 1
             }
         ]
     },
@@ -465,5 +466,10 @@ export const events =
             return desc;
         },
         west: 1
-    }
+    },
+    event31:
+    {
+        description: "You suddenly hear the ground shaking...",
+        redirect: 27
+    },
 };

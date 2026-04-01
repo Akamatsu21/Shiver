@@ -1171,6 +1171,10 @@ InputMode Game::resolveGameInput(const std::string& user_input)
         {
             _current_event.triggerDirectionCallback(direction);
             mode = updateCurrentEvent(_current_event.getDestination(utils::commandToDirection(command)), true);
+            if(_combat_state.combat_in_progress)
+            {
+                advance_combat_round = true;
+            }
         }
     }   break;
     case Command::FIGHT:
@@ -1236,6 +1240,10 @@ InputMode Game::resolveGameInput(const std::string& user_input)
             if(local_command.redirect != 0)
             {
                 mode = updateCurrentEvent(local_command.redirect, local_command.new_room);
+                if(_combat_state.combat_in_progress)
+                {
+                    advance_combat_round = true;
+                }
             }
         }
         else

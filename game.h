@@ -89,7 +89,7 @@ class Game: public QObject
     // Game checks
     void checkForEnemyDeath();
     void handleCombatRound();
-    bool performGameChecks(bool advance_combat_round = false);   // true if player died
+    bool performGameChecks(bool advance_combat_round = true);   // true if player died
 
     // Resolve triggers
     void resolveCombatEndTriggers(bool escape);
